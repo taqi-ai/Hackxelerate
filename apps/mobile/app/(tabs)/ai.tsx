@@ -15,7 +15,10 @@ import { useTheme } from "../../src/lib/theme";
 import { VoiceAiVisualizer } from "../../src/components/VoiceAiVisualizer";
 import { fetchDashboardStats, fetchTopPriorityStudents } from "../../src/lib/api";
 import { triggerHaptic } from "../../src/lib/haptics";
+import { BrandMark } from "../../src/components/BrandMark";
+import { AnimatedAscoraArt } from "../../src/components/AnimatedAscoraArt";
 import type { StudentRow } from "../../src/lib/types";
+
 
 interface InsightResponse {
   query: string;
@@ -130,18 +133,27 @@ export default function AiScreen() {
     >
       {/* Top Header */}
       <View style={styles.header}>
-        <Text
-          style={[
-            styles.title,
-            { color: colors.text, fontFamily: "BricolageGrotesque_700Bold" },
-          ]}
-        >
-          Ascora Voice & AI
-        </Text>
-        <Text style={[styles.subtitle, { color: colors.mutedText }]}>
-          Real-time institutional intelligence and speech synthesis
-        </Text>
+        <View style={styles.headerTitleRow}>
+          <BrandMark compact size={32} />
+          <View style={{ flex: 1 }}>
+            <Text
+              style={[
+                styles.title,
+                { color: colors.text, fontFamily: "BricolageGrotesque_700Bold" },
+              ]}
+            >
+              Ask Ascora
+            </Text>
+            <Text style={[styles.subtitle, { color: colors.mutedText }]}>
+              Natural language campus synthesis & voice streaming
+            </Text>
+          </View>
+          <View style={styles.headerArt}>
+            <AnimatedAscoraArt kind="chat" width={80} height={44} />
+          </View>
+        </View>
       </View>
+
 
       {/* Hero Visualizer matching user's reference */}
       <VoiceAiVisualizer
@@ -312,7 +324,16 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: 4,
   },
+  headerTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  headerArt: {
+    opacity: 0.8,
+  },
   title: {
+
     fontSize: 22,
     fontWeight: "700",
   },

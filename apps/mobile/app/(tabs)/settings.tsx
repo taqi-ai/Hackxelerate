@@ -15,7 +15,10 @@ import { useTheme, ThemeMode } from "../../src/lib/theme";
 import { fetchCurrentProfile } from "../../src/lib/api";
 import { supabase } from "../../src/lib/supabase";
 import { triggerHaptic } from "../../src/lib/haptics";
+import { BrandMark } from "../../src/components/BrandMark";
+import { AnimatedAscoraArt } from "../../src/components/AnimatedAscoraArt";
 import type { Profile } from "../../src/lib/types";
+
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -82,18 +85,27 @@ export default function SettingsScreen() {
     >
       {/* Header */}
       <View style={styles.header}>
-        <Text
-          style={[
-            styles.title,
-            { color: colors.text, fontFamily: "BricolageGrotesque_700Bold" },
-          ]}
-        >
-          Settings
-        </Text>
-        <Text style={[styles.subtitle, { color: colors.mutedText }]}>
-          Account preferences and device configuration
-        </Text>
+        <View style={styles.headerTitleRow}>
+          <BrandMark compact size={32} />
+          <View style={{ flex: 1 }}>
+            <Text
+              style={[
+                styles.title,
+                { color: colors.text, fontFamily: "BricolageGrotesque_700Bold" },
+              ]}
+            >
+              Settings
+            </Text>
+            <Text style={[styles.subtitle, { color: colors.mutedText }]}>
+              Account preferences and device configuration
+            </Text>
+          </View>
+          <View style={styles.headerArt}>
+            <AnimatedAscoraArt kind="grid" width={80} height={44} />
+          </View>
+        </View>
       </View>
+
 
       {/* Profile Card */}
       <View
@@ -344,7 +356,16 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: 4,
   },
+  headerTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  headerArt: {
+    opacity: 0.8,
+  },
   title: {
+
     fontSize: 22,
     fontWeight: "700",
   },

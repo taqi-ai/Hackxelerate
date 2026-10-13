@@ -22,7 +22,9 @@ import { DriverList } from "../../src/components/DriverList";
 import { LmsBarChart } from "../../src/components/LmsBarChart";
 import { InterventionModal } from "../../src/components/InterventionModal";
 import { EmptyState } from "../../src/components/EmptyState";
+import { BrandMark } from "../../src/components/BrandMark";
 import {
+
   maskEmail,
   maskPhone,
   suggestIntervention,
@@ -176,8 +178,12 @@ export default function StudentDetailScreen() {
         >
           <Feather name="arrow-left" size={18} color={colors.text} />
         </TouchableOpacity>
-        <Text style={[styles.navTitle, { color: colors.text }]}>{student.id}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <BrandMark compact size={26} />
+          <Text style={[styles.navTitle, { color: colors.text }]}>{student.id}</Text>
+        </View>
         <View style={{ width: 36 }} />
+
       </View>
 
       <ScrollView

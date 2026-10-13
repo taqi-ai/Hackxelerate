@@ -19,7 +19,10 @@ import { InterventionModal } from "../../src/components/InterventionModal";
 import { INTERVENTION_LABEL } from "../../src/lib/format";
 import { triggerHaptic } from "../../src/lib/haptics";
 import { playSound } from "../../src/lib/sound";
+import { BrandMark } from "../../src/components/BrandMark";
+import { AnimatedAscoraArt } from "../../src/components/AnimatedAscoraArt";
 import type { StudentRow } from "../../src/lib/types";
+
 
 const ALERT_TO_TYPE: Record<string, string> = {
   silent_decliner: "mentor_meeting",
@@ -137,18 +140,27 @@ export default function ThisWeekScreen() {
     >
       {/* Top Header */}
       <View style={styles.header}>
-        <Text
-          style={[
-            styles.title,
-            { color: colors.text, fontFamily: "BricolageGrotesque_700Bold" },
-          ]}
-        >
-          This Week Planner
-        </Text>
-        <Text style={[styles.subtitle, { color: colors.mutedText }]}>
-          Greedy knapsack scheduling optimized by student priority
-        </Text>
+        <View style={styles.headerTitleRow}>
+          <BrandMark compact size={32} />
+          <View style={{ flex: 1 }}>
+            <Text
+              style={[
+                styles.title,
+                { color: colors.text, fontFamily: "BricolageGrotesque_700Bold" },
+              ]}
+            >
+              Who to meet this week
+            </Text>
+            <Text style={[styles.subtitle, { color: colors.mutedText }]}>
+              Greedy knapsack scheduling optimized by student priority
+            </Text>
+          </View>
+          <View style={styles.headerArt}>
+            <AnimatedAscoraArt kind="calendar" width={90} height={48} />
+          </View>
+        </View>
       </View>
+
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -406,7 +418,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 12,
   },
+  headerTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  headerArt: {
+    opacity: 0.8,
+  },
   title: {
+
     fontSize: 22,
     fontWeight: "700",
   },
