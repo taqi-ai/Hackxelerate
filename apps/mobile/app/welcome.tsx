@@ -5,19 +5,21 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../src/lib/theme";
 import { playSound } from "../src/lib/sound";
+import { BrandMark } from "../src/components/BrandMark";
+import { AuroraBackground } from "../src/components/AuroraBackground";
+import { AnimatedAscoraArt } from "../src/components/AnimatedAscoraArt";
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+
 
   const handleGetStarted = () => {
     playSound("whoosh");
@@ -25,19 +27,7 @@ export default function WelcomeScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Background ambient radial glow */}
-      <View style={styles.glowAura} pointerEvents="none">
-        <LinearGradient
-          colors={
-            isDark
-              ? ["rgba(169, 180, 245, 0.15)", "transparent"]
-              : ["rgba(85, 96, 201, 0.12)", "transparent"]
-          }
-          style={styles.glowGradient}
-        />
-      </View>
-
+    <AuroraBackground>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
@@ -48,13 +38,9 @@ export default function WelcomeScreen() {
           },
         ]}
       >
-        {/* Brand Header */}
+        {/* Brand Header with Official Dark Tile Mark */}
         <View style={styles.header}>
-          <Image
-            source={require("../assets/mark.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+          <BrandMark size={40} showSubtitle={false} />
           <View style={[styles.badgePill, { backgroundColor: colors.brandSoft }]}>
             <Feather name="zap" size={12} color={colors.brand} />
             <Text style={[styles.badgeText, { color: colors.brand }]}>
@@ -63,18 +49,22 @@ export default function WelcomeScreen() {
           </View>
         </View>
 
-        {/* Hero Typography */}
+        {/* Hero Section with Official Logo Banner & PageArt Graphic */}
         <View style={styles.heroSection}>
+          <View style={styles.artContainer}>
+            <AnimatedAscoraArt kind="orbit" width={220} height={110} />
+          </View>
+
           <Text
             style={[
               styles.heroTitle,
               { color: colors.text, fontFamily: "BricolageGrotesque_700Bold" },
             ]}
           >
-            Student success at the speed of thought
+            From early warning to real intervention.
           </Text>
           <Text style={[styles.heroSubtitle, { color: colors.mutedText }]}>
-            Ascora bridges campus ERP records, attendance registers, and LMS activity logs to give faculty leaders proactive early warnings and measurable interventions.
+            Ascora joins ERP, attendance, LMS, placement, skills, clubs and feedback into one view of every student, explains who needs support and why, and tracks what mentors do about it.
           </Text>
         </View>
 
@@ -96,10 +86,34 @@ export default function WelcomeScreen() {
                   { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
                 ]}
               >
-                Proactive Early Warning
+                Explainable Drivers
               </Text>
               <Text style={[styles.featureDesc, { color: colors.mutedText }]}>
-                Detects academic drops and silent decliners weeks before exam scores reflect disengagement.
+                Every score shows its SHAP drivers and counterfactuals—no black boxes.
+              </Text>
+            </View>
+          </View>
+
+          <View
+            style={[
+              styles.featureCard,
+              { backgroundColor: colors.card, borderColor: colors.cardBorder },
+            ]}
+          >
+            <View style={[styles.featureIconWrap, { backgroundColor: colors.riskHighSoft }]}>
+              <Feather name="shield" size={18} color={colors.riskHigh} />
+            </View>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text
+                style={[
+                  styles.featureTitle,
+                  { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
+                ]}
+              >
+                Two Distinct Risks
+              </Text>
+              <Text style={[styles.featureDesc, { color: colors.mutedText }]}>
+                Academic risk and placement readiness are evaluated separately, never blended.
               </Text>
             </View>
           </View>
@@ -111,7 +125,7 @@ export default function WelcomeScreen() {
             ]}
           >
             <View style={[styles.featureIconWrap, { backgroundColor: colors.riskLowSoft }]}>
-              <Feather name="shield" size={18} color={colors.riskLow} />
+              <Feather name="calendar" size={18} color={colors.riskLow} />
             </View>
             <View style={{ flex: 1, gap: 2 }}>
               <Text
@@ -120,34 +134,10 @@ export default function WelcomeScreen() {
                   { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
                 ]}
               >
-                Explainable SHAP Drivers
+                Audited & Role-Based
               </Text>
               <Text style={[styles.featureDesc, { color: colors.mutedText }]}>
-                No black boxes: mentors see exactly which factors raise or lower student risk with counterfactuals.
-              </Text>
-            </View>
-          </View>
-
-          <View
-            style={[
-              styles.featureCard,
-              { backgroundColor: colors.card, borderColor: colors.cardBorder },
-            ]}
-          >
-            <View style={[styles.featureIconWrap, { backgroundColor: colors.brandSoft }]}>
-              <Feather name="calendar" size={18} color={colors.brand} />
-            </View>
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text
-                style={[
-                  styles.featureTitle,
-                  { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
-                ]}
-              >
-                Knapsack Meeting Planner
-              </Text>
-              <Text style={[styles.featureDesc, { color: colors.mutedText }]}>
-                Allocates available faculty hours to the highest-priority students to maximize cohort outcomes.
+                HOD whole-campus access vs. Mentor cohort privacy with full intervention audit logs.
               </Text>
             </View>
           </View>
@@ -158,132 +148,127 @@ export default function WelcomeScreen() {
           <TouchableOpacity
             style={[styles.primaryBtn, { backgroundColor: colors.brand }]}
             onPress={handleGetStarted}
-            activeOpacity={0.8}
+            activeOpacity={0.85}
           >
-            <Text style={styles.primaryBtnText}>Get started with Ascora</Text>
+            <Text style={styles.primaryBtnText}>Get started</Text>
             <Feather name="arrow-right" size={18} color="#07070b" />
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.secondaryBtn, { borderColor: colors.cardBorder }]}
+            style={[
+              styles.secondaryBtn,
+              { backgroundColor: colors.surface, borderColor: colors.cardBorder },
+            ]}
             onPress={() => {
               playSound("tap");
-              router.push("/sign-in");
+              router.push("/about");
             }}
             activeOpacity={0.7}
           >
-            <Text style={[styles.secondaryBtnText, { color: colors.mutedText }]}>
-              Already have an evaluation account? <Text style={{ color: colors.brand, fontWeight: "600" }}>Sign in</Text>
+            <Feather name="info" size={16} color={colors.mutedText} />
+            <Text style={[styles.secondaryBtnText, { color: colors.text }]}>
+              About Ascora & Challenge 04
             </Text>
           </TouchableOpacity>
-
-          <Text style={[styles.sampleCohortText, { color: colors.mutedText }]}>
-            The students shown are a generated sample cohort. Built for KPMG Smart Campus Analytics challenge at HacXLerate 2026.
-          </Text>
         </View>
+
+        {/* Footer Meta */}
+        <Text style={[styles.footerText, { color: colors.mutedText }]}>
+          Ascora · KPMG Challenge 04 · byteXL HacXLerate 2026
+        </Text>
       </ScrollView>
-    </View>
+    </AuroraBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    position: "relative",
-  },
-  glowAura: {
-    position: "absolute",
-    top: -100,
-    left: -50,
-    right: -50,
-    height: 380,
-  },
-  glowGradient: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 200,
-  },
   scrollContent: {
     paddingHorizontal: 20,
-    gap: 20,
+    gap: 24,
   },
   header: {
+    flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-  },
-  logo: {
-    width: 72,
-    height: 72,
+    justifyContent: "space-between",
   },
   badgePill: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    paddingHorizontal: 10,
     paddingVertical: 5,
-    paddingHorizontal: 12,
     borderRadius: 999,
   },
   badgeText: {
     fontSize: 10,
     fontWeight: "700",
-    letterSpacing: 0.8,
+    letterSpacing: 0.5,
   },
   heroSection: {
+    gap: 12,
+    marginTop: 4,
+  },
+  artContainer: {
     alignItems: "center",
-    gap: 10,
-    textAlign: "center",
+    marginBottom: -8,
   },
   heroTitle: {
     fontSize: 28,
-    fontWeight: "700",
     lineHeight: 34,
-    textAlign: "center",
-    letterSpacing: -0.6,
+    letterSpacing: -0.8,
   },
   heroSubtitle: {
-    fontSize: 13,
-    lineHeight: 20,
-    textAlign: "center",
-    maxWidth: 320,
+    fontSize: 14,
+    lineHeight: 22,
   },
   featuresList: {
-    gap: 10,
-    marginTop: 6,
+    gap: 12,
   },
   featureCard: {
     flexDirection: "row",
-    alignItems: "center",
-    padding: 14,
-    borderRadius: 18,
+    alignItems: "flex-start",
+    padding: 16,
+    borderRadius: 16,
     borderWidth: 1,
     gap: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 2,
   },
   featureIconWrap: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
+    width: 38,
+    height: 38,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
   },
   featureTitle: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "600",
   },
   featureDesc: {
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 12.5,
+    lineHeight: 18,
+    marginTop: 2,
   },
   ctaSection: {
-    gap: 12,
-    marginTop: 10,
+    gap: 10,
+    marginTop: 8,
   },
   primaryBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 10,
+    gap: 8,
     height: 52,
-    borderRadius: 16,
+    borderRadius: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
   },
   primaryBtnText: {
     color: "#07070b",
@@ -291,17 +276,21 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   secondaryBtn: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 8,
+    gap: 8,
+    height: 48,
+    borderRadius: 14,
+    borderWidth: 1,
   },
   secondaryBtnText: {
-    fontSize: 13,
+    fontSize: 14,
+    fontWeight: "600",
   },
-  sampleCohortText: {
-    fontSize: 11,
+  footerText: {
     textAlign: "center",
-    lineHeight: 16,
+    fontSize: 11,
     marginTop: 4,
   },
 });

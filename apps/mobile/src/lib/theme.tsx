@@ -14,6 +14,12 @@ export interface ColorTokens {
   mutedText: string;
   brand: string;
   brandSoft: string;
+  glow: string;
+  chart1: string;
+  chart2: string;
+  chart3: string;
+  chart4: string;
+  chart5: string;
   riskHigh: string;
   riskHighSoft: string;
   riskMedium: string;
@@ -21,44 +27,70 @@ export interface ColorTokens {
   riskLow: string;
   riskLowSoft: string;
   inputBg: string;
+  sidebar: string;
+  radius: number;
 }
 
+/**
+ * Exact dark tokens synchronized with apps/web/src/app/globals.css (.dark).
+ * Ascora dark: near-black canvas with lavender/periwinkle brand mark accent.
+ */
 export const DARK_TOKENS: ColorTokens = {
   background: "#07070b",
-  surface: "#0b0b12",
-  card: "#0e0e15",
-  cardBorder: "rgba(255,255,255,0.08)",
-  border: "rgba(255,255,255,0.08)",
+  surface: "#0d0d14",
+  card: "#12121c",
+  cardBorder: "rgba(255, 255, 255, 0.08)",
+  border: "rgba(255, 255, 255, 0.08)",
   text: "#f4f4f8",
-  mutedText: "rgba(244,244,248,0.55)",
-  brand: "#a9b4f5",
-  brandSoft: "rgba(169,180,245,0.14)",
+  mutedText: "rgba(244, 244, 248, 0.60)",
+  brand: "#a9b4f5", // OKLCH equivalent lavender brand
+  brandSoft: "rgba(169, 180, 245, 0.15)",
+  glow: "rgba(169, 180, 245, 0.18)",
+  chart1: "#a9b4f5",
+  chart2: "#91b7f0",
+  chart3: "#e8b84f",
+  chart4: "#6fcf97",
+  chart5: "#f0786e",
   riskHigh: "#f0786e",
-  riskHighSoft: "rgba(240,120,110,0.16)",
+  riskHighSoft: "rgba(240, 120, 110, 0.16)",
   riskMedium: "#e8b84f",
-  riskMediumSoft: "rgba(232,184,79,0.16)",
+  riskMediumSoft: "rgba(232, 184, 79, 0.16)",
   riskLow: "#6fcf97",
-  riskLowSoft: "rgba(111,207,151,0.16)",
-  inputBg: "#14141e",
+  riskLowSoft: "rgba(111, 207, 151, 0.16)",
+  inputBg: "#141420",
+  sidebar: "#07070b",
+  radius: 12,
 };
 
+/**
+ * Exact light tokens synchronized with apps/web/src/app/globals.css (:root).
+ * Ascora light: cool paper, ink text, brand periwinkle (#5560c9) as the single accent.
+ */
 export const LIGHT_TOKENS: ColorTokens = {
-  background: "#f6f6fb",
+  background: "#f7f7fc",
   surface: "#ffffff",
   card: "#ffffff",
-  cardBorder: "rgba(20,20,40,0.08)",
-  border: "rgba(20,20,40,0.08)",
-  text: "#14141f",
-  mutedText: "rgba(20,20,31,0.55)",
-  brand: "#5560c9",
-  brandSoft: "rgba(85,96,201,0.12)",
+  cardBorder: "rgba(20, 20, 40, 0.08)",
+  border: "rgba(20, 20, 40, 0.08)",
+  text: "#151522",
+  mutedText: "rgba(21, 21, 34, 0.58)",
+  brand: "#5560c9", // Periwinkle brand
+  brandSoft: "rgba(85, 96, 201, 0.12)",
+  glow: "rgba(85, 96, 201, 0.18)",
+  chart1: "#5560c9",
+  chart2: "#4c81db",
+  chart3: "#a8730a",
+  chart4: "#1f8a4c",
+  chart5: "#c8372d",
   riskHigh: "#c8372d",
-  riskHighSoft: "rgba(200,55,45,0.14)",
+  riskHighSoft: "rgba(200, 55, 45, 0.14)",
   riskMedium: "#a8730a",
-  riskMediumSoft: "rgba(168,115,10,0.14)",
+  riskMediumSoft: "rgba(168, 115, 10, 0.14)",
   riskLow: "#1f8a4c",
-  riskLowSoft: "rgba(31,138,76,0.14)",
-  inputBg: "#efeff6",
+  riskLowSoft: "rgba(31, 138, 76, 0.14)",
+  inputBg: "#f0f0f7",
+  sidebar: "#f4f4fa",
+  radius: 12,
 };
 
 interface ThemeContextType {

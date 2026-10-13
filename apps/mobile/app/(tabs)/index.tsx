@@ -7,7 +7,6 @@ import {
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
-  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -23,6 +22,8 @@ import {
 import { ScoreRing } from "../../src/components/ScoreRing";
 import { RiskBadge } from "../../src/components/RiskBadge";
 import { EmptyState } from "../../src/components/EmptyState";
+import { BrandMark } from "../../src/components/BrandMark";
+import { AnimatedAscoraArt } from "../../src/components/AnimatedAscoraArt";
 import { triggerHaptic } from "../../src/lib/haptics";
 import type { Profile, StudentRow, Intervention } from "../../src/lib/types";
 
@@ -124,12 +125,8 @@ export default function HomeScreen() {
     return { dateStr, dayName, dayNum, dayInts, isToday: i === 0 };
   });
 
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const overdueCount = interventions.filter(
-    (it) => it.status === "open" && it.due_date && it.due_date < todayStr
-  ).length;
-
   if (loading) {
+
     return (
       <View style={[styles.centerLoading, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.brand} />
@@ -164,14 +161,10 @@ export default function HomeScreen() {
       }
       showsVerticalScrollIndicator={false}
     >
-      {/* Top Greeting */}
+      {/* Top Greeting Header with Official Brand Mark */}
       <View style={styles.greetingHeader}>
         <View style={styles.greetingTitleRow}>
-          <Image
-            source={require("../../assets/mark.png")}
-            style={styles.headerMark}
-            resizeMode="contain"
-          />
+          <BrandMark compact size={36} />
           <View>
             <Text
               style={[
@@ -197,7 +190,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Campus Intelligence Gradient Card */}
+      {/* Campus Intelligence Gradient Card with Animated PageArt */}
       <LinearGradient
         colors={
           isDark
@@ -208,6 +201,10 @@ export default function HomeScreen() {
         end={{ x: 1, y: 1 }}
         style={[styles.intelCard, { borderColor: isDark ? "rgba(169, 180, 245, 0.25)" : colors.cardBorder }]}
       >
+        <View style={styles.artPositioner}>
+          <AnimatedAscoraArt kind="orbit" width={180} height={90} />
+        </View>
+
         <View style={styles.intelHeader}>
           <View style={[styles.intelPill, { backgroundColor: colors.brandSoft }]}>
             <Feather name="zap" size={13} color={colors.brand} />
@@ -283,7 +280,7 @@ export default function HomeScreen() {
             { backgroundColor: colors.card, borderColor: colors.cardBorder },
           ]}
         >
-          <Text style={[styles.statTitle, { color: colors.mutedText }]}>High Academic</Text>
+          <Text style={[styles.statTitle, { color: colors.mutedText }]}>Academic Risk</Text>
           <Text
             style={[
               styles.statNumber,
@@ -292,7 +289,7 @@ export default function HomeScreen() {
           >
             {stats.highAcademic}
           </Text>
-          <Text style={[styles.statDetail, { color: colors.riskHigh }]}>Needs action</Text>
+          <Text style={[styles.statDetail, { color: colors.mutedText }]}>Requires support</Text>
         </View>
 
         <View
@@ -301,210 +298,134 @@ export default function HomeScreen() {
             { backgroundColor: colors.card, borderColor: colors.cardBorder },
           ]}
         >
-          <Text style={[styles.statTitle, { color: colors.mutedText }]}>High Placement</Text>
+          <Text style={[styles.statTitle, { color: colors.mutedText }]}>Silent Drift</Text>
           <Text
             style={[
               styles.statNumber,
               { color: colors.riskMedium, fontFamily: "BricolageGrotesque_700Bold" },
             ]}
           >
-            {stats.highPlacement}
+            {stats.silentDecliners}
           </Text>
-          <Text style={[styles.statDetail, { color: colors.riskMedium }]}>Career gap</Text>
+          <Text style={[styles.statDetail, { color: colors.mutedText }]}>Early warning</Text>
         </View>
       </View>
 
-      {/* Horizontal 6-day Week Strip */}
+      {/* Week Calendar Strip */}
       <View style={styles.sectionHeader}>
-        <View style={styles.sectionTitleRow}>
-          <Text
-            style={[
-              styles.sectionTitle,
-              { color: colors.text, fontFamily: "BricolageGrotesque_700Bold" },
-            ]}
-          >
-            This week schedule
-          </Text>
-          {overdueCount > 0 && (
-            <View style={[styles.overdueBadge, { backgroundColor: colors.riskHighSoft }]}>
-              <Text style={[styles.overdueText, { color: colors.riskHigh }]}>
-                {overdueCount} overdue
-              </Text>
-            </View>
-          )}
-        </View>
+        <Text
+          style={[
+            styles.sectionTitle,
+            { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
+          ]}
+        >
+          This Week
+        </Text>
         <TouchableOpacity onPress={() => router.push("/(tabs)/this-week")}>
-          <Text style={[styles.seeAllText, { color: colors.brand }]}>Planner</Text>
+          <Text style={[styles.seeAllText, { color: colors.brand }]}>View planner</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.weekStrip}
+        contentContainerStyle={styles.calendarStrip}
       >
-        {weekDays.map((day) => {
-          const hasInts = day.dayInts.length > 0;
-          return (
-            <View
-              key={day.dateStr}
+        {weekDays.map((d) => (
+          <View
+            key={d.dateStr}
+            style={[
+              styles.calendarDayCard,
+              {
+                backgroundColor: d.isToday ? colors.brandSoft : colors.card,
+                borderColor: d.isToday ? colors.brand : colors.cardBorder,
+              },
+            ]}
+          >
+            <Text
               style={[
-                styles.dayCard,
+                styles.calendarDayName,
+                { color: d.isToday ? colors.brand : colors.mutedText },
+              ]}
+            >
+              {d.dayName}
+            </Text>
+            <Text
+              style={[
+                styles.calendarDayNum,
                 {
-                  backgroundColor: day.isToday
-                    ? colors.brandSoft
-                    : colors.card,
-                  borderColor: day.isToday
-                    ? colors.brand
-                    : colors.cardBorder,
+                  color: d.isToday ? colors.brand : colors.text,
+                  fontFamily: "BricolageGrotesque_700Bold",
                 },
               ]}
             >
-              <Text
-                style={[
-                  styles.dayName,
-                  { color: day.isToday ? colors.brand : colors.mutedText },
-                ]}
-              >
-                {day.dayName}
-              </Text>
-              <Text
-                style={[
-                  styles.dayNum,
-                  {
-                    color: colors.text,
-                    fontFamily: "BricolageGrotesque_700Bold",
-                  },
-                ]}
-              >
-                {day.dayNum}
-              </Text>
-
-              {hasInts ? (
-                <View style={styles.dueInterventionsList}>
-                  {day.dayInts.slice(0, 2).map((it) => (
-                    <View
-                      key={it.id}
-                      style={[
-                        styles.duePill,
-                        {
-                          backgroundColor:
-                            it.status === "done"
-                              ? colors.riskLowSoft
-                              : colors.surface,
-                          borderColor:
-                            it.status === "done"
-                              ? colors.riskLow
-                              : colors.cardBorder,
-                        },
-                      ]}
-                    >
-                      <Text
-                        numberOfLines={1}
-                        style={[
-                          styles.duePillText,
-                          {
-                            color:
-                              it.status === "done"
-                                ? colors.riskLow
-                                : colors.text,
-                          },
-                        ]}
-                      >
-                        {it.student_name || it.student_id}
-                      </Text>
-                    </View>
-                  ))}
-                  {day.dayInts.length > 2 && (
-                    <Text style={[styles.moreCount, { color: colors.mutedText }]}>
-                      +{day.dayInts.length - 2} more
-                    </Text>
-                  )}
-                </View>
-              ) : (
-                <Text style={[styles.noDueText, { color: colors.mutedText }]}>
-                  Open
-                </Text>
-              )}
-            </View>
-          );
-        })}
+              {d.dayNum}
+            </Text>
+            {d.dayInts.length > 0 ? (
+              <View style={[styles.meetingDot, { backgroundColor: colors.brand }]} />
+            ) : (
+              <View style={{ height: 6 }} />
+            )}
+          </View>
+        ))}
       </ScrollView>
 
-      {/* Meet First (Top 5 Priority Students) */}
-      <View style={[styles.sectionHeader, { marginTop: 24 }]}>
-        <Text
-          style={[
-            styles.sectionTitle,
-            { color: colors.text, fontFamily: "BricolageGrotesque_700Bold" },
-          ]}
-        >
-          Meet first
-        </Text>
+      {/* Top Priority Students */}
+      <View style={styles.sectionHeader}>
+        <View style={styles.sectionTitleRow}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
+            ]}
+          >
+            Who to meet first
+          </Text>
+          <View style={[styles.priorityBadge, { backgroundColor: colors.riskHighSoft }]}>
+            <Text style={[styles.priorityBadgeText, { color: colors.riskHigh }]}>Top 5</Text>
+          </View>
+        </View>
         <TouchableOpacity onPress={() => router.push("/(tabs)/students")}>
-          <Text style={[styles.seeAllText, { color: colors.brand }]}>View all</Text>
+          <Text style={[styles.seeAllText, { color: colors.brand }]}>All students</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.meetFirstList}>
-        {meetFirst.map((student, idx) => (
+      <View style={styles.studentsList}>
+        {meetFirst.map((st) => (
           <TouchableOpacity
-            key={student.id}
+            key={st.id}
             style={[
               styles.studentCard,
               { backgroundColor: colors.card, borderColor: colors.cardBorder },
             ]}
-            onPress={() => router.push(`/student/${student.id}`)}
+            onPress={() => router.push(`/student/${st.id}`)}
             activeOpacity={0.7}
           >
-            <View style={styles.rankBadge}>
+            <ScoreRing score={st.success_score ?? 50} size={50} strokeWidth={5} />
+            <View style={styles.studentInfo}>
               <Text
                 style={[
-                  styles.rankNumber,
-                  { color: colors.mutedText, fontFamily: "BricolageGrotesque_700Bold" },
+                  styles.studentName,
+                  { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
                 ]}
               >
-                #{idx + 1}
+                {st.name}
               </Text>
-            </View>
-
-            <View style={styles.studentInfo}>
-              <View style={styles.studentNameRow}>
-                <Text
-                  style={[
-                    styles.studentName,
-                    { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
-                  ]}
-                >
-                  {student.name}
-                </Text>
-              </View>
               <Text style={[styles.studentMeta, { color: colors.mutedText }]}>
-                {student.id} · {student.branch} · Yr {student.year} · Sec {student.section}
+                {st.id} · {st.branch} (Yr {st.year})
               </Text>
-
-              <View style={styles.badgesRow}>
-                <RiskBadge
-                  level={student.academic_risk_level}
-                  prob={student.academic_risk_prob}
-                  label="Acad"
-                />
-                {student.placement_risk_level !== "N/A" && (
-                  <RiskBadge
-                    level={student.placement_risk_level}
-                    prob={student.placement_risk_prob}
-                    label="Place"
-                  />
+              <View style={styles.riskRow}>
+                <RiskBadge level={st.academic_risk_level} label="Academic" size="sm" />
+                {st.placement_risk_level && st.placement_risk_level !== "N/A" && (
+                  <RiskBadge level={st.placement_risk_level} label="Placement" size="sm" />
                 )}
               </View>
             </View>
-
-            <View style={styles.scoreWrap}>
-              <ScoreRing score={student.success_score} size={54} strokeWidth={5} label="" />
-            </View>
+            <Feather name="chevron-right" size={18} color={colors.mutedText} />
           </TouchableOpacity>
         ))}
       </View>
+
     </ScrollView>
   );
 }
@@ -515,50 +436,57 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 16,
+    gap: 16,
   },
   centerLoading: {
     flex: 1,
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
   },
   greetingHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
   },
   greetingTitleRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-  },
-  headerMark: {
-    width: 28,
-    height: 28,
+    gap: 10,
   },
   greetingText: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: "700",
-    letterSpacing: -0.4,
   },
   roleBadge: {
-    fontSize: 12,
-    marginTop: 2,
+    fontSize: 11.5,
+    marginTop: 1,
   },
   profileButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
   intelCard: {
-    borderRadius: 20,
+    position: "relative",
+    overflow: "hidden",
+    borderRadius: 18,
     borderWidth: 1,
-    padding: 18,
-    marginBottom: 16,
+    padding: 16,
     gap: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  artPositioner: {
+    position: "absolute",
+    right: -20,
+    top: -15,
+    opacity: 0.5,
   },
   intelHeader: {
     flexDirection: "row",
@@ -568,15 +496,14 @@ const styles = StyleSheet.create({
   intelPill: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 5,
+    paddingHorizontal: 8,
     paddingVertical: 4,
-    paddingHorizontal: 10,
     borderRadius: 999,
   },
   intelPillText: {
     fontSize: 11,
     fontWeight: "700",
-    letterSpacing: 0.5,
   },
   voicePromptBtn: {
     flexDirection: "row",
@@ -588,155 +515,110 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   intelSummary: {
-    fontSize: 15,
-    lineHeight: 22,
-    fontWeight: "600",
+    fontSize: 14.5,
+    lineHeight: 20,
   },
   intelFootnote: {
     fontSize: 11,
-    lineHeight: 15,
   },
   statsGrid: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    marginBottom: 20,
+    gap: 8,
   },
   statCard: {
     flex: 1,
-    minWidth: "47%",
-    borderRadius: 16,
+    padding: 10,
+    borderRadius: 12,
     borderWidth: 1,
-    padding: 14,
-    gap: 4,
+    gap: 2,
   },
   statTitle: {
-    fontSize: 12,
-    fontWeight: "500",
+    fontSize: 10,
+    fontWeight: "600",
   },
   statNumber: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "700",
+    marginVertical: 1,
   },
   statDetail: {
-    fontSize: 11,
+    fontSize: 9.5,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
+    marginTop: 4,
   },
   sectionTitleRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 6,
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "600",
   },
-  overdueBadge: {
-    paddingHorizontal: 8,
+  priorityBadge: {
+    paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 999,
   },
-  overdueText: {
-    fontSize: 11,
+  priorityBadgeText: {
+    fontSize: 10,
     fontWeight: "700",
   },
   seeAllText: {
-    fontSize: 13,
+    fontSize: 12.5,
     fontWeight: "600",
   },
-  weekStrip: {
-    gap: 10,
-    paddingBottom: 4,
+  calendarStrip: {
+    gap: 8,
   },
-  dayCard: {
-    width: 90,
-    minHeight: 110,
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 10,
+  calendarDayCard: {
+    width: 52,
+    paddingVertical: 8,
     alignItems: "center",
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 4,
   },
-  dayName: {
+  calendarDayName: {
     fontSize: 11,
     fontWeight: "600",
-    textTransform: "uppercase",
   },
-  dayNum: {
-    fontSize: 18,
-    fontWeight: "700",
-    marginVertical: 4,
+  calendarDayNum: {
+    fontSize: 15,
   },
-  dueInterventionsList: {
-    width: "100%",
-    gap: 4,
-    marginTop: 4,
+  meetingDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
-  duePill: {
-    borderRadius: 6,
-    borderWidth: 0.5,
-    paddingVertical: 2,
-    paddingHorizontal: 4,
-    alignItems: "center",
-  },
-  duePillText: {
-    fontSize: 9,
-    fontWeight: "600",
-  },
-  moreCount: {
-    fontSize: 9,
-    textAlign: "center",
-  },
-  noDueText: {
-    fontSize: 10,
-    marginTop: 8,
-  },
-  meetFirstList: {
-    gap: 10,
+  studentsList: {
+    gap: 8,
   },
   studentCard: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 18,
+    padding: 12,
+    borderRadius: 14,
     borderWidth: 1,
-    padding: 14,
     gap: 12,
-  },
-  rankBadge: {
-    width: 28,
-    alignItems: "center",
-  },
-  rankNumber: {
-    fontSize: 14,
-    fontWeight: "700",
   },
   studentInfo: {
     flex: 1,
-    gap: 4,
-  },
-  studentNameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
+    gap: 3,
   },
   studentName: {
-    fontSize: 15,
-    fontWeight: "600",
+    fontSize: 14,
   },
   studentMeta: {
-    fontSize: 11,
+    fontSize: 11.5,
   },
-  badgesRow: {
+  riskRow: {
     flexDirection: "row",
     gap: 6,
     marginTop: 2,
-  },
-  scoreWrap: {
-    alignItems: "center",
-    justifyContent: "center",
   },
 });

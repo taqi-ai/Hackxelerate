@@ -14,4 +14,5 @@ One line per finished or in-progress task. Newest at the bottom. Format: `date |
 2026-10-13 | gemini | Student Portal & CUIMS Integration (apps/web): Student role, 0006 migration, attendance/marks/CGPA simulators, 1200 student demo chooser, CU Lucknow verified import, 17 vitest + 36 pytest pass | gemini/student-portal | done, PR opened
 2026-10-13 | gemini | Student Portal UX Polish & CI verification: timetable, transcript diagnostics, scenario solver, CI test step, demo cookie fallback | gemini/student-portal | done, PR #2 updated
 2026-10-14 | gemini | Mobile auth keys, offline fallback safety, UI polish pushed to separate branch | gemini/mobile-and-offline-fixes | pushed
+2026-10-14 | gemini | Synchronize mobile app with web UI/UX: official mark tile, exact OKLCH tokens, animated AuroraBackground & PageArt, sign-in role tabs, lint & typecheck pass | gemini/mobile-and-offline-fixes | done
 
