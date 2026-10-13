@@ -11,3 +11,4 @@ One line per finished or in-progress task. Newest at the bottom. Format: `date |
 2026-10-13 | gemini | Mobile app UX polish: ScoreRing scaling fix, onboarding welcome screen, Platform Hub tab, synthesized audio engine, scrollbar suppression, lint/typecheck clean | gemini/mobile-app | done, PR #1 updated
 2026-10-13 | gemini | Fix offline sign-out crash when Supabase client env vars are absent: apps/web/src/components/user-menu.tsx | gemini/fix-offline-signout | done
 2026-10-13 | gemini | Mobile app complete fix: official mark.png branding across screens, Supabase URL fallback crash guard, lint/typecheck clean | gemini/mobile-app | done
+2026-10-14 | gemini | Mobile auth keys, offline fallback safety, UI polish pushed to separate branch | gemini/mobile-and-offline-fixes | pushed
