@@ -1,8 +1,29 @@
 import "server-only";
 import { cache } from "react";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import { artifact, offlineInterventions, OFFLINE, OFFLINE_MENTOR, OFFLINE_ROLE, one, snapshot, visibleIds } from "@/lib/offline";
-import type { Insight, Intervention, Profile, Segment, StudentRow, StudentScore } from "@/lib/types";
+import {
+  artifact,
+  offlineConnections,
+  offlineInterventions,
+  offlinePlans,
+  OFFLINE,
+  OFFLINE_MENTOR,
+  OFFLINE_ROLE,
+  one,
+  snapshot,
+  visibleIds,
+} from "@/lib/offline";
+import type {
+  ExternalConnection,
+  Insight,
+  Intervention,
+  Profile,
+  Segment,
+  StudentPlan,
+  StudentRow,
+  StudentScore,
+} from "@/lib/types";
 
 type Supa = Awaited<ReturnType<typeof createClient>>;
 
@@ -20,6 +41,38 @@ async function fetchAll<T>(build: (s: Supa) => any, pageSize = 1000): Promise<T[
 }
 
 export const getProfile = cache(async (): Promise<(Profile & { email: string }) | null> => {
+  const cookieStore = await cookies();
+  const demoStudentId = cookieStore.get("ascora_demo_student")?.value;
+
+  if (demoStudentId) {
+    if (OFFLINE) {
+      const st = snapshot().students.find((s) => s.id === demoStudentId);
+      if (st) {
+        return {
+          id: `student-${st.id}`,
+          full_name: st.name,
+          role: "student",
+          mentor_id: st.mentor_id,
+          student_id: st.id,
+          email: st.email ?? `${st.id.toLowerCase()}@cumail.in`,
+        };
+      }
+    } else {
+      const supabase = await createClient();
+      const { data: st } = await supabase.from("students").select("id, name, email, mentor_id").eq("id", demoStudentId).maybeSingle();
+      if (st) {
+        return {
+          id: `student-${st.id}`,
+          full_name: st.name,
+          role: "student",
+          mentor_id: st.mentor_id,
+          student_id: st.id,
+          email: st.email ?? `${st.id.toLowerCase()}@cumail.in`,
+        };
+      }
+    }
+  }
+
   if (OFFLINE) {
     return OFFLINE_ROLE === "admin"
       ? { id: "offline-admin", full_name: "Dr. Meera Iyer", role: "admin", mentor_id: null, email: "admin@ascora.test" }
@@ -30,7 +83,7 @@ export const getProfile = cache(async (): Promise<(Profile & { email: string }) 
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data } = await supabase.from("profiles").select("id, full_name, role, mentor_id").eq("id", user.id).single();
+  const { data } = await supabase.from("profiles").select("id, full_name, role, mentor_id, student_id").eq("id", user.id).single();
   if (!data) return null;
   return { ...(data as Profile), email: user.email ?? "" };
 });
@@ -63,6 +116,18 @@ function toRow(r: any, st: any): StudentRow {
 }
 
 export const getStudentRows = cache(async (): Promise<StudentRow[]> => {
+  const profile = await getProfile();
+  if (profile?.role === "student" && profile.student_id) {
+    if (OFFLINE) {
+      const s = snapshot();
+      const st = s.students.find((x) => x.id === profile.student_id);
+      const sc = s.student_scores.find((x) => x.student_id === profile.student_id);
+      return st && sc ? [toRow(sc, st)] : [];
+    }
+    const supabase = await createClient();
+    const { data: sc } = await supabase.from("student_scores").select(ROW_COLS).eq("student_id", profile.student_id).maybeSingle();
+    return sc ? [toRow(sc, sc.students)] : [];
+  }
   if (OFFLINE) {
     const s = snapshot();
     const ids = visibleIds();
@@ -166,8 +231,12 @@ export async function getInterventions(studentId?: string): Promise<Intervention
 }
 
 export async function getStudent360(id: string) {
+  const profile = await getProfile();
+  if (profile?.role === "student" && profile.student_id !== id) {
+    return null;
+  }
   if (OFFLINE) {
-    if (!visibleIds().has(id)) return null;
+    if (!visibleIds(profile?.student_id ?? undefined).has(id)) return null;
     const s = snapshot();
     const st = s.students.find((x) => x.id === id);
     const mentor = s.mentors.find((m) => m.id === st.mentor_id);
@@ -237,3 +306,136 @@ export const getWeeklyLogins = cache(async (): Promise<Map<string, number[]>> =>
   );
   return new Map(rows.map((r) => [r.student_id, toSeries(r.weekly)]));
 });
+
+/** Search demo students across the 1,200 cohort with safe pagination and filters */
+export async function searchDemoStudents(query = "", branch?: string, year?: number, limit = 20) {
+  const q = query.trim().toLowerCase();
+  if (OFFLINE) {
+    let list = snapshot().students;
+    if (q) {
+      list = list.filter((s) => s.id.toLowerCase().includes(q) || s.name.toLowerCase().includes(q));
+    }
+    if (branch && branch !== "all") {
+      list = list.filter((s) => s.branch === branch);
+    }
+    if (year) {
+      list = list.filter((s) => s.year === year);
+    }
+    return list.slice(0, limit).map((s) => ({
+      id: s.id as string,
+      name: s.name as string,
+      branch: s.branch as string,
+      year: s.year as number,
+      section: s.section as string,
+    }));
+  }
+  const supabase = await createClient();
+  let builder = supabase.from("students").select("id, name, branch, year, section").order("id").limit(limit);
+  if (q) {
+    builder = builder.or(`id.ilike.%${q}%,name.ilike.%${q}%`);
+  }
+  if (branch && branch !== "all") {
+    builder = builder.eq("branch", branch);
+  }
+  if (year) {
+    builder = builder.eq("year", year);
+  }
+  const { data } = await builder;
+  return (data ?? []).map((s: any) => ({
+    id: s.id,
+    name: s.name,
+    branch: s.branch,
+    year: s.year,
+    section: s.section,
+  }));
+}
+
+/** Retrieve personal planning targets for a student */
+export async function getStudentPlans(studentId?: string): Promise<StudentPlan[]> {
+  const profile = await getProfile();
+  const targetId = studentId ?? profile?.student_id;
+  if (!targetId) return [];
+
+  if (OFFLINE) {
+    return offlinePlans.filter((p) => p.student_id === targetId);
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("student_plans")
+    .select("*")
+    .eq("student_id", targetId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    // Fallback to offline plans if table not yet migrated on remote Supabase
+    return offlinePlans.filter((p) => p.student_id === targetId);
+  }
+  return (data ?? []) as StudentPlan[];
+}
+
+/** Retrieve verified connection / sync provenance metadata for a student */
+export async function getExternalConnection(studentId?: string): Promise<ExternalConnection | null> {
+  const profile = await getProfile();
+  const targetId = studentId ?? profile?.student_id;
+  if (!targetId) return null;
+
+  if (OFFLINE) {
+    return (
+      offlineConnections.get(targetId) ?? {
+        id: `conn-${targetId}`,
+        student_id: targetId,
+        provider: "culko",
+        status: "last_synced",
+        last_synced_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+        provenance: "synthetic_demo",
+        details: { cohort_version: "HacXLerate 2026 Demo Frozen Cohort" },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+    );
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("external_connections")
+    .select("*")
+    .eq("student_id", targetId)
+    .maybeSingle();
+
+  if (error || !data) {
+    return {
+      id: `conn-${targetId}`,
+      student_id: targetId,
+      provider: "culko",
+      status: "last_synced",
+      last_synced_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+      provenance: "synthetic_demo",
+      details: { cohort_version: "HacXLerate 2026 Demo Frozen Cohort" },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+  }
+  return data as ExternalConnection;
+}
+
+/** Unified academic data retriever for student portal */
+export async function getStudentAcademicData(studentId?: string) {
+  const profile = await getProfile();
+  const targetId = studentId ?? profile?.student_id;
+  if (!targetId) return null;
+
+  const data360 = await getStudent360(targetId);
+  if (!data360) return null;
+
+  const [plans, connection] = await Promise.all([
+    getStudentPlans(targetId),
+    getExternalConnection(targetId),
+  ]);
+
+  return {
+    ...data360,
+    plans,
+    connection,
+  };
+}

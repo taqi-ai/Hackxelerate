@@ -1,12 +1,14 @@
 export type RiskLevel = "Low" | "Medium" | "High";
 export type PlacementLevel = RiskLevel | "N/A";
-export type Role = "admin" | "mentor";
+export type Role = "admin" | "mentor" | "student";
 
 export interface Profile {
   id: string;
   full_name: string;
   role: Role;
   mentor_id: string | null;
+  student_id?: string | null;
+  email?: string | null;
 }
 
 export interface Driver {
@@ -145,4 +147,73 @@ export interface Intervention {
   baseline: { success_score: number; academic_risk_prob: number; placement_risk_prob: number | null } | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface StudentPlan {
+  id: string;
+  student_id: string;
+  title: string;
+  category: "attendance" | "marks" | "cgpa" | "deadline" | "general";
+  target_value: Record<string, unknown>;
+  current_value: Record<string, unknown>;
+  due_date: string | null;
+  status: "active" | "completed" | "archived";
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ExternalConnection {
+  id: string;
+  student_id: string;
+  provider: string;
+  status: "connected" | "syncing" | "last_synced" | "expired" | "auth_required" | "failed" | "manual_import";
+  last_synced_at: string | null;
+  provenance: "synthetic_demo" | "culko_portal" | "manual_import" | "derived_calc";
+  details: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AttendanceCalculation {
+  attended: number;
+  conducted: number;
+  currentPct: number;
+  requiredPct: number;
+  safeZonePct: number;
+  status: "critically_low" | "below_target" | "safe" | "surplus";
+  classesNeededForRequired: number;
+  classesNeededForSafeZone: number;
+  allowedAbsencesAtTarget: number;
+  allowedAbsencesAtSafeZone: number;
+  projectedPct: number;
+  message: string;
+  safeMessage: string;
+  absenceMessage: string;
+}
+
+export interface SubjectMarkScenario {
+  subject: string;
+  credits: number;
+  internalScore: number;
+  internalMax: number;
+  endSemScore: number | null;
+  endSemMax: number;
+  currentTotal: number;
+  targetTotal: number;
+  requiredEndSemScore: number | null;
+  isAchievable: boolean;
+  gradeBand: string;
+  projectedGradePoint: number;
+}
+
+export interface CGPAScenario {
+  currentCGPA: number;
+  completedCredits: number;
+  currentSemesterCredits: number;
+  targetCGPA: number;
+  requiredSGPA: number;
+  isAchievable: boolean;
+  projectedCGPA: number;
+  semesterSubjects: { subject: string; credits: number; targetGradePoint: number }[];
 }

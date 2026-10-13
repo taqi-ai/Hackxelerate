@@ -15,6 +15,11 @@ const KIND: Record<string, Kind> = {
   "Score & models": "grid",
   "Fairness & privacy": "shield",
   Settings: "grid",
+  "Student Overview": "orbit",
+  "My Academics": "bars",
+  "Plan & Improve": "grid",
+  "Schedule & Tasks": "calendar",
+  "Data & Portal": "stack",
 };
 
 export function artFor(title: string): Kind {

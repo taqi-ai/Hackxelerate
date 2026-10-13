@@ -13,7 +13,7 @@ import { openCommandPalette } from "@/components/command-palette";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/lib/types";
 
-const GROUPS = ["Insight", "Action", "Trust", "Account"] as const;
+const GROUPS = ["Academic", "Planning", "Portal", "Insight", "Action", "Trust", "Account"] as const;
 
 function NavLinks({ role, onNavigate, layoutKey }: { role: Role; onNavigate?: () => void; layoutKey: string }) {
   const path = usePathname();
@@ -62,7 +62,7 @@ function NavLinks({ role, onNavigate, layoutKey }: { role: Role; onNavigate?: ()
 export function AppSidebar({ role, name }: { role: Role; name: string }) {
   return (
     <aside className="sticky top-0 hidden h-[100dvh] flex-col gap-6 border-r bg-sidebar px-3 py-4 lg:flex">
-      <Link href="/overview" className="rounded-lg px-2 outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Ascora overview">
+      <Link href={role === "student" ? "/student" : "/overview"} className="rounded-lg px-2 outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Ascora overview">
         <BrandMark />
       </Link>
       <button
@@ -80,7 +80,9 @@ export function AppSidebar({ role, name }: { role: Role; name: string }) {
       <NavLinks role={role} layoutKey="desk" />
       <div className="mt-auto rounded-xl border bg-gradient-to-br from-brand/10 to-transparent p-3">
         <p className="truncate text-sm font-medium">{name}</p>
-        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">Scores support mentors. They never replace their judgement.</p>
+        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+          {role === "student" ? "Your personal academic intelligence portal." : "Scores support mentors. They never replace their judgement."}
+        </p>
       </div>
     </aside>
   );
