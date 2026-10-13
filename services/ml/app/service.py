@@ -2,6 +2,7 @@
 the what-if simulator, and writes a JSON snapshot used by the web app's offline demo mode."""
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import threading
@@ -12,7 +13,7 @@ import joblib
 import numpy as np
 import pandas as pd
 
-from .config import ARTIFACTS, DEMO_DIR, RISK_THRESHOLDS
+from .config import ARTIFACTS, CACHE_DIR, DEMO_DIR, RISK_THRESHOLDS
 from .db import Publisher, _clean, records
 from .features.build import ACADEMIC_FEATURES, PLACEMENT_FEATURES
 from .insights.llm import cache_rows
@@ -37,6 +38,27 @@ class RunState:
 RUNS: dict[str, RunState] = {}
 _lock = threading.Lock()
 STATE: dict = {}
+
+
+def input_fingerprint(folder: Path) -> str:
+    """Hash of every input file's bytes plus the pipeline code and dependency pins: a result is reusable only
+    when neither the data nor the code changed."""
+    h = hashlib.sha256()
+    for f in sorted(folder.iterdir()):
+        if f.is_file():
+            h.update(f.name.encode())
+            h.update(f.read_bytes())
+    code = Path(__file__).resolve().parent
+    for f in sorted(code.rglob("*.py")):
+        h.update(f.read_bytes())
+    req = code.parent / "requirements.txt"
+    if req.exists():
+        h.update(req.read_bytes())
+    return h.hexdigest()[:24]
+
+
+def _cache_path(fp: str) -> Path:
+    return CACHE_DIR / f"run-{fp}.joblib"
 
 
 def build_payload(res: PipelineResult, intel: Intelligence) -> dict[str, list[dict]]:
@@ -91,7 +113,7 @@ def write_snapshot(payload: dict, path: Path):
 
 
 def run_all(folder: Path = DEMO_DIR, publish: bool = True, run: RunState | None = None,
-            snapshot_path: Path | None = None) -> dict:
+            snapshot_path: Path | None = None, force: bool = False) -> dict:
     def on_change(sl: StepLog):
         if run:
             run.steps = sl.as_list()
@@ -99,12 +121,31 @@ def run_all(folder: Path = DEMO_DIR, publish: bool = True, run: RunState | None 
     sl = StepLog(on_change)
     if run:
         sl.run_id = run.run_id
-    truth_dir = folder if (folder / "_truth.parquet").exists() else DEMO_DIR
-    res = run_integration(folder, sl, truth_dir=truth_dir)
-    intel = run_intelligence(res, sl, truth_dir)
-    res.report["steps"] = sl.as_list()
-    payload = build_payload(res, intel)
-    save_state(intel)
+    fp = input_fingerprint(folder)
+    cached = None if force else _load_cache(fp)
+    if cached:
+        payload, steps, summary_base, intel_state = cached
+        # replay the recorded steps, clearly marked as reused, so the UI shows what the run consists of
+        for st in steps:
+            if st["key"] in sl.steps and st["key"] != "publish":
+                sl.steps[st["key"]].status = "done"
+                sl.steps[st["key"]].seconds = 0.0
+                sl.steps[st["key"]].metrics = st["metrics"]
+                sl.steps[st["key"]].detail = [*st["detail"][:2], f"Reused cached result (input and code unchanged, computed in {st['seconds']}s)"]
+        sl._emit()
+        STATE.update(intel_state)
+    else:
+        truth_dir = folder if (folder / "_truth.parquet").exists() else DEMO_DIR
+        res = run_integration(folder, sl, truth_dir=truth_dir)
+        intel = run_intelligence(res, sl, truth_dir)
+        res.report["steps"] = sl.as_list()
+        payload = build_payload(res, intel)
+        save_state(intel)
+        summary_base = {"run_id": res.run_id, "students": len(res.students), "matching": res.report["matching"].get("fuzzy_overall"),
+                        "conflicts": len(res.conflicts),
+                        "academic_auc": intel.artifacts["model_academic"]["metrics"]["roc_auc"],
+                        "placement_auc": intel.artifacts["model_placement"]["metrics"]["roc_auc"]}
+        _save_cache(fp, payload, sl.as_list(), summary_base, {k: STATE[k] for k in ("features", "ref", "academic", "placement")})
     if snapshot_path:
         write_snapshot(payload, snapshot_path)
     counts = {}
@@ -114,14 +155,31 @@ def run_all(folder: Path = DEMO_DIR, publish: bool = True, run: RunState | None 
         sl.done("publish", rows=counts)
     else:
         sl.skip("publish", "publish=false (local run)")
-    res.report["steps"] = sl.as_list()
-    summary = {"run_id": res.run_id, "students": len(res.students), "matching": res.report["matching"].get("fuzzy_overall"),
-               "conflicts": len(res.conflicts), "published": counts,
-               "academic_auc": intel.artifacts["model_academic"]["metrics"]["roc_auc"],
-               "placement_auc": intel.artifacts["model_placement"]["metrics"]["roc_auc"]}
+    summary = {**summary_base, "published": counts, "cache": "hit" if cached else "miss", "fingerprint": fp}
     if run:
         run.steps, run.summary, run.status = sl.as_list(), summary, "done"
     return summary
+
+
+def _load_cache(fp: str):
+    f = _cache_path(fp)
+    if not f.exists():
+        return None
+    try:
+        return joblib.load(f)
+    except Exception:  # corrupt or from an incompatible library version: recompute
+        log.warning("cache unreadable, recomputing")
+        return None
+
+
+def _save_cache(fp: str, payload, steps, summary_base, state):
+    try:
+        CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        for old in CACHE_DIR.glob("run-*.joblib"):
+            old.unlink(missing_ok=True)  # keep only the latest
+        joblib.dump((payload, steps, summary_base, state), _cache_path(fp), compress=3)
+    except OSError as e:
+        log.warning("could not write cache: %s", e)
 
 
 def start_run(folder: Path, publish: bool) -> RunState:

@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 import logging
 import math
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime
 
 import httpx
@@ -55,7 +56,8 @@ class Publisher:
     def __init__(self):
         if not (SUPABASE_URL and SUPABASE_ANON_KEY and INGEST_TOKEN):
             raise RuntimeError("SUPABASE_URL, SUPABASE_ANON_KEY and ASCORA_INGEST_TOKEN must be set in services/ml/.env")
-        self.client = httpx.Client(base_url=f"{SUPABASE_URL}/rest/v1", timeout=60.0,
+        self.client = httpx.Client(base_url=f"{SUPABASE_URL}/rest/v1", timeout=httpx.Timeout(90.0, pool=300.0),
+                                   limits=httpx.Limits(max_connections=4, max_keepalive_connections=4),
                                    headers={"apikey": SUPABASE_ANON_KEY, "Content-Type": "application/json"})
 
     def _rpc(self, fn: str, payload: dict):
@@ -67,18 +69,43 @@ class Publisher:
     def reset(self, keep_interventions: bool = True):
         self._rpc("ascora_reset", {"p_token": INGEST_TOKEN, "p_keep_interventions": keep_interventions})
 
-    def insert(self, table: str, rows: list[dict], batch: int = 300) -> int:
-        n = 0
-        for i in range(0, len(rows), batch):
-            n += self._rpc("ascora_ingest", {"p_token": INGEST_TOKEN, "p_table": table, "p_rows": rows[i:i + batch]}) or 0
-        return n
+    @staticmethod
+    def _chunks(rows: list[dict], max_rows: int = 800, max_bytes: int = 900_000) -> list[list[dict]]:
+        """Batch by payload size, not just row count: a student_scores row carries full SHAP JSON (several KB)."""
+        out, cur, size = [], [], 0
+        for r in rows:
+            n = len(json.dumps(r, ensure_ascii=False))
+            if cur and (len(cur) >= max_rows or size + n > max_bytes):
+                out.append(cur)
+                cur, size = [], 0
+            cur.append(r)
+            size += n
+        if cur:
+            out.append(cur)
+        return out
+
+    def insert(self, table: str, rows: list[dict]) -> int:
+        chunks = self._chunks(rows)
+        if not chunks:
+            return 0
+
+        def one(chunk):
+            return self._rpc("ascora_ingest", {"p_token": INGEST_TOKEN, "p_table": table, "p_rows": chunk}) or 0
+        with ThreadPoolExecutor(max_workers=4) as pool:  # batches of one table are independent rows
+            return sum(pool.map(one, chunks))
 
     def publish(self, payload: dict[str, list[dict]], progress=None) -> dict:
         self.reset()
         counts = {}
-        for t in PUBLISH_ORDER:
-            if t in payload:
-                counts[t] = self.insert(t, payload[t])
-                if progress:
-                    progress(t, counts[t])
+        # parent tables first (foreign keys); each stage's tables are independent of each other
+        stages = [["mentors"], ["students", "segments"],
+                  ["source_links", "academic", "attendance", "lms_activity", "engagement", "placement", "skills", "feedback", "conflicts"],
+                  ["student_scores", "insights", "analytics_artifacts", "data_quality_log", "raw_uploads", "llm_cache"]]
+        for stage in stages:
+            todo = [tb for tb in stage if tb in payload]
+            with ThreadPoolExecutor(max_workers=min(4, len(todo) or 1)) as pool:
+                for tb, n in zip(todo, pool.map(lambda tb: self.insert(tb, payload[tb]), todo)):
+                    counts[tb] = n
+                    if progress:
+                        progress(tb, n)
         return counts

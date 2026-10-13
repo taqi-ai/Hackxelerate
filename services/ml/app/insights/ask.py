@@ -10,7 +10,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, ValidationError
 
-from .llm import generate
+from .llm import generate, provider
 
 Risk = Literal["Low", "Medium", "High"]
 BRANCHES = ["CSE", "CSE-AIML", "CSE-Data Science", "ECE", "ME"]
@@ -63,7 +63,7 @@ def llm_parse(q: str) -> Query | None:
     prompt = ("Convert the question into a JSON object for a student-analytics filter. Output ONLY JSON matching this schema, "
               f"no prose.\nAllowed branch values: {BRANCHES}. Personas: {PERSONAS}. Intents: {INTENTS}. Alert types: {ALERTS}.\n"
               f"Schema: {SCHEMA_HINT}\nQuestion: {q}")
-    out = generate(prompt)
+    out = generate(prompt, json_mode=True)
     if not out:
         return None
     m = re.search(r"\{.*\}", out, re.S)
@@ -133,7 +133,7 @@ def rule_parse(q: str) -> Query:
 
 def ask(question: str) -> dict:
     q = llm_parse(question)
-    engine = "gemini" if q else "rules"
+    engine = provider() if q else "rules"
     if q is None:
         q = rule_parse(question)
     return {"question": question, "engine": engine, "query": json.loads(q.model_dump_json())}

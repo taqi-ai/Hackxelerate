@@ -178,6 +178,9 @@ def fairness(students: pd.DataFrame, flag: pd.Series, y: pd.Series, kind: str) -
 
 # --------------------------------------------------------------------------- early warning curve
 
+# 6 weeks x 5 folds = 30 fits: a lighter model is plenty to show how the signal grows with time
+CURVE_PARAMS = {**LGB_PARAMS, "n_estimators": 120, "learning_rate": 0.06}
+
 def early_curve(students, tables, weekly, y: pd.Series, weeks=(2, 4, 6, 8, 10, 12), k_frac: float = 0.2) -> list[dict]:
     """How early can we know? Retrain the academic model with only the data available by week w."""
     out = []
@@ -187,7 +190,7 @@ def early_curve(students, tables, weekly, y: pd.Series, weeks=(2, 4, 6, 8, 10, 1
         yy = y.astype(int).to_numpy()
         oof = np.zeros(len(yy))
         for tr, te in StratifiedKFold(5, shuffle=True, random_state=5).split(X, yy):
-            m = lgb.LGBMClassifier(**LGB_PARAMS).fit(X.iloc[tr], yy[tr])
+            m = lgb.LGBMClassifier(**CURVE_PARAMS).fit(X.iloc[tr], yy[tr])
             oof[te] = m.predict_proba(X.iloc[te])[:, 1]
         k = int(len(yy) * k_frac)
         top = np.argsort(-oof)[:k]

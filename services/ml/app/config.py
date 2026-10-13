@@ -22,6 +22,11 @@ SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 INGEST_TOKEN = os.getenv("ASCORA_INGEST_TOKEN", "")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+TOKEN_SECRET = os.getenv("ASCORA_TOKEN_SECRET", "")
+CACHE_DIR = Path(os.getenv("ASCORA_CACHE_DIR", str(ML_ROOT / "artifacts" / "cache")))
+AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT", "")
+AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY", "")
+AZURE_OPENAI_DEPLOYMENT = os.getenv("AZURE_OPENAI_DEPLOYMENT", "ascora-chat")
 ALLOWED_ORIGINS = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",") if o.strip()]
 
 # --- Student Success Score: component weights (sum to 1.0) -------------------------------

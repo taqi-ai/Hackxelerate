@@ -7,12 +7,14 @@ import time
 import uuid
 from pathlib import Path
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from . import service
-from .config import ALLOWED_ORIGINS, DEMO_DIR, GEMINI_API_KEY, ML_ROOT
+from .auth import current_user, require_admin
+from .config import ALLOWED_ORIGINS, DEMO_DIR, ML_ROOT
+from .insights.llm import model_name, provider
 from .insights.ask import ask as ask_query
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -22,7 +24,7 @@ UPLOADS = ML_ROOT / "artifacts" / "uploads"
 app = FastAPI(title="Ascora ML service", version="1.0.0",
               description="Integration pipeline, Success Score, risk models, what-if simulation and Ask Ascora.")
 app.add_middleware(CORSMiddleware, allow_origins=ALLOWED_ORIGINS, allow_origin_regex=r"https://ascora.*\.vercel\.app",
-                   allow_methods=["GET", "POST"], allow_headers=["*"])
+                   allow_methods=["GET", "POST"], allow_headers=["Authorization", "Content-Type"])
 
 
 @app.on_event("startup")
@@ -48,10 +50,10 @@ class AskRequest(BaseModel):
 @app.get("/health")
 def health():
     return {"status": "ok", "model_state": bool(service.STATE) or service.STATE_FILE.exists(),
-            "llm": "gemini" if GEMINI_API_KEY else "disabled (deterministic fallbacks)", "time": time.time()}
+            "llm": provider() if provider() != "none" else "disabled (deterministic fallbacks)", "llm_model": model_name(), "time": time.time()}
 
 
-@app.post("/pipeline/upload")
+@app.post("/pipeline/upload", dependencies=[Depends(require_admin)])
 async def upload(files: list[UploadFile] = File(...)):
     if not files or len(files) > 12:
         raise HTTPException(400, "Upload between 1 and 12 files")
@@ -72,7 +74,7 @@ async def upload(files: list[UploadFile] = File(...)):
     return {"upload_id": uid, "files": saved}
 
 
-@app.post("/pipeline/run")
+@app.post("/pipeline/run", dependencies=[Depends(require_admin)])
 def run(req: RunRequest):
     if req.source == "upload":
         if not req.upload_id or not (UPLOADS / req.upload_id).is_dir():
@@ -84,7 +86,7 @@ def run(req: RunRequest):
     return {"run_id": st.run_id, "status": st.status}
 
 
-@app.get("/pipeline/runs/{run_id}")
+@app.get("/pipeline/runs/{run_id}", dependencies=[Depends(require_admin)])
 def run_status(run_id: str):
     st = service.RUNS.get(run_id)
     if not st:
@@ -92,7 +94,7 @@ def run_status(run_id: str):
     return {"run_id": st.run_id, "status": st.status, "steps": st.steps, "summary": st.summary, "error": st.error}
 
 
-@app.post("/whatif")
+@app.post("/whatif", dependencies=[Depends(current_user)])
 def whatif(req: WhatIfRequest):
     try:
         return service.whatif(req.student_id, req.changes)
@@ -104,7 +106,7 @@ def whatif(req: WhatIfRequest):
         raise HTTPException(503, str(e))
 
 
-@app.get("/whatif/{student_id}/inputs")
+@app.get("/whatif/{student_id}/inputs", dependencies=[Depends(current_user)])
 def whatif_inputs(student_id: str):
     try:
         return service.whatif_inputs(student_id)
@@ -114,6 +116,6 @@ def whatif_inputs(student_id: str):
         raise HTTPException(503, str(e))
 
 
-@app.post("/ask")
+@app.post("/ask", dependencies=[Depends(current_user)])
 def ask(req: AskRequest):
     return ask_query(req.question)

@@ -88,8 +88,10 @@ def parse_program(program: str) -> tuple[str | None, int | None]:
 
 def link_by_roll(df: pd.DataFrame, source: str, roster_ids: set[str]) -> pd.DataFrame:
     rows = []
+    # a roll appears on many rows (marks per subject, attendance per month): normalise each distinct value once
+    canon = {v: normalize_roll(v) for v in df["roll"].dropna().unique()}
     for raw, ref, key in zip(df["roll"], df["src_ref"], df["src_key"]):
-        sid = normalize_roll(raw)
+        sid = canon.get(raw)
         if sid and sid in roster_ids:
             same_format = str(raw).strip().upper() == sid
             conf = 1.0 if same_format else 0.99

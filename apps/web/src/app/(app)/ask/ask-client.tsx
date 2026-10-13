@@ -90,7 +90,7 @@ export function AskClient({ rows }: { rows: StudentRow[] }) {
       try {
         const r = await mlFetch<{ query: Query; engine: string }>("/ask", { method: "POST", body: JSON.stringify({ question: q }) });
         setQuery(r.query);
-        setEngine(r.engine === "gemini" ? "Gemini, validated against the filter schema" : "built-in rules (no LLM key set)");
+        setEngine(r.engine === "azure-openai" ? "Azure OpenAI, validated against the filter schema" : r.engine === "gemini" ? "Gemini, validated against the filter schema" : "built-in rules (no LLM available)");
       } catch (e) {
         setError(e instanceof MlUnavailable ? "The ML service is offline. Try one of the example questions, which work without it." : (e as Error).message);
       }
