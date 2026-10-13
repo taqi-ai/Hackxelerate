@@ -7,6 +7,7 @@ import {
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -165,20 +166,27 @@ export default function HomeScreen() {
     >
       {/* Top Greeting */}
       <View style={styles.greetingHeader}>
-        <View>
-          <Text
-            style={[
-              styles.greetingText,
-              { color: colors.text, fontFamily: "BricolageGrotesque_700Bold" },
-            ]}
-          >
-            {getKolkataGreeting(profile?.full_name)}
-          </Text>
-          <Text style={[styles.roleBadge, { color: colors.mutedText }]}>
-            {profile?.role === "admin"
-              ? "Head of Department (Whole Campus)"
-              : "Faculty Mentor"}
-          </Text>
+        <View style={styles.greetingTitleRow}>
+          <Image
+            source={require("../../assets/mark.png")}
+            style={styles.headerMark}
+            resizeMode="contain"
+          />
+          <View>
+            <Text
+              style={[
+                styles.greetingText,
+                { color: colors.text, fontFamily: "BricolageGrotesque_700Bold" },
+              ]}
+            >
+              {getKolkataGreeting(profile?.full_name)}
+            </Text>
+            <Text style={[styles.roleBadge, { color: colors.mutedText }]}>
+              {profile?.role === "admin"
+                ? "Head of Department (Whole Campus)"
+                : "Faculty Mentor"}
+            </Text>
+          </View>
         </View>
         <TouchableOpacity
           style={[styles.profileButton, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
@@ -518,6 +526,15 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 16,
+  },
+  greetingTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  headerMark: {
+    width: 28,
+    height: 28,
   },
   greetingText: {
     fontSize: 22,

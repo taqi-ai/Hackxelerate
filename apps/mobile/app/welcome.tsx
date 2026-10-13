@@ -51,7 +51,7 @@ export default function WelcomeScreen() {
         {/* Brand Header */}
         <View style={styles.header}>
           <Image
-            source={require("../assets/icon-512-transparent.png")}
+            source={require("../assets/mark.png")}
             style={styles.logo}
             resizeMode="contain"
           />
