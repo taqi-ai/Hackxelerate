@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 
+import { Animated3DOrb } from "./animated-3d-orb";
+
 /**
  * The Overview's opening card: who you are, the one thing that matters this week, and where to go.
  * Always dark (in both themes) so the brand orb and logo glow read the same everywhere.
@@ -8,11 +10,9 @@ import { ArrowRight, Sparkles } from "lucide-react";
 export function CampusHero({ greeting, summary, chips }: { greeting: string; summary: React.ReactNode; chips: { label: string; href: string }[] }) {
   return (
     <section className="relative isolate overflow-hidden rounded-3xl bg-[#0b0b14] p-6 text-white shadow-[0_30px_80px_-40px_oklch(0.5_0.16_272/0.7)] sm:p-8">
-      {/* layered orb: the 3D-feeling centrepiece, pure CSS */}
-      <div aria-hidden className="pointer-events-none absolute -right-16 -top-24 size-[340px] sm:-right-6 sm:-top-16">
-        <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_200deg,oklch(0.7_0.16_272),oklch(0.72_0.15_320),oklch(0.78_0.12_200),oklch(0.7_0.16_272))] opacity-80 blur-[2px] motion-safe:animate-[spin_24s_linear_infinite]" />
-        <div className="absolute inset-[18%] rounded-full bg-[radial-gradient(circle_at_30%_30%,oklch(0.95_0.03_272),oklch(0.55_0.14_272)_45%,oklch(0.2_0.06_272)_80%)] shadow-[inset_-20px_-30px_60px_oklch(0.15_0.05_272)]" />
-        <div className="absolute inset-0 rounded-full bg-[radial-gradient(closest-side,transparent_55%,#0b0b14_100%)]" />
+      {/* Interactive 3D Animated Orb */}
+      <div className="pointer-events-auto absolute -right-16 -top-24 size-[340px] sm:-right-6 sm:-top-16">
+        <Animated3DOrb className="size-full" />
       </div>
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(600px_circle_at_0%_100%,oklch(0.55_0.16_272/0.25),transparent_60%)]" />
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgb(255_255_255/0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgb(255_255_255/0.04)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:linear-gradient(to_right,black,transparent_70%)]" />

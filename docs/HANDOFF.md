@@ -17,6 +17,7 @@ One line per finished or in-progress task. Newest at the bottom. Format: `date |
 2026-10-14 | gemini | Mobile auth keys, offline fallback safety, UI polish pushed to separate branch | gemini/mobile-and-offline-fixes | pushed
 2026-10-14 | gemini | Exact website-to-mobile UI/UX synchronization: PageArt across all tabs, BrandMark tiles, exact OKLCH tokens, lint & typecheck clean | gemini/mobile-and-offline-fixes | done
 2026-10-14 | gemini | Website 3D motion experience: Cinematic3DHeroVisual, PerspectiveTiltCard 3D tilt, Awwwards-grade depth & lighting | gemini/website-3d-motion | done
+2026-10-14 | gemini | Interactive 3D Animated Orb on CampusHero banner, spring tilt & specular flare on hero visual, hydration warning fix | gemini/website-3d-motion | done, pushed
 
 
 
