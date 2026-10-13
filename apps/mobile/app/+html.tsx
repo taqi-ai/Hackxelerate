@@ -83,6 +83,18 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Hide scrollbars everywhere so mobile frame looks native */
+* {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+*::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+  background: transparent !important;
+}
+
 #simulator-container {
   display: flex;
   flex-direction: column;

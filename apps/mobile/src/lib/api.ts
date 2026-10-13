@@ -239,7 +239,7 @@ export async function fetchStudent360(studentId: string) {
 export async function fetchInterventions(studentId?: string): Promise<Intervention[]> {
   let query = supabase
     .from("interventions")
-    .select("*, students(name)")
+    .select("*")
     .order("created_at", { ascending: false });
 
   if (studentId) {
@@ -264,7 +264,6 @@ export async function fetchInterventions(studentId?: string): Promise<Interventi
     baseline: i.baseline,
     created_at: i.created_at,
     updated_at: i.updated_at,
-    student_name: i.students?.name,
   }));
 }
 

@@ -18,6 +18,7 @@ import { EmptyState } from "../../src/components/EmptyState";
 import { InterventionModal } from "../../src/components/InterventionModal";
 import { INTERVENTION_LABEL } from "../../src/lib/format";
 import { triggerHaptic } from "../../src/lib/haptics";
+import { playSound } from "../../src/lib/sound";
 import type { StudentRow } from "../../src/lib/types";
 
 const ALERT_TO_TYPE: Record<string, string> = {
@@ -100,6 +101,7 @@ export default function ThisWeekScreen() {
 
   const changeHours = (delta: number) => {
     triggerHaptic("light");
+    playSound("tick");
     setHours((prev) => Math.min(10, Math.max(1, Math.round((prev + delta) * 2) / 2)));
   };
 

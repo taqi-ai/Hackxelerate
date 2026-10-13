@@ -55,6 +55,15 @@ export function WebSimulatorWrapper({ children }: WebSimulatorWrapperProps) {
 
   return (
     <View style={styles.webContainer}>
+      {/* Global CSS to hide scrollbars on web */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            * { scrollbar-width: none !important; -ms-overflow-style: none !important; }
+            *::-webkit-scrollbar { display: none !important; width: 0px !important; height: 0px !important; }
+          `,
+        }}
+      />
       {/* Simulator Toolbar in page margin */}
       <View style={styles.toolbar}>
         <View style={styles.titleWrap}>

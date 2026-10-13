@@ -312,6 +312,7 @@ export default function StudentsScreen() {
           data={students}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
           contentContainerStyle={[
             styles.listContent,
             { paddingBottom: Math.max(insets.bottom, 16) + 32 },

@@ -43,11 +43,12 @@ function AuthGate() {
   useEffect(() => {
     if (!sessionChecked) return;
 
-    const inAuthGroup = segments[0] === "sign-in";
+    const currentRoute = segments[0];
+    const isPublicRoute = currentRoute === "welcome" || currentRoute === "sign-in";
 
-    if (!isAuthenticated && !inAuthGroup) {
-      router.replace("/sign-in");
-    } else if (isAuthenticated && inAuthGroup) {
+    if (!isAuthenticated && !isPublicRoute) {
+      router.replace("/welcome");
+    } else if (isAuthenticated && isPublicRoute) {
       router.replace("/(tabs)");
     }
   }, [sessionChecked, isAuthenticated, segments, router]);
@@ -70,6 +71,7 @@ function AuthGate() {
           animation: "slide_from_right",
         }}
       >
+        <Stack.Screen name="welcome" options={{ headerShown: false }} />
         <Stack.Screen name="sign-in" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen

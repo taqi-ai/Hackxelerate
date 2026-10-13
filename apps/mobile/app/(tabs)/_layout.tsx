@@ -69,19 +69,25 @@ export default function TabLayout() {
       <Tabs.Screen
         name="this-week"
         options={{
-          title: "This week",
-          tabBarIcon: ({ color, size }) => (
+          title: "Planner",
+          tabBarIcon: ({ color }) => (
             <Feather name="calendar" size={20} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="hub"
+        options={{
+          title: "Hub",
+          tabBarIcon: ({ color }) => (
+            <Feather name="layers" size={20} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: "Settings",
-          tabBarIcon: ({ color, size }) => (
-            <Feather name="settings" size={20} color={color} />
-          ),
+          href: null,
         }}
       />
     </Tabs>

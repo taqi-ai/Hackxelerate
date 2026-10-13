@@ -18,6 +18,8 @@ import { useTheme } from "../src/lib/theme";
 import { supabase } from "../src/lib/supabase";
 import { triggerHaptic } from "../src/lib/haptics";
 
+import { playSound } from "../src/lib/sound";
+
 const SHARED_PASSWORD = "AscoraDemo#2026";
 
 const QUICK_ROLES = [
@@ -46,6 +48,7 @@ export default function SignInScreen() {
   const handleSignIn = async () => {
     if (!email.trim() || !password) {
       triggerHaptic("error");
+      playSound("error");
       setError("Enter your email and password, or pick a role below.");
       return;
     }
@@ -60,6 +63,7 @@ export default function SignInScreen() {
 
       if (signInError) {
         triggerHaptic("error");
+        playSound("error");
         setError(
           signInError.message === "Invalid login credentials"
             ? "Invalid email or password. Pick a quick role below to fill."
@@ -67,10 +71,12 @@ export default function SignInScreen() {
         );
       } else {
         triggerHaptic("success");
+        playSound("success");
         router.replace("/(tabs)");
       }
     } catch (e: any) {
       triggerHaptic("error");
+      playSound("error");
       setError(e.message || "An unexpected error occurred");
     } finally {
       setLoading(false);
@@ -79,6 +85,7 @@ export default function SignInScreen() {
 
   const handleQuickFill = (roleEmail: string) => {
     triggerHaptic("light");
+    playSound("tap");
     setEmail(roleEmail);
     setPassword(SHARED_PASSWORD);
     setError(null);
