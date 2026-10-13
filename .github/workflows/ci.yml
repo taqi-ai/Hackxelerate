@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# a new push cancels the older run on the same branch -> fast feedback
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Each job skips itself until its folder has a package.json,
+  # so CI is green from day one and picks up app/ and mobile/ automatically.
+  app:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - id: has
+        run: echo "ok=$([ -f app/package.json ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+      - if: steps.has.outputs.ok == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - if: steps.has.outputs.ok == 'true'
+        working-directory: app
+        run: |
+          npm ci
+          npm run --if-present lint
+          npm run --if-present typecheck
+          npm run --if-present test
+          npm run build
+        env:
+          # placeholders so the build never fails on missing secrets
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
+
+  mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - id: has
+        run: echo "ok=$([ -f mobile/package.json ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+      - if: steps.has.outputs.ok == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - if: steps.has.outputs.ok == 'true'
+        working-directory: mobile
+        run: |
+          npm ci
+          npm run --if-present lint
+          npm run --if-present typecheck
+
+  motion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: motion/package-lock.json
+      - working-directory: motion
+        run: |
+          npm ci
+          npm run typecheck
+
+  secrets-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

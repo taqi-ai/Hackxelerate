@@ -1,0 +1,20 @@
+node_modules/
+.env
+.env.*
+!.env.example
+
+# build output
+dist/
+build/
+.next/
+out/
+.expo/
+.vercel/
+
+# remotion renders
+motion/out/
+
+# os / editor
+.DS_Store
+Thumbs.db
+*.log

@@ -1,0 +1,24 @@
+{
+  "name": "hackx-motion",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Remotion videos for HACKXELERATE26 (demo video, intro, social clips)",
+  "scripts": {
+    "dev": "remotion studio",
+    "render": "remotion render Intro out/intro.mp4",
+    "render:all": "remotion render Intro out/intro.mp4 && remotion render Social out/social.mp4",
+    "still": "remotion still Intro out/thumb.png --frame=60",
+    "upgrade": "remotion upgrade",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.535",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "remotion": "4.0.535"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "typescript": "^5.6.0"
+  }
+}
