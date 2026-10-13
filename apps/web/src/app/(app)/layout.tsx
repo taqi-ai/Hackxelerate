@@ -25,7 +25,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <MobileNav role={profile.role} />
           <div className="ml-auto flex items-center gap-1">
             <span className="mr-1 hidden rounded-full border bg-background/60 px-2.5 py-0.5 text-xs text-muted-foreground sm:inline">
-              {profile.role === "admin" ? "Admin · whole campus" : `Mentor · ${profile.mentor_id}`}
+              {profile.role === "admin"
+                ? "Admin · whole campus"
+                : profile.role === "student"
+                ? `Student · ${profile.student_id ?? "Portal"}`
+                : `Mentor · ${profile.mentor_id}`}
             </span>
             <SearchButton />
             <SoundToggle />

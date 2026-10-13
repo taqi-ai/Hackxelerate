@@ -42,3 +42,5 @@ services/ml/artifacts/cache/
 # agent tooling installed per machine
 .agents/
 .claude/skills/
+supabase/.temp/
+data/culko_login.html

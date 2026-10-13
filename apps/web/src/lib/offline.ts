@@ -1,7 +1,7 @@
 import "server-only";
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import type { Intervention } from "@/lib/types";
+import type { ExternalConnection, Intervention, StudentPlan } from "@/lib/types";
 
 /**
  * Offline mode (ASCORA_OFFLINE=1): the whole product runs from a local JSON snapshot written by
@@ -28,7 +28,8 @@ export function snapshot(): Snapshot {
   return snap;
 }
 
-export function visibleIds(): Set<string> {
+export function visibleIds(activeStudentId?: string): Set<string> {
+  if (activeStudentId) return new Set([activeStudentId]);
   const s = snapshot();
   return new Set(
     s.students.filter((st) => OFFLINE_ROLE === "admin" || st.mentor_id === OFFLINE_MENTOR).map((st) => st.id as string),
@@ -46,8 +47,60 @@ export function artifact(key: string) {
 
 /** interventions created during an offline session live in memory (reset on server restart) */
 // anchored on globalThis: server actions and pages can load separate module instances in dev
-const g = globalThis as unknown as { __ascoraInterventions?: Intervention[] };
+const g = globalThis as unknown as {
+  __ascoraInterventions?: Intervention[];
+  __ascoraPlans?: StudentPlan[];
+  __ascoraConnections?: Map<string, ExternalConnection>;
+};
 export const offlineInterventions: Intervention[] = (g.__ascoraInterventions ??= OFFLINE ? samplePlan() : []);
+export const offlinePlans: StudentPlan[] = (g.__ascoraPlans ??= OFFLINE ? sampleStudentPlans() : []);
+export const offlineConnections: Map<string, ExternalConnection> = (g.__ascoraConnections ??= new Map());
+
+/** sample student plans for offline evaluation */
+function sampleStudentPlans(): StudentPlan[] {
+  const stamp = new Date().toISOString();
+  return [
+    {
+      id: "plan-sample-1",
+      student_id: "CU24AIML0001",
+      title: "Maintain safe 80% attendance in Cloud Computing",
+      category: "attendance",
+      target_value: { subject: "Cloud Computing", targetPct: 80, requiredClasses: 4 },
+      current_value: { currentPct: 74.2 },
+      due_date: "2026-10-31",
+      status: "active",
+      notes: "Attend all 4 sessions scheduled this week to rebuild buffer.",
+      created_at: stamp,
+      updated_at: stamp,
+    },
+    {
+      id: "plan-sample-2",
+      student_id: "CU24AIML0001",
+      title: "Score at least 18/20 in upcoming Deep Learning MST-2",
+      category: "marks",
+      target_value: { subject: "Deep Learning", targetMark: 18, maxMark: 20 },
+      current_value: { internal: 23, internalMax: 40 },
+      due_date: "2026-11-08",
+      status: "active",
+      notes: "Targeting Grade A (80+ total) in end-semester grading.",
+      created_at: stamp,
+      updated_at: stamp,
+    },
+    {
+      id: "plan-sample-3",
+      student_id: "CU24AIML0001",
+      title: "Reach target CGPA of 6.50 this semester",
+      category: "cgpa",
+      target_value: { targetCGPA: 6.5, requiredSGPA: 7.2 },
+      current_value: { currentCGPA: 5.65, completedCredits: 80, currentSemesterCredits: 20 },
+      due_date: "2026-12-20",
+      status: "active",
+      notes: "Need minimum 7.20 SGPA across all 5 semester subjects.",
+      created_at: stamp,
+      updated_at: stamp,
+    },
+  ];
+}
 
 /** the same small sample plan the live database carries: top-priority students, due over the next few weeks */
 function samplePlan(): Intervention[] {
