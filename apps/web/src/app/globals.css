@@ -272,3 +272,21 @@
   50% { transform: translate(8%, 6%) rotate(25deg) scale(1.15); }
   100% { transform: translate(-10%, -6%) rotate(0deg) scale(1); }
 }
+
+/* Smooth theme cross-fade without layout thrashing */
+.theme-fade,
+.theme-fade *,
+.theme-fade *::before,
+.theme-fade *::after {
+  transition: background-color 0.25s ease-out, border-color 0.25s ease-out, color 0.25s ease-out, fill 0.25s ease-out !important;
+  transition-delay: 0s !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-fade,
+  .theme-fade *,
+  .theme-fade *::before,
+  .theme-fade *::after {
+    transition: none !important;
+  }
+}
