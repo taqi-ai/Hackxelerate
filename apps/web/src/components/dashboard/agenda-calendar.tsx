@@ -32,13 +32,13 @@ function initials(name: string) {
 /** A week strip with the selected day, then the check-ins due in that week as cards. */
 export function AgendaCalendar({ events, today }: { events: AgendaEvent[]; today: string }) {
   const [picked, setPicked] = useState(today);
-  // the strip shows 6 days starting two days before the picked day, like a rolling planner
+  // the strip shows 7 days centered on the picked day for a full rolling week
   const start = useMemo(() => {
     const d = parse(picked);
-    d.setDate(d.getDate() - 2);
+    d.setDate(d.getDate() - 3);
     return d;
   }, [picked]);
-  const days = Array.from({ length: 6 }, (_, i) => {
+  const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(start);
     d.setDate(start.getDate() + i);
     return d;
@@ -70,16 +70,30 @@ export function AgendaCalendar({ events, today }: { events: AgendaEvent[]; today
   return (
     <div className="relative overflow-hidden rounded-[1.4rem] border bg-gradient-to-b from-card via-card to-brand/[0.07] p-4">
       <div className="flex items-center justify-between">
-        <button type="button" onClick={() => shift(-6)} aria-label="Earlier days" className="press grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground">
+        <button type="button" onClick={() => shift(-7)} aria-label="Earlier days" className="press grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground">
           <ChevronLeft className="size-4" />
         </button>
-        <p className="font-display font-semibold">{month}</p>
-        <button type="button" onClick={() => shift(6)} aria-label="Later days" className="press grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground">
+        <div className="flex items-center gap-2">
+          <p className="font-display font-semibold">{month}</p>
+          {picked !== today && (
+            <button
+              type="button"
+              onClick={() => {
+                setPicked(today);
+                play("tick");
+              }}
+              className="rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-medium text-brand hover:bg-brand/25 transition-colors"
+            >
+              Today
+            </button>
+          )}
+        </div>
+        <button type="button" onClick={() => shift(7)} aria-label="Later days" className="press grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground">
           <ChevronRight className="size-4" />
         </button>
       </div>
 
-      <div className="mt-3 grid grid-cols-6 gap-1 text-center">
+      <div className="mt-3 grid grid-cols-7 gap-1 text-center">
         {days.map((d) => {
           const key = ymd(d);
           const sel = key === picked;
