@@ -26,17 +26,26 @@ Role: lead engineer / architect / QA / deploy for the team. Goal: qualify for To
 8. Time plan for the 22h build: 10% setup · 45% mandatory features · 15% differentiators · 15% tests/bugfix · 10% deploy/docs · 5% final verification. Give short milestone updates (done / doing / blocked / mandatory status / top risk / next).
 9. Act autonomously on routine work. Ask only for missing essentials, ambiguity, irreversible decisions, secrets or costs.
 
+## Product decisions (locked)
+- Product name: **Ascora** (not Pragati). Tagline: "From early warning to real intervention."
+- Locked challenge: **KPMG in India, Challenge 04: Smart Campus Analytics** (student success score, at-risk identification, dashboard).
+- The full build brief is `master promptinitialclaude.md` (gitignored, not for evaluators). Rubric: Data Integration 30, Score and Risk 25, Dashboard 25, Problem Understanding 10, Demo 10.
+- Live: https://ascora-five.vercel.app. Supabase project ref `xomihahbrxacgrwclect` (ap-northeast-1). Vercel project `ascora`, root `apps/web`, Git-connected.
+- Azure is NOT set up yet; the ML service (FastAPI) runs locally until the user supplies Azure. Do not touch Azure until told.
+
 ## Layout
-- `motion/` — Remotion (v4) videos: demo video, intro, social cuts. `npm run dev` opens Studio.
-  - Brand values live in `motion/src/theme.ts`; keep them in sync with the app theme.
-  - Compositions: `Intro` (1920x1080), `Social` (1080x1920).
-- `app/` — main product (web). Not scaffolded yet.
-- `mobile/` — mobile app, only if the idea needs it (Expo / React Native planned). Not scaffolded yet.
-- `docs/` — idea, pitch script, demo script, judging notes.
-- `assets/` — shared brand files (logo, fonts) and product screenshots/screen recordings used by `motion/`.
+- `apps/web`: Next.js 15 dashboard. `npm run dev`, `npm run dev:offline` (snapshot mode, local only).
+- `services/ml`: FastAPI service. `.venv` is local (gitignored). `pytest -q` for tests; `scripts/publish_demo.py` runs the full pipeline.
+- `data/generator`, `data/demo`: synthetic data and the frozen judging set (`data/raw` is gitignored).
+- `supabase/migrations`: 0001-0005 applied to the live project.
+- `docs`: score-note, architecture, demo-script, pitch-outline (deliverables); PREP, RULEBOOK_SUMMARY, REQUIREMENTS_MATRIX, EVALUATOR_QA, FINAL_GATE.
+- `motion`: Remotion videos (placeholder intro; build the real trailer once the logo exists).
+- `ASSETS_NEEDED.md`: assets the user must provide; never invent or download assets.
 
 ## Conventions
-- Windows dev machine; Node 22, npm. Each sub-project has its own `package.json` (no monorepo tooling).
-- Secrets go in `.env.local` files (gitignored). Never commit keys.
-- Optimise for demo-ability: every feature should be showable in the live demo or the video.
-- Remotion agent skills are installed in `.claude/skills/` (`remotion-best-practices` is the router) — use them for any video work.
+- Windows dev machine; Node 22, npm; Python 3.12 venv in `services/ml/.venv`.
+- Secrets only in `.env`/`.env.local` (gitignored). The ML service never holds the Supabase service-role key; it uses the token-gated `ascora_ingest` RPC.
+- Git Bash rewrites leading `/` in arguments: use `MSYS_NO_PATHCONV=1` for `vercel api /v9/...`.
+- Don't run `npm run build` while the dev server runs (they share `.next`); stop the dev server first.
+- Remotion agent skills are in `.claude/skills/`; use them for video work.
+- No em-dashes in user-facing copy.
