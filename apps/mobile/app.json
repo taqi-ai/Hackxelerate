@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "Ascora",
+    "slug": "ascora",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon-512-transparent.png",
+    "scheme": "ascora",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/icon-512-transparent.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#07070b"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon-512-transparent.png",
+        "backgroundColor": "#07070b"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/icon-512-transparent.png"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

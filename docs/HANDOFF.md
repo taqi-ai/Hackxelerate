@@ -7,3 +7,4 @@ One line per finished or in-progress task. Newest at the bottom. Format: `date |
 2026-10-13 | claude | Azure ML service live (https://ascora-ml.azurewebsites.net, ascora-rg, Central India B1), CI/CD deploy-ml.yml, Vercel pointed at it | main | done
 2026-10-13 | claude | WIP branch claude/ml-auth-cache: ML token auth, result cache, parallel publish, faster CI, logo assets, Azure OpenAI wiring. NOT merged: web must mint tokens first (see below) | claude/ml-auth-cache | merged
 2026-10-13 | claude | Merged claude/ml-auth-cache: ML token auth, pipeline cache, parallel publish, faster CI/CD, logo, Azure OpenAI | main | done
+2026-10-13 | gemini | Ascora mobile companion (apps/mobile): Expo, React Native, Voice AI tab, browser simulator, live Supabase RLS | gemini/mobile-app | done, PR opened
