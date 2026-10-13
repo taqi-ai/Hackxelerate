@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { CheckCircle2, CircleDashed, Loader2, Play, Upload, WifiOff, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Panel } from "@/components/kit";
-import { ML_API, mlFetch, MlUnavailable } from "@/lib/ml-api";
+import { ML_API, mlFetch, mlToken, MlUnavailable } from "@/lib/ml-api";
 import { cn } from "@/lib/utils";
 
 type Step = { key: string; label: string; status: string; seconds: number | null; metrics: Record<string, unknown>; detail: string[] };
@@ -14,7 +14,12 @@ type Run = { run_id: string; status: "running" | "done" | "error"; steps: Step[]
 function metricLine(s: Step) {
   const m = s.metrics;
   const bits: string[] = [];
-  const add = (label: string, v: unknown) => v !== undefined && v !== null && bits.push(`${label} ${typeof v === "number" ? v.toLocaleString("en-IN") : String(v)}`);
+  const add = (label: string, v: unknown) => {
+    if (v === undefined || v === null) return;
+    // the publish step reports rows per table: show the total
+    const n = typeof v === "object" ? Object.values(v as Record<string, number>).reduce((a, b) => a + (Number(b) || 0), 0) : v;
+    bits.push(`${label} ${typeof n === "number" ? n.toLocaleString("en-IN") : String(n)}`);
+  };
   add("files", m.files);
   add("rows", m.rows);
   add("students", m.students);
@@ -56,7 +61,7 @@ export function PipelineRunner() {
       if (source === "upload") {
         const fd = new FormData();
         files.forEach((f) => fd.append("files", f));
-        const res = await fetch(`${ML_API}/pipeline/upload`, { method: "POST", body: fd });
+        const res = await fetch(`${ML_API}/pipeline/upload`, { method: "POST", body: fd, headers: { Authorization: `Bearer ${await mlToken()}` } });
         if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail ?? "Upload failed");
         upload_id = (await res.json()).upload_id;
       }
