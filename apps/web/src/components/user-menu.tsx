@@ -46,7 +46,9 @@ export function UserMenu({ name, email }: { name: string; email: string }) {
         </DropdownMenuItem>
         <DropdownMenuItem
           onSelect={async () => {
-            await createClient().auth.signOut();
+            if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+              await createClient().auth.signOut();
+            }
             router.replace("/login");
             router.refresh();
           }}
