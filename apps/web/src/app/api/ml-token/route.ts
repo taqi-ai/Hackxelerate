@@ -8,6 +8,9 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const profile = await getProfile();
   if (!profile) return NextResponse.json({ error: "Sign in required" }, { status: 401, headers: { "Cache-Control": "no-store" } });
+  if (profile.role !== "admin" && profile.role !== "mentor") {
+    return NextResponse.json({ error: "Forbidden: institutional access required" }, { status: 403, headers: { "Cache-Control": "no-store" } });
+  }
   try {
     const { token, exp } = mintMlToken({ sub: profile.id, role: profile.role });
     return NextResponse.json({ token, exp }, { headers: { "Cache-Control": "no-store" } });

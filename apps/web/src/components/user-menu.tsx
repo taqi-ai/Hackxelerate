@@ -46,9 +46,12 @@ export function UserMenu({ name, email }: { name: string; email: string }) {
         </DropdownMenuItem>
         <DropdownMenuItem
           onSelect={async () => {
+            const { exitDemoStudentAction } = await import("@/app/(app)/actions");
+            await exitDemoStudentAction();
             if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
               await createClient().auth.signOut();
             }
+
             router.replace("/login");
             router.refresh();
           }}

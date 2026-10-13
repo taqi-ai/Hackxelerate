@@ -2,9 +2,10 @@
 
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { OFFLINE, offlineInterventions, one, visibleIds } from "@/lib/offline";
+import { OFFLINE, offlineConnections, offlineInterventions, offlinePlans, one, visibleIds } from "@/lib/offline";
 
 const TYPES = ["mentor_meeting", "peer_tutoring", "mock_interview", "counselling_referral", "parent_call", "skill_workshop"] as const;
 
@@ -81,5 +82,176 @@ export async function updateInterventionStatus(input: z.infer<typeof StatusSchem
   }
   revalidatePath("/interventions");
   revalidatePath("/overview");
+  return { ok: true };
+}
+
+export async function selectDemoStudentAction(studentId: string): Promise<ActionResult> {
+  if (!/^CU\d{2}[A-Z]{2,4}\d{4}$/.test(studentId)) {
+    return { ok: false, error: "Invalid student identifier format" };
+  }
+  const cookieStore = await cookies();
+  cookieStore.set("ascora_demo_student", studentId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  });
+  revalidatePath("/student");
+  revalidatePath("/student/academics");
+  revalidatePath("/student/calculator");
+  revalidatePath("/student/schedule");
+  revalidatePath("/student/connection");
+  return { ok: true };
+}
+
+export async function exitDemoStudentAction(): Promise<ActionResult> {
+  const cookieStore = await cookies();
+  cookieStore.delete("ascora_demo_student");
+  revalidatePath("/");
+  revalidatePath("/login");
+  revalidatePath("/student");
+  return { ok: true };
+}
+
+const PlanSchema = z.object({
+  student_id: z.string().regex(/^CU\d{2}[A-Z]{2,4}\d{4}$/),
+  title: z.string().trim().min(3, "Title must be at least 3 characters").max(120),
+  category: z.enum(["attendance", "marks", "cgpa", "deadline", "general"]),
+  target_value: z.record(z.string(), z.any()),
+  current_value: z.record(z.string(), z.any()),
+  due_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  notes: z.string().max(1000).optional().nullable(),
+});
+
+export async function saveStudentPlanAction(input: z.infer<typeof PlanSchema>): Promise<ActionResult> {
+  const parsed = PlanSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  const v = parsed.data;
+  const now = new Date().toISOString();
+
+  if (OFFLINE) {
+    offlinePlans.unshift({
+      id: randomUUID(),
+      student_id: v.student_id,
+      title: v.title,
+      category: v.category,
+      target_value: v.target_value,
+      current_value: v.current_value,
+      due_date: v.due_date ?? null,
+      status: "active",
+      notes: v.notes ?? null,
+      created_at: now,
+      updated_at: now,
+    });
+  } else {
+    const supabase = await createClient();
+    const { error } = await supabase.from("student_plans").insert({
+      student_id: v.student_id,
+      title: v.title,
+      category: v.category,
+      target_value: v.target_value,
+      current_value: v.current_value,
+      due_date: v.due_date ?? null,
+      status: "active",
+      notes: v.notes ?? null,
+    });
+    if (error) {
+      // In-memory fallback if table not yet migrated
+      offlinePlans.unshift({
+        id: randomUUID(),
+        student_id: v.student_id,
+        title: v.title,
+        category: v.category,
+        target_value: v.target_value,
+        current_value: v.current_value,
+        due_date: v.due_date ?? null,
+        status: "active",
+        notes: v.notes ?? null,
+        created_at: now,
+        updated_at: now,
+      });
+    }
+  }
+
+  revalidatePath("/student");
+  revalidatePath("/student/calculator");
+  revalidatePath("/student/schedule");
+  return { ok: true };
+}
+
+export async function updateStudentPlanStatusAction(planId: string, status: "active" | "completed" | "archived"): Promise<ActionResult> {
+  if (OFFLINE) {
+    const p = offlinePlans.find((x) => x.id === planId);
+    if (p) {
+      p.status = status;
+      p.updated_at = new Date().toISOString();
+    }
+  } else {
+    const supabase = await createClient();
+    const { error } = await supabase.from("student_plans").update({ status, updated_at: new Date().toISOString() }).eq("id", planId);
+    if (error) {
+      const p = offlinePlans.find((x) => x.id === planId);
+      if (p) {
+        p.status = status;
+        p.updated_at = new Date().toISOString();
+      }
+    }
+  }
+  revalidatePath("/student/schedule");
+  return { ok: true };
+}
+
+export async function deleteStudentPlanAction(planId: string): Promise<ActionResult> {
+  if (OFFLINE) {
+    const idx = offlinePlans.findIndex((x) => x.id === planId);
+    if (idx !== -1) offlinePlans.splice(idx, 1);
+  } else {
+    const supabase = await createClient();
+    const { error } = await supabase.from("student_plans").delete().eq("id", planId);
+    if (error) {
+      const idx = offlinePlans.findIndex((x) => x.id === planId);
+      if (idx !== -1) offlinePlans.splice(idx, 1);
+    }
+  }
+  revalidatePath("/student/schedule");
+  return { ok: true };
+}
+
+export async function importManualAcademicRecordAction(input: {
+  student_id: string;
+  source: string;
+  notes?: string;
+  attendancePct?: number;
+  cgpa?: number;
+}): Promise<ActionResult> {
+  const now = new Date().toISOString();
+  const connData = {
+    id: `conn-${input.student_id}`,
+    student_id: input.student_id,
+    provider: "manual_import",
+    status: "manual_import" as const,
+    last_synced_at: now,
+    provenance: "manual_import" as const,
+    details: {
+      source: input.source,
+      notes: input.notes,
+      attendancePct: input.attendancePct,
+      cgpa: input.cgpa,
+      verified_by: "Student Verified Submission",
+    },
+    created_at: now,
+    updated_at: now,
+  };
+
+  offlineConnections.set(input.student_id, connData);
+
+  if (!OFFLINE) {
+    const supabase = await createClient();
+    await supabase.from("external_connections").upsert(connData, { onConflict: "student_id" });
+  }
+
+  revalidatePath("/student");
+  revalidatePath("/student/connection");
   return { ok: true };
 }
