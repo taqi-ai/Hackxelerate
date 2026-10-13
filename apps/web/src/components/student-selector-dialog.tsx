@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Check, Filter, Loader2, Search, UserCheck } from "lucide-react";
 import {
   Dialog,
@@ -42,7 +41,6 @@ export function StudentSelectorDialog({
 }) {
   const defaultLabel = currentStudentId ? `Switch Profile (${currentStudentId})` : "Browse 1,200 Student Cohort...";
   const label = triggerText ?? defaultLabel;
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [branch, setBranch] = useState("all");
@@ -91,8 +89,7 @@ export function StudentSelectorDialog({
       if (res.ok) {
         play("success");
         setOpen(false);
-        router.replace("/student");
-        router.refresh();
+        window.location.href = "/student";
       } else {
         play("error");
       }

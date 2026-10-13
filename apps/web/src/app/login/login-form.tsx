@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import {
   ExternalLink,
   GraduationCap,
@@ -31,7 +30,6 @@ const STUDENT_QUICK_PICKS = [
 ];
 
 export function LoginForm({ next }: { next?: string }) {
-  const router = useRouter();
   const [tab, setTab] = useState<"institutional" | "student">("institutional");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -58,8 +56,10 @@ export function LoginForm({ next }: { next?: string }) {
         return;
       }
       play("success");
-      router.replace(next && next.startsWith("/") && next !== "/" ? next : getPrefs().home);
-      router.refresh();
+      const { exitDemoStudentAction } = await import("@/app/(app)/actions");
+      await exitDemoStudentAction();
+      const dest = next && next.startsWith("/") && next !== "/" ? next : getPrefs().home;
+      window.location.href = dest;
     });
   }
 
@@ -69,8 +69,7 @@ export function LoginForm({ next }: { next?: string }) {
       const res = await selectDemoStudentAction(studentId);
       if (res.ok) {
         play("success");
-        router.replace("/student");
-        router.refresh();
+        window.location.href = "/student";
       } else {
         play("error");
         setError(res.error || "Failed to start demo student session.");

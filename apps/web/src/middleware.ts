@@ -5,6 +5,7 @@ const PUBLIC_PREFIXES = [
   "/login",
   "/auth",
   "/api/ml-token",
+  "/api/students",
   "/product",
   "/how-it-works",
   "/trust",
@@ -30,7 +31,7 @@ export async function middleware(request: NextRequest) {
 
   // Offline mode: no Supabase, no auth (local machine only; see lib/offline.ts)
   if (process.env.ASCORA_OFFLINE === "1" && !process.env.VERCEL) {
-    if (path === "/login") {
+    if (path === "/login" && request.nextUrl.searchParams.get("redirect") === "auto") {
       return NextResponse.redirect(new URL(demoStudentCookie ? "/student" : "/overview", request.url));
     }
     if (demoStudentCookie && INSTITUTIONAL_PREFIXES.some((p) => path.startsWith(p))) {
@@ -40,9 +41,12 @@ export async function middleware(request: NextRequest) {
   }
 
   let response = NextResponse.next({ request });
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://xomihahbrxacgrwclect.supabase.co";
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "sb_publishable_XuDcQnqMy5ZXUdiCPsqBGg_iigElt_4";
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {
@@ -65,11 +69,15 @@ export async function middleware(request: NextRequest) {
 
   // If user is accessing via Demo Student session
   if (demoStudentCookie) {
-    if (path === "/login") {
-      return NextResponse.redirect(new URL("/student", request.url));
+    if (path === "/login" && request.nextUrl.searchParams.get("redirect") === "auto") {
+      const res = NextResponse.redirect(new URL("/student", request.url));
+      response.cookies.getAll().forEach((c) => res.cookies.set(c.name, c.value));
+      return res;
     }
     if (INSTITUTIONAL_PREFIXES.some((p) => path.startsWith(p))) {
-      return NextResponse.redirect(new URL("/student", request.url));
+      const res = NextResponse.redirect(new URL("/student", request.url));
+      response.cookies.getAll().forEach((c) => res.cookies.set(c.name, c.value));
+      return res;
     }
     return response;
   }
@@ -79,17 +87,21 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", path);
-    return NextResponse.redirect(url);
+    const res = NextResponse.redirect(url);
+    response.cookies.getAll().forEach((c) => res.cookies.set(c.name, c.value));
+    return res;
   }
 
   // User is signed in and visits login page
-  if (user && path === "/login") {
+  if (user && path === "/login" && request.nextUrl.searchParams.get("redirect") === "auto") {
     const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
     const destination = profile?.role === "student" ? "/student" : "/overview";
     const url = request.nextUrl.clone();
     url.pathname = destination;
     url.search = "";
-    return NextResponse.redirect(url);
+    const res = NextResponse.redirect(url);
+    response.cookies.getAll().forEach((c) => res.cookies.set(c.name, c.value));
+    return res;
   }
 
   return response;

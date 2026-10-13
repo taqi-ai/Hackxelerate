@@ -98,7 +98,7 @@ export const getProfile = cache(async (): Promise<(Profile & { email: string }) 
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data } = await supabase.from("profiles").select("id, full_name, role, mentor_id, student_id").eq("id", user.id).single();
+  const { data } = await supabase.from("profiles").select("id, full_name, role, mentor_id").eq("id", user.id).single();
   if (!data) return null;
   return { ...(data as Profile), email: user.email ?? "" };
 });
@@ -388,12 +388,33 @@ export async function searchDemoStudents(query = "", branch?: string, year?: num
     builder = builder.eq("year", year);
   }
   const { data } = await builder;
-  return (data ?? []).map((s: any) => ({
-    id: s.id,
-    name: s.name,
-    branch: s.branch,
-    year: s.year,
-    section: s.section,
+  if (data && data.length > 0) {
+    return data.map((s: any) => ({
+      id: s.id,
+      name: s.name,
+      branch: s.branch,
+      year: s.year,
+      section: s.section,
+    }));
+  }
+
+  // Fallback to local snapshot cohort if unauthenticated by Supabase RLS
+  let list = snapshot().students;
+  if (q) {
+    list = list.filter((s) => s.id.toLowerCase().includes(q) || s.name.toLowerCase().includes(q));
+  }
+  if (branch && branch !== "all") {
+    list = list.filter((s) => s.branch === branch);
+  }
+  if (year) {
+    list = list.filter((s) => s.year === year);
+  }
+  return list.slice(0, limit).map((s) => ({
+    id: s.id as string,
+    name: s.name as string,
+    branch: s.branch as string,
+    year: s.year as number,
+    section: s.section as string,
   }));
 }
 
