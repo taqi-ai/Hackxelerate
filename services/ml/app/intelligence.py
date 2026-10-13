@@ -104,7 +104,9 @@ def run_intelligence(res: PipelineResult, log: StepLog, truth_dir: Path) -> Inte
             segment_id=int(labels[sid]), persona=persona_by_id[int(labels[sid])],
             shap_academic=shap_a.get(sid), shap_placement=shap_p.get(sid), alerts=alerts.get(sid, []),
             trend=trend.get(sid, []), recourse={k: v for k, v in (("academic", rec_a.get(sid)), ("placement", rec_p.get(sid))) if v},
-            readiness=ready.get(sid), priority=float(prio[sid])))
+            readiness=ready.get(sid), priority=float(prio[sid]),
+            metrics={k: (None if pd.isna(f.at[sid, k]) else round(float(f.at[sid, k]), 2))
+                     for k in ("cgpa", "backlogs", "att_overall", "att_core", "completion_rate", "login_freq", "mocks", "aptitude", "coding", "soft_avg", "tech_avg")}))
     scores = pd.DataFrame(rows).set_index("student_id", drop=False)
 
     # ---------------------------------------------------------------- insights + artifacts

@@ -104,6 +104,16 @@ def whatif(req: WhatIfRequest):
         raise HTTPException(503, str(e))
 
 
+@app.get("/whatif/{student_id}/inputs")
+def whatif_inputs(student_id: str):
+    try:
+        return service.whatif_inputs(student_id)
+    except KeyError:
+        raise HTTPException(404, "unknown student")
+    except LookupError as e:
+        raise HTTPException(503, str(e))
+
+
 @app.post("/ask")
 def ask(req: AskRequest):
     return ask_query(req.question)

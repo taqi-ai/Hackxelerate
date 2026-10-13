@@ -84,7 +84,8 @@ def load_state() -> bool:
 def write_snapshot(payload: dict, path: Path):
     """Compact JSON snapshot for the web app's offline demo mode (no Supabase / no internet needed)."""
     keep = {k: payload[k] for k in ("students", "segments", "student_scores", "insights", "analytics_artifacts", "mentors",
-                                    "data_quality_log", "conflicts", "raw_uploads")}
+                                    "data_quality_log", "conflicts", "raw_uploads", "academic", "attendance", "lms_activity",
+                                    "engagement", "placement", "skills", "feedback", "source_links")}
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(keep, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
@@ -145,6 +146,19 @@ def start_run(folder: Path, publish: bool) -> RunState:
 
 WHATIF_FEATURES = {"att_overall", "att_core", "completion_rate", "login_freq", "mocks", "soft_avg", "aptitude", "coding",
                    "certifications", "hackathons"}
+
+
+def whatif_inputs(student_id: str) -> dict:
+    if not STATE and not load_state():
+        raise LookupError("no model state yet - run the pipeline first")
+    f: pd.DataFrame = STATE["features"]
+    if student_id not in f.index:
+        raise KeyError(student_id)
+    row = f.loc[student_id]
+    vals = {k: (None if pd.isna(row[k]) else round(float(row[k]), 2)) for k in sorted(WHATIF_FEATURES)}
+    if vals.get("mocks") is None:
+        vals["mocks"] = 0.0
+    return {"student_id": student_id, "values": vals}
 
 
 def whatif(student_id: str, changes: dict[str, float]) -> dict:
