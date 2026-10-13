@@ -1,5 +1,7 @@
 "use client";
 
+import { play } from "@/lib/sound";
+
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Clock } from "lucide-react";
@@ -54,7 +56,10 @@ export function Planner({ rows }: { rows: StudentRow[] }) {
           </label>
           <p className="tabular text-4xl font-semibold tracking-tight">{hours}h</p>
         </div>
-        <Slider id="hours" min={1} max={10} step={0.5} value={[hours]} onValueChange={([v]) => setHours(v)} aria-label="Hours available" />
+        <Slider id="hours" min={1} max={10} step={0.5} value={[hours]} onValueChange={([v]) => {
+            play("tick");
+            setHours(v);
+          }} aria-label="Hours available" />
         <dl className="grid grid-cols-2 gap-3 text-sm">
           <div>
             <dt className="text-muted-foreground">Meetings</dt>

@@ -1,5 +1,7 @@
 "use client";
 
+import { play } from "@/lib/sound";
+
 import { useState, useTransition } from "react";
 import { CalendarPlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -52,9 +54,11 @@ export function InterventionPanel({
     start(async () => {
       const r = await createIntervention({ student_id: studentId, type: type as any, driver: suggestedDriver, owner_name: owner, due_date: due, notes });
       if (!r.ok) {
+        play("error");
         setErr(r.error);
         return;
       }
+      play("success");
       toast.success(`Intervention logged for ${studentName}`);
       setOpen(false);
       setNotes("");
@@ -176,7 +180,10 @@ export function InterventionRow({
         onValueChange={(status) =>
           start(async () => {
             const r = await updateInterventionStatus({ id: i.id, status: status as any });
-            if (!r.ok) toast.error(r.error);
+            if (!r.ok) {
+              play("error");
+              toast.error(r.error);
+            } else if (status === "done") play("success");
           })
         }
       >

@@ -4,11 +4,23 @@ import { AlertTriangle, ArrowRight, BriefcaseBusiness, DatabaseZap, GraduationCa
 import { getArtifacts, getInsights, getInterventions, getProfile, getQualityReport, getSegments, getStudentRows } from "@/lib/data";
 import { EmptyState, PageHeader, Panel, RiskBadge, ScoreValue, Stat } from "@/components/kit";
 import { RiskByGroup, ScoreHistogram, WeeklyTrend } from "@/components/charts";
+import { Stagger, StaggerItem } from "@/components/motion";
 import { Button } from "@/components/ui/button";
 import { fmtInt } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Overview" };
+
+function greeting() {
+  const h = Number(new Intl.DateTimeFormat("en-IN", { hour: "numeric", hour12: false, timeZone: "Asia/Kolkata" }).format(new Date()));
+  return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+}
+
+function firstName(full: string) {
+  const clean = full.replace(/\(.*?\)/g, "").trim();
+  const parts = clean.split(" ");
+  return parts[0] === "Dr." || parts[0] === "Prof." ? `${parts[0]} ${parts[parts.length - 1]}` : parts[0] || "there";
+}
 
 export default async function OverviewPage() {
   const [profile, rows, insights, segments, artifacts, interventions, quality] = await Promise.all([
@@ -62,11 +74,11 @@ export default async function OverviewPage() {
   return (
     <>
       <PageHeader
-        title={isMentor ? "Your mentees at a glance" : "Campus overview"}
+        title={`${greeting()}, ${firstName(profile?.full_name ?? "")}`}
         description={
           isMentor
-            ? `${n} students assigned to you. Everything here is computed from your students only.`
-            : `All ${fmtInt(n)} B.Tech 2nd and 3rd-year students across ${sources} integrated data sources, as of week 12 of the odd semester.`
+            ? `Your ${n} mentees at a glance. Everything here is computed from your students only.`
+            : `Campus health across all ${fmtInt(n)} B.Tech 2nd and 3rd-year students and ${sources} integrated data sources, as of week 12 of the odd semester.`
         }
         actions={
           <Button asChild>
@@ -77,34 +89,34 @@ export default async function OverviewPage() {
         }
       />
 
-      <section className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-        <Stat label="Students" value={fmtInt(n)} icon={Users} hint={isMentor ? "Your mentees" : `${cohort?.mentors ?? "-"} faculty mentors`} href="/students" />
-        <Stat label="Avg Success Score" value={avg.toFixed(1)} icon={GraduationCap} hint="0-100, cohort percentile based" href="/model" />
-        <Stat
+      <Stagger className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+        <StaggerItem><Stat label="Students" value={n} icon={Users} hint={isMentor ? "Your mentees" : `${cohort?.mentors ?? "-"} faculty mentors`} href="/students" /></StaggerItem>
+        <StaggerItem><Stat label="Avg Success Score" value={avg} decimals={1} icon={GraduationCap} hint="0-100, cohort percentile based" href="/model" /></StaggerItem>
+        <StaggerItem><Stat
           label="High academic risk"
-          value={fmtInt(highA)}
+          value={highA}
           tone="high"
           icon={AlertTriangle}
           hint={`${((100 * highA) / n).toFixed(0)}% of students`}
           href="/students?academic=High"
-        />
-        <Stat
+        /></StaggerItem>
+        <StaggerItem><Stat
           label="High placement risk"
-          value={fmtInt(highP)}
+          value={highP}
           tone="medium"
           icon={BriefcaseBusiness}
           hint={`of ${fmtInt(track.length)} on the placement track`}
           href="/students?placement=High"
-        />
-        <Stat
+        /></StaggerItem>
+        <StaggerItem><Stat
           label="Silent decliners"
-          value={fmtInt(decliners)}
+          value={decliners}
           tone="brand"
           icon={Lightbulb}
           hint={`${openInt} open interventions`}
           href="/students?alert=silent_decliner"
-        />
-      </section>
+        /></StaggerItem>
+      </Stagger>
 
       <section className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
         <Panel title="Success Score distribution" description="Red below 40, green from 65. Hover a bar for the count.">

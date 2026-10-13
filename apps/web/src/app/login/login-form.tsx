@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
+import { play } from "@/lib/sound";
 
 const DEMO = [
   { label: "HOD / Admin", email: "admin@ascora.test", hint: "Whole campus, data integration, models" },
@@ -24,13 +25,20 @@ export function LoginForm({ next }: { next?: string }) {
   function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!email.trim() || !password) {
+      play("error");
+      setError("Enter your email and password, or pick a demo account below.");
+      return;
+    }
     start(async () => {
       const { error } = await createClient().auth.signInWithPassword({ email, password });
       if (error) {
-        setError(error.message === "Invalid login credentials" ? "That email and password don't match an account." : error.message);
+        play("error");
+        setError(error.message === "Invalid login credentials" ? "That email and password don't match an account. Check them, or use a demo account below." : error.message);
         return;
       }
-      router.replace(next && next.startsWith("/") ? next : "/");
+      play("success");
+      router.replace(next && next.startsWith("/") && next !== "/" ? next : "/overview");
       router.refresh();
     });
   }
@@ -40,12 +48,13 @@ export function LoginForm({ next }: { next?: string }) {
       <form onSubmit={submit} className="space-y-4" noValidate>
         <div className="grid gap-2">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <Input id="email" name="email" type="email" autoComplete="email" spellCheck={false} placeholder="name@college.edu…" required value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
         <div className="grid gap-2">
           <Label htmlFor="password">Password</Label>
           <Input
             id="password"
+            name="password"
             type="password"
             autoComplete="current-password"
             required
@@ -58,7 +67,7 @@ export function LoginForm({ next }: { next?: string }) {
             {error}
           </p>
         )}
-        <Button type="submit" className="w-full" disabled={pending || !email || !password}>
+        <Button type="submit" className="press h-11 w-full rounded-xl text-[15px]" disabled={pending}>
           {pending && <Loader2 className="size-4 animate-spin" />}
           Sign in
         </Button>
@@ -75,7 +84,7 @@ export function LoginForm({ next }: { next?: string }) {
                 setEmail(d.email);
                 setPassword(DEMO_PASSWORD);
               }}
-              className="rounded-lg border bg-card px-3.5 py-2.5 text-left transition-colors hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring active:translate-y-px"
+              className="press rounded-xl border bg-background/50 px-3.5 py-2.5 text-left hover:border-ring/40 hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring"
             >
               <span className="block text-sm font-medium">{d.label}</span>
               <span className="block text-xs text-muted-foreground">{d.hint}</span>

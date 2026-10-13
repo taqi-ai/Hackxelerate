@@ -5,6 +5,7 @@ import { ArrowLeft, Lock, Target, TriangleAlert } from "lucide-react";
 import { getInterventions, getStudent360 } from "@/lib/data";
 import { Panel, RiskBadge } from "@/components/kit";
 import { ComponentRadar } from "@/components/charts";
+import { ScoreRing } from "@/components/motion";
 import { COMPONENT_LABEL, INTENT_LABEL, maskEmail, maskPhone, scoreTone, suggestIntervention } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { DriverList } from "./driver-list";
@@ -35,10 +36,11 @@ export default async function Student360({ params }: { params: Promise<{ id: str
       </Link>
 
       {/* header */}
-      <section className="grid gap-4 rounded-xl border bg-card p-5 lg:grid-cols-[1fr_auto]">
+      <section className="edge relative grid gap-4 overflow-hidden rounded-2xl border bg-card/80 p-5 backdrop-blur-sm lg:grid-cols-[1fr_auto]">
+        <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 size-72 rounded-full bg-[radial-gradient(circle,var(--glow),transparent_70%)]" />
         <div className="space-y-3">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">{st.name}</h1>
+            <h1 className="font-display text-3xl font-semibold tracking-tight">{st.name}</h1>
             <p className="text-sm text-muted-foreground">
               <span className="font-mono">{st.id}</span> · {st.branch}, Year {st.year}, Section {st.section} · Mentor{" "}
               {st.mentors?.name ?? st.mentor_id}
@@ -61,11 +63,8 @@ export default async function Student360({ params }: { params: Promise<{ id: str
             <Lock className="size-3" /> {maskEmail(st.email)} · {maskPhone(st.phone)} · contact details are masked; this view is logged.
           </p>
         </div>
-        <div className="flex items-center gap-4 lg:flex-col lg:items-end lg:justify-center">
-          <div className="text-right">
-            <p className="text-xs text-muted-foreground">Success Score</p>
-            <p className={cn("tabular text-5xl font-semibold tracking-tight", scoreTone(score.success_score))}>{score.success_score.toFixed(0)}</p>
-          </div>
+        <div className="flex items-center justify-center lg:justify-end">
+          <ScoreRing score={score.success_score} size={136} />
         </div>
       </section>
 

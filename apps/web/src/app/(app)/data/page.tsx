@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Data integration" };
 
 export default async function DataPage() {
   const profile = await getProfile();
-  if (profile?.role !== "admin") redirect("/");
+  if (profile?.role !== "admin") redirect("/overview");
   const [quality, conflicts, review] = await Promise.all([getQualityReport(), getConflicts(60), getReviewQueue(40)]);
   return (
     <>

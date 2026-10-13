@@ -55,7 +55,7 @@ export async function createIntervention(input: z.infer<typeof CreateSchema>): P
   }
   revalidatePath(`/students/${v.student_id}`);
   revalidatePath("/interventions");
-  revalidatePath("/");
+  revalidatePath("/overview");
   return { ok: true };
 }
 
@@ -80,6 +80,6 @@ export async function updateInterventionStatus(input: z.infer<typeof StatusSchem
     if (error) return { ok: false, error: error.message };
   }
   revalidatePath("/interventions");
-  revalidatePath("/");
+  revalidatePath("/overview");
   return { ok: true };
 }

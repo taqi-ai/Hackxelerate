@@ -3,12 +3,13 @@ import type { LucideIcon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { riskTone, scoreTone } from "@/lib/format";
+import { CountUp } from "@/components/motion";
 
 export function PageHeader({ title, description, actions }: { title: string; description?: React.ReactNode; actions?: React.ReactNode }) {
   return (
     <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-balance">{title}</h1>
+        <h1 className="font-display text-3xl font-semibold tracking-[-0.02em] text-balance sm:text-[2.1rem] sm:leading-[1.1]">{title}</h1>
         {description && <p className="max-w-[70ch] text-sm leading-relaxed text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
@@ -36,13 +37,15 @@ export function ScoreValue({ score, className }: { score: number; className?: st
 export function Stat({
   label,
   value,
+  decimals = 0,
   hint,
   icon: Icon,
   tone,
   href,
 }: {
   label: string;
-  value: React.ReactNode;
+  value: React.ReactNode | number;
+  decimals?: number;
   hint?: React.ReactNode;
   icon?: LucideIcon;
   tone?: "high" | "medium" | "low" | "brand";
@@ -50,22 +53,31 @@ export function Stat({
 }) {
   const toneCls =
     tone === "high" ? "text-risk-high" : tone === "medium" ? "text-risk-medium" : tone === "low" ? "text-risk-low" : tone === "brand" ? "text-brand" : "";
+  const glow =
+    tone === "high" ? "var(--risk-high)" : tone === "medium" ? "var(--risk-medium)" : tone === "low" ? "var(--risk-low)" : "var(--brand)";
   const body = (
-    <div className="flex h-full flex-col gap-2 rounded-xl border bg-card p-4 transition-colors">
+    <div className="edge group relative flex h-full flex-col gap-2 overflow-hidden rounded-2xl border bg-card/80 p-4 backdrop-blur-sm transition-[transform,box-shadow] duration-300 group-hover:-translate-y-0.5">
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -right-10 -top-10 size-28 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-60"
+        style={{ background: `color-mix(in oklch, ${glow} 40%, transparent)` }}
+      />
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <span>{label}</span>
-        {Icon && <Icon className="size-4" strokeWidth={1.75} />}
+        {Icon && <Icon className="size-4" strokeWidth={1.75} aria-hidden />}
       </div>
-      <div className={cn("tabular text-3xl font-semibold tracking-tight", toneCls)}>{value}</div>
+      <div className={cn("tabular font-display text-[2rem] font-semibold leading-none tracking-tight", toneCls)}>
+        {typeof value === "number" ? <CountUp value={value} decimals={decimals} /> : value}
+      </div>
       {hint && <div className="text-xs text-muted-foreground">{hint}</div>}
     </div>
   );
   return href ? (
-    <Link href={href} className="block rounded-xl focus-visible:outline-2 focus-visible:outline-ring [&>div]:hover:bg-accent/40">
+    <Link href={href} className="group block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring">
       {body}
     </Link>
   ) : (
-    body
+    <div className="group h-full">{body}</div>
   );
 }
 
@@ -85,10 +97,10 @@ export function Panel({
   contentClassName?: string;
 }) {
   return (
-    <Card className={cn("gap-4", className)}>
+    <Card className={cn("edge gap-4 rounded-2xl bg-card/80 backdrop-blur-sm", className)}>
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div className="space-y-1">
-          <CardTitle className="text-base">{title}</CardTitle>
+          <CardTitle className="font-display text-[1.05rem] font-semibold tracking-tight">{title}</CardTitle>
           {description && <CardDescription>{description}</CardDescription>}
         </div>
         {action}

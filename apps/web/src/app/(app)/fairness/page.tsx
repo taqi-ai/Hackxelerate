@@ -64,7 +64,7 @@ function Audit({ a }: { a: any }) {
 
 export default async function FairnessPage() {
   const profile = await getProfile();
-  if (profile?.role !== "admin") redirect("/");
+  if (profile?.role !== "admin") redirect("/overview");
   const a = await getArtifacts(["fairness_academic", "fairness_placement"]);
 
   return (

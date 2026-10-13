@@ -1,5 +1,7 @@
 "use client";
 
+import { play } from "@/lib/sound";
+
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, CircleDashed, Loader2, Play, Upload, WifiOff, XCircle } from "lucide-react";
@@ -67,8 +69,13 @@ export function PipelineRunner() {
       }
       const { run_id } = await mlFetch<{ run_id: string }>("/pipeline/run", { method: "POST", body: JSON.stringify({ source, upload_id, publish: true }) });
       const done = await poll(run_id);
-      if (done.status === "done") router.refresh();
-      else setError(done.error ?? "The run failed");
+      if (done.status === "done") {
+        play("success");
+        router.refresh();
+      } else {
+        play("error");
+        setError(done.error ?? "The run failed");
+      }
     } catch (e) {
       if (e instanceof MlUnavailable || (e as Error).name === "TypeError") setOffline(true);
       else setError((e as Error).message);

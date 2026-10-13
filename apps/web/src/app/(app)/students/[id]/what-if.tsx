@@ -1,5 +1,7 @@
 "use client";
 
+import { play } from "@/lib/sound";
+
 import { useEffect, useRef, useState } from "react";
 import { Loader2, RotateCcw, SlidersHorizontal, WifiOff } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
@@ -69,6 +71,7 @@ export function WhatIf({ studentId, placementTrack }: { studentId: string; place
   }, [studentId]);
 
   function change(key: string, v: number) {
+    play("tick");
     const next = { ...vals, [key]: v };
     setVals(next);
     if (timer.current) clearTimeout(timer.current);
