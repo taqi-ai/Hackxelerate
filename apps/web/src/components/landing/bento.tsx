@@ -1,10 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { motion, useInView, useReducedMotion } from "framer-motion";
+
 import { useEffect, useRef, useState } from "react";
 import { EyeOff, Fingerprint, LockKeyhole, ScrollText } from "lucide-react";
+import { PerspectiveTiltCard } from "@/components/landing/perspective-tilt-card";
 import { cn } from "@/lib/utils";
+
 
 /** A tile whose border and backdrop light up under the cursor. Pointer position is written straight to CSS, no re-renders. */
 function Tile({ className, children }: { className?: string; children: React.ReactNode }) {
@@ -151,18 +153,16 @@ export function Bento() {
             Six personas found in the data, from high academics with low placement readiness to disengaged students, each with a recommended action.
           </p>
         </div>
-        <div className="relative mt-6 h-56 overflow-hidden">
-          <Image
-            src="/assets/shots/segments.webp"
-            alt="Segments page showing student personas with sizes and recommended actions"
-            width={2400}
-            height={1500}
-            loading="lazy"
-            className="absolute left-6 top-0 w-[115%] max-w-none rounded-tl-xl border-l border-t border-white/10 transition-transform duration-700 group-hover:-translate-y-6"
+        <div className="relative mt-6 px-4 pb-4 sm:px-8 sm:pb-8">
+          <PerspectiveTiltCard
+            imageSrc="/assets/shots/segments.webp"
+            imageAlt="Segments page showing student personas with sizes and recommended actions"
+            depthRatio={8}
+            glareEffect={true}
           />
-          <div aria-hidden className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#0e0e15] to-transparent" />
         </div>
       </Tile>
+
       <Tile className="lg:col-span-6">
         <div className="grid gap-8 lg:grid-cols-[1fr_2fr] lg:items-center">
           <div>

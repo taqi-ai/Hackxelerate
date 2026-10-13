@@ -3,7 +3,9 @@ import type { Metadata } from "next";
 import { ArrowUpRight, BookOpenCheck, Briefcase, CalendarCheck, ClipboardList, GraduationCap, MessageSquareText, Trophy } from "lucide-react";
 import { Headline } from "@/components/landing/headline";
 import { HeroStage } from "@/components/landing/hero-stage";
+import { Cinematic3DHeroVisual } from "@/components/landing/cinematic-3d-hero-visual";
 import { Story } from "@/components/landing/story";
+
 import { Bento } from "@/components/landing/bento";
 import { Aurora, ClosingCta, Eyebrow, GhostCta, PrimaryCta, SectionHead } from "@/components/landing/site-kit";
 import { CountUp, Reveal } from "@/components/motion";
@@ -88,10 +90,14 @@ export default async function Home() {
             </Reveal>
           </div>
           <div className="relative">
-            <HeroStage />
+            <Cinematic3DHeroVisual />
+            <div className="mt-8">
+              <HeroStage />
+            </div>
           </div>
         </div>
       </section>
+
 
       {/* the seven systems, as a slow marquee */}
       <section aria-label="Campus systems Ascora joins" className="relative border-y border-white/10 bg-white/[0.015] py-6">
