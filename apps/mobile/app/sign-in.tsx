@@ -15,7 +15,7 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../src/lib/theme";
-import { supabase } from "../src/lib/supabase";
+import { supabase, isSupabaseConfigured } from "../src/lib/supabase";
 import { triggerHaptic } from "../src/lib/haptics";
 
 import { playSound } from "../src/lib/sound";
@@ -64,11 +64,15 @@ export default function SignInScreen() {
       if (signInError) {
         triggerHaptic("error");
         playSound("error");
-        setError(
-          signInError.message === "Invalid login credentials"
-            ? "Invalid email or password. Pick a quick role below to fill."
-            : signInError.message
-        );
+        if (!isSupabaseConfigured || signInError.message?.toLowerCase().includes("invalid api key")) {
+          setError(
+            "Supabase credentials not configured in apps/mobile/.env. Add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY to log in."
+          );
+        } else if (signInError.message === "Invalid login credentials") {
+          setError("Invalid email or password. Pick a quick role below to fill.");
+        } else {
+          setError(signInError.message);
+        }
       } else {
         triggerHaptic("success");
         playSound("success");
