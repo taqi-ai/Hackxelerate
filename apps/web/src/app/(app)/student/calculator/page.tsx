@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { Calendar, Clock, GraduationCap, Target, HelpCircle } from "lucide-react";
+import { Calendar, Clock, GraduationCap, Target, HelpCircle, Layers } from "lucide-react";
 import { getProfile, getStudentAcademicData } from "@/lib/data";
 import { PageHeader, Panel } from "@/components/kit";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { AttendanceSliderCard } from "@/components/student/attendance-slider-card";
 import { MarksCalculatorCard } from "@/components/student/marks-calculator-card";
 import { CGPACalculatorCard } from "@/components/student/cgpa-calculator-card";
+import { CombinedTargetCard } from "@/components/student/combined-target-card";
 import { StudentSelectorDialog } from "@/components/student-selector-dialog";
 
 export const metadata: Metadata = { title: "Plan & Improve" };
@@ -56,6 +57,21 @@ export default async function StudentCalculatorPage() {
     sem: s.sem,
   }));
 
+  const combinedSubjects = currentSubjects.map((s) => {
+    const pct = bySubjectAttendance[s.subject] ?? attendance?.overall_pct ?? 75;
+    const conducted = 40;
+    const attended = Math.round((pct / 100) * conducted);
+    return {
+      subject: s.subject,
+      internal: s.internal,
+      end_sem: s.end_sem,
+      attendancePct: pct,
+      attended,
+      conducted,
+      credits: 4,
+    };
+  });
+
   const currentCGPA = academic?.cgpa ?? 5.5;
   const completedCredits = (currentSem - 1) * 20;
   const currentSemesterCredits = 20;
@@ -79,18 +95,22 @@ export default async function StudentCalculatorPage() {
       />
 
       <Tabs defaultValue="attendance" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 max-w-lg">
-          <TabsTrigger value="attendance" className="flex items-center gap-2 text-xs">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 max-w-2xl">
+          <TabsTrigger value="attendance" className="flex items-center gap-1.5 text-xs">
             <Clock className="h-3.5 w-3.5" />
             <span>Attendance What-If</span>
           </TabsTrigger>
-          <TabsTrigger value="marks" className="flex items-center gap-2 text-xs">
+          <TabsTrigger value="marks" className="flex items-center gap-1.5 text-xs">
             <Target className="h-3.5 w-3.5" />
-            <span>Marks Target Solver</span>
+            <span>Marks Solver</span>
           </TabsTrigger>
-          <TabsTrigger value="cgpa" className="flex items-center gap-2 text-xs">
+          <TabsTrigger value="cgpa" className="flex items-center gap-1.5 text-xs">
             <GraduationCap className="h-3.5 w-3.5" />
-            <span>SGPA & CGPA Planner</span>
+            <span>SGPA & CGPA</span>
+          </TabsTrigger>
+          <TabsTrigger value="combined" className="flex items-center gap-1.5 text-xs">
+            <Layers className="h-3.5 w-3.5" />
+            <span>Combined Goal</span>
           </TabsTrigger>
         </TabsList>
 
@@ -115,6 +135,13 @@ export default async function StudentCalculatorPage() {
             completedCredits={completedCredits}
             currentSemesterCredits={currentSemesterCredits}
             subjects={currentSubjects.map((s) => ({ subject: s.subject, credits: 4 }))}
+          />
+        </TabsContent>
+
+        <TabsContent value="combined" className="space-y-6">
+          <CombinedTargetCard
+            subjects={combinedSubjects}
+            studentId={student.id}
           />
         </TabsContent>
       </Tabs>

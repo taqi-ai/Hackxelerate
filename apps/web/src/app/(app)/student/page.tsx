@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { StudentSelectorDialog } from "@/components/student-selector-dialog";
 import { ManualImportDialog } from "@/components/manual-import-dialog";
 import { AttendanceSliderCard } from "@/components/student/attendance-slider-card";
+import { SubjectCardGrid } from "@/components/student/subject-card-grid";
 
 export const metadata: Metadata = { title: "Student Overview" };
 
@@ -72,6 +73,16 @@ export default async function StudentOverviewPage() {
   const attTone = overallAtt >= 80 ? "low" : overallAtt >= 75 ? "medium" : "high";
   const cgpaValue = academic?.cgpa ?? 0;
   const activePlansCount = plans.filter((p) => p.status === "active").length;
+
+  const subjectCardItems = currentSubjects.map((s) => ({
+    subject: s.subject,
+    internal: s.internal,
+    end_sem: s.end_sem,
+    total: s.total,
+    sem: s.sem,
+    attendancePct: bySubjectAttendance[s.subject] ?? overallAtt,
+    credits: 4,
+  }));
 
   return (
     <div className="space-y-6">
@@ -214,59 +225,32 @@ export default async function StudentOverviewPage() {
 
       {/* Two Column Layout: Subject Outlook & What-If Slider */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Current Semester Courses */}
-        <div className="lg:col-span-5 space-y-4">
+        {/* Left Column: Active Courses with Filtering and Detail Dialogs */}
+        <div className="lg:col-span-7 space-y-4">
           <Panel
-            title={`Current Semester Courses (Semester ${currentSem})`}
-            description="Continuous evaluation marks and subject-wise attendance"
+            title={`Active Courses & Attendance (Semester ${currentSem})`}
+            description="Continuous evaluation marks, interactive filtering, and recovery targets"
             action={
               <Button asChild variant="ghost" size="sm" className="text-xs">
                 <Link href="/student/academics" className="flex items-center gap-1">
-                  <span>View All</span>
+                  <span>Full History</span>
                   <ArrowRight className="h-3 w-3" />
                 </Link>
               </Button>
             }
           >
-            <div className="space-y-3 pt-2">
-              {currentSubjects.map((sub) => {
-                const subAtt = bySubjectAttendance[sub.subject] ?? overallAtt;
-                const isLow = subAtt < 75;
-
-                return (
-                  <div
-                    key={sub.subject}
-                    className="rounded-xl border bg-background/60 p-3.5 space-y-2 hover:border-brand/30 transition-colors"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="font-semibold text-sm text-foreground truncate">{sub.subject}</p>
-                        <span className="text-xs text-muted-foreground font-mono">
-                          Internal: {sub.internal} / 40
-                        </span>
-                      </div>
-                      <span
-                        className={`font-mono text-xs font-semibold px-2 py-0.5 rounded-md border ${
-                          isLow
-                            ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
-                            : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-                        }`}
-                      >
-                        {subAtt.toFixed(1)}% Att.
-                      </span>
-                    </div>
-
-                    <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${isLow ? "bg-rose-500" : "bg-brand"}`}
-                        style={{ width: `${Math.min(100, subAtt)}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="pt-2">
+              <SubjectCardGrid subjects={subjectCardItems} studentId={student.id} />
             </div>
           </Panel>
+        </div>
+
+        {/* Right Column: Interactive Attendance Simulator */}
+        <div className="lg:col-span-5 space-y-6">
+          <AttendanceSliderCard
+            subjects={subjectAttendanceList}
+            studentId={student.id}
+          />
 
           {/* Quick Guidance Card */}
           <div className="rounded-2xl border bg-muted/20 p-5 space-y-3">
@@ -287,14 +271,6 @@ export default async function StudentOverviewPage() {
               </Button>
             </div>
           </div>
-        </div>
-
-        {/* Right Column: Interactive Attendance Simulator */}
-        <div className="lg:col-span-7 space-y-6">
-          <AttendanceSliderCard
-            subjects={subjectAttendanceList}
-            studentId={student.id}
-          />
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import {
-  Calendar,
+  Calendar as CalendarIcon,
   Clock,
   Target,
   Sparkles,
@@ -11,7 +11,9 @@ import {
 import { getProfile, getStudentAcademicData } from "@/lib/data";
 import { PageHeader, Panel } from "@/components/kit";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlanList } from "@/components/student/plan-list";
+import { WeeklyTimetable } from "@/components/student/weekly-timetable";
 import { StudentSelectorDialog } from "@/components/student-selector-dialog";
 
 export const metadata: Metadata = { title: "Schedule & Tasks" };
@@ -81,7 +83,7 @@ export default async function StudentSchedulePage() {
     <div className="space-y-6">
       <PageHeader
         title="Schedule & Tasks"
-        description="Upcoming academic examinations, project deadlines, and personal targets committed across your courses."
+        description="Weekly lecture and lab timetable, upcoming semester examinations, and personal targets committed across your courses."
         actions={
           <div className="flex items-center gap-2">
             <StudentSelectorDialog currentStudentId={student.id} />
@@ -96,49 +98,95 @@ export default async function StudentSchedulePage() {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Official Academic Timetable */}
+        {/* Left Column: Timetable & Exam Milestones */}
+        <div className="lg:col-span-7 space-y-4">
+          <Tabs defaultValue="timetable" className="space-y-4">
+            <TabsList className="grid w-full grid-cols-2 max-w-xs">
+              <TabsTrigger value="timetable" className="flex items-center gap-2 text-xs">
+                <Clock className="h-3.5 w-3.5" />
+                <span>Weekly Timetable</span>
+              </TabsTrigger>
+              <TabsTrigger value="exams" className="flex items-center gap-2 text-xs">
+                <CalendarIcon className="h-3.5 w-3.5" />
+                <span>Exams & Milestones</span>
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="timetable" className="space-y-4">
+              <Panel
+                title="Weekly Class Schedule"
+                description={`Semester ${currentSem} lecture, laboratory, and tutorial schedule`}
+              >
+                <div className="pt-2">
+                  <WeeklyTimetable
+                    subjects={currentSubjects}
+                    studentId={student.id}
+                  />
+                </div>
+              </Panel>
+            </TabsContent>
+
+            <TabsContent value="exams" className="space-y-4">
+              <Panel
+                title="Official Academic Timetable"
+                description={`Semester ${currentSem} examinations and milestone deadlines`}
+              >
+                <div className="space-y-3 pt-2">
+                  {upcomingMilestones.map((m) => (
+                    <div
+                      key={m.id}
+                      className="rounded-xl border bg-background/60 p-3.5 space-y-2 hover:border-brand/30 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="font-semibold text-sm text-foreground leading-snug">
+                          {m.title}
+                        </span>
+                        <span
+                          className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-md border shrink-0 ${
+                            m.priority === "high"
+                              ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
+                              : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
+                          }`}
+                        >
+                          {m.category}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground pt-1">
+                        <span className="flex items-center gap-1 font-mono">
+                          <CalendarIcon className="h-3.5 w-3.5 text-brand" />
+                          {m.date}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                          {m.time}
+                        </span>
+                      </div>
+
+                      <div className="text-[11px] text-muted-foreground font-mono">
+                        Venue: {m.venue}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Panel>
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {/* Right Column: Personal Goals & Commitments List */}
         <div className="lg:col-span-5 space-y-4">
           <Panel
-            title="Official Academic Timetable"
-            description={`Semester ${currentSem} examinations and milestone deadlines`}
+            title="My Saved Academic Targets"
+            description="Personal commitments for attendance recovery, exam scores, and semester grade goals"
+            action={
+              <Button asChild variant="ghost" size="sm" className="text-xs">
+                <Link href="/student/calculator">Add Target</Link>
+              </Button>
+            }
           >
-            <div className="space-y-3 pt-2">
-              {upcomingMilestones.map((m) => (
-                <div
-                  key={m.id}
-                  className="rounded-xl border bg-background/60 p-3.5 space-y-2 hover:border-brand/30 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="font-semibold text-sm text-foreground leading-snug">
-                      {m.title}
-                    </span>
-                    <span
-                      className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-md border shrink-0 ${
-                        m.priority === "high"
-                          ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
-                          : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
-                      }`}
-                    >
-                      {m.category}
-                    </span>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground pt-1">
-                    <span className="flex items-center gap-1 font-mono">
-                      <Calendar className="h-3.5 w-3.5 text-brand" />
-                      {m.date}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                      {m.time}
-                    </span>
-                  </div>
-
-                  <div className="text-[11px] text-muted-foreground font-mono">
-                    Venue: {m.venue}
-                  </div>
-                </div>
-              ))}
+            <div className="pt-2">
+              <PlanList plans={plans} studentId={student.id} />
             </div>
           </Panel>
 
@@ -158,23 +206,6 @@ export default async function StudentSchedulePage() {
               </Link>
             </Button>
           </div>
-        </div>
-
-        {/* Right Column: Personal Goals & Commitments List */}
-        <div className="lg:col-span-7 space-y-4">
-          <Panel
-            title="My Saved Academic Targets"
-            description="Personal commitments for attendance recovery, exam scores, and semester grade goals"
-            action={
-              <Button asChild variant="ghost" size="sm" className="text-xs">
-                <Link href="/student/calculator">Add Target</Link>
-              </Button>
-            }
-          >
-            <div className="pt-2">
-              <PlanList plans={plans} studentId={student.id} />
-            </div>
-          </Panel>
         </div>
       </div>
     </div>

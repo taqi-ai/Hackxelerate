@@ -58,8 +58,23 @@ export const getProfile = cache(async (): Promise<(Profile & { email: string }) 
         };
       }
     } else {
-      const supabase = await createClient();
-      const { data: st } = await supabase.from("students").select("id, name, email, mentor_id").eq("id", demoStudentId).maybeSingle();
+      try {
+        const supabase = await createClient();
+        const { data: st } = await supabase.from("students").select("id, name, email, mentor_id").eq("id", demoStudentId).maybeSingle();
+        if (st) {
+          return {
+            id: `student-${st.id}`,
+            full_name: st.name,
+            role: "student",
+            mentor_id: st.mentor_id,
+            student_id: st.id,
+            email: st.email ?? `${st.id.toLowerCase()}@cumail.in`,
+          };
+        }
+      } catch {
+        // Fallback to snapshot if Supabase fails
+      }
+      const st = snapshot().students.find((s) => s.id === demoStudentId);
       if (st) {
         return {
           id: `student-${st.id}`,
@@ -124,9 +139,17 @@ export const getStudentRows = cache(async (): Promise<StudentRow[]> => {
       const sc = s.student_scores.find((x) => x.student_id === profile.student_id);
       return st && sc ? [toRow(sc, st)] : [];
     }
-    const supabase = await createClient();
-    const { data: sc } = await supabase.from("student_scores").select(ROW_COLS).eq("student_id", profile.student_id).maybeSingle();
-    return sc ? [toRow(sc, sc.students)] : [];
+    try {
+      const supabase = await createClient();
+      const { data: sc } = await supabase.from("student_scores").select(ROW_COLS).eq("student_id", profile.student_id).maybeSingle();
+      if (sc) return [toRow(sc, sc.students)];
+    } catch {
+      // Fallback to snapshot
+    }
+    const s = snapshot();
+    const st = s.students.find((x) => x.id === profile.student_id);
+    const sc = s.student_scores.find((x) => x.student_id === profile.student_id);
+    return st && sc ? [toRow(sc, st)] : [];
   }
   if (OFFLINE) {
     const s = snapshot();
@@ -268,9 +291,33 @@ export async function getStudent360(id: string) {
     supabase.from("conflicts").select("*").eq("student_id", id),
     supabase.from("source_links").select("source, raw_ref, raw_key, match_method, match_confidence, status").eq("student_id", id),
   ]);
-  if (!student.data) return null;
-  // DPDP: record who viewed which profile (RLS lets users write only their own audit rows)
-  await supabase.from("audit_log").insert({ action: "view_student_360", student_id: id });
+  if (!student.data) {
+    const s = snapshot();
+    const st = s.students.find((x) => x.id === id);
+    if (st) {
+      const mentor = s.mentors.find((m) => m.id === st.mentor_id);
+      return {
+        student: { ...st, mentors: mentor ? { name: mentor.name } : null },
+        score: one("student_scores", id) as StudentScore | null,
+        academic: one("academic", id),
+        attendance: one("attendance", id),
+        lms: one("lms_activity", id),
+        engagement: one("engagement", id),
+        placement: one("placement", id),
+        skills: one("skills", id),
+        feedback: s.feedback.filter((f) => f.student_id === id),
+        conflicts: s.conflicts.filter((c) => c.student_id === id),
+        links: s.source_links.filter((l) => l.student_id === id),
+      };
+    }
+    return null;
+  }
+  try {
+    // DPDP: record who viewed which profile (RLS lets users write only their own audit rows)
+    await supabase.from("audit_log").insert({ action: "view_student_360", student_id: id });
+  } catch {
+    // Ignore audit log insert error in demo / unauthenticated mode
+  }
   return {
     student: student.data,
     score: score.data as StudentScore | null,
