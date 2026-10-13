@@ -9,7 +9,8 @@ let cached: { token: string; exp: number } | null = null;
 export async function mlToken(): Promise<string> {
   if (cached && cached.exp - 30 > Date.now() / 1000) return cached.token;
   const res = await fetch("/api/ml-token", { cache: "no-store" });
-  if (res.status === 401) throw new Error("Your session has expired. Sign in again.");
+  // an expired session is redirected to /login by the middleware (HTML), not answered with JSON
+  if (res.redirected || res.status === 401) throw new Error("Your session has expired. Sign in again.");
   if (!res.ok) throw new MlUnavailable("The ML service is not configured.");
   cached = await res.json();
   return cached!.token;
