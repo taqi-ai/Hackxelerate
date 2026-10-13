@@ -32,10 +32,11 @@ jobs:
           enable-cache: true
           cache-dependency-glob: services/ml/requirements.txt
           python-version: "3.12"
-      - run: uv pip install --system -r services/ml/requirements.txt
+      - run: uv pip install -r services/ml/requirements.txt
       - name: Tests gate the deploy
         working-directory: services/ml
-        run: python -m pytest -q -x
+        run: |
+          "$GITHUB_WORKSPACE/.venv/bin/python" -m pytest -q -x
       - name: Stage the code-only package
         run: |
           mkdir -p stage/services/ml/artifacts stage/data

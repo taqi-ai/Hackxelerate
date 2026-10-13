@@ -90,9 +90,10 @@ jobs:
           cache-dependency-glob: services/ml/requirements.txt
           python-version: "3.12"
       # uv resolves and installs the wheels several times faster than pip
-      - run: uv pip install --system -r services/ml/requirements.txt
+      - run: uv pip install -r services/ml/requirements.txt
       - working-directory: services/ml
-        run: python -m pytest -q -x
+        run: |
+          "$GITHUB_WORKSPACE/.venv/bin/python" -m pytest -q -x
 
   secrets-scan:
     runs-on: ubuntu-latest
