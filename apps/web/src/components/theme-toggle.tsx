@@ -11,7 +11,13 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       aria-label="Toggle dark mode"
-      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+      onClick={() => {
+        // cross-fade colours for a moment so the day/night change feels smooth
+        const root = document.documentElement;
+        root.classList.add("theme-fade");
+        setTheme(resolvedTheme === "dark" ? "light" : "dark");
+        window.setTimeout(() => root.classList.remove("theme-fade"), 450);
+      }}
     >
       <Sun className="size-4 dark:hidden" />
       <Moon className="hidden size-4 dark:block" />

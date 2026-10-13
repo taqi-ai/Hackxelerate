@@ -7,6 +7,9 @@ You are continuing a project that Claude built. Claude is the lead; your job is 
 
 Read these before touching anything: `CLAUDE.md` (decisions and conventions), `docs/architecture.md`, `docs/REQUIREMENTS_MATRIX.md`.
 
+## Current task
+Build the mobile app by following `docs/ANTIGRAVITY_MOBILE_BRIEF.md` exactly. Work only in `apps/mobile/`. Do not touch the web app, the ML service or the database; Claude owns those.
+
 ## Hard rules (breaking these causes clashes)
 1. **Never change the product name, the stack, the database schema semantics, or the scoring logic** (`services/ml/app/scoring`, `models`, `config.py` weights and thresholds). Those are locked.
 2. **Never edit an existing migration file.** Add a new `supabase/migrations/000N_name.sql` (next number is 0006) and apply it with the Supabase tooling.

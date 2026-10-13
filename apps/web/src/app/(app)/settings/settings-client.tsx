@@ -185,6 +185,8 @@ export function SettingsClient({ name, email, role, mentorId, visibleStudents, o
                 label="Theme"
                 value={(theme as "light" | "dark" | "system") ?? "system"}
                 onChange={(v) => {
+                  document.documentElement.classList.add("theme-fade");
+                  window.setTimeout(() => document.documentElement.classList.remove("theme-fade"), 450);
                   setTheme(v);
                   play("toggle");
                 }}

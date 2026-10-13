@@ -157,6 +157,16 @@
   }
   html {
     -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+  /* day and night switch cross-fades instead of snapping */
+  html.theme-fade, html.theme-fade *, html.theme-fade *::before, html.theme-fade *::after {
+    transition: background-color 350ms ease, border-color 350ms ease, color 250ms ease, fill 350ms ease, stroke 350ms ease, box-shadow 350ms ease !important;
+  }
+  button, a, [role="tab"], [role="radio"] {
+    transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+    transition-duration: 180ms;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   }
   @media (pointer: fine) {
     html {

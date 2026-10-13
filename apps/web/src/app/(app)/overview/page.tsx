@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { AlertTriangle, ArrowRight, BriefcaseBusiness, DatabaseZap, GraduationCap, Info, Users } from "lucide-react";
-import { getArtifacts, getInsights, getInterventions, getProfile, getQualityReport, getSegments, getStudentRows } from "@/lib/data";
+import { getArtifacts, getInsights, getInterventions, getProfile, getQualityReport, getSegments, getStudentRows, getWeeklyLogins } from "@/lib/data";
 import { EmptyState, PageHeader, Panel, RiskBadge, ScoreValue, Stat } from "@/components/kit";
 import { RiskByGroup, ScoreHistogram, WeeklyTrend } from "@/components/charts";
 import { Stagger, StaggerItem } from "@/components/motion";
@@ -9,6 +9,7 @@ import { CampusHero } from "@/components/dashboard/campus-hero";
 import { AgendaCalendar, type AgendaEvent } from "@/components/dashboard/agenda-calendar";
 import { HealthHeatmap } from "@/components/dashboard/health-heatmap";
 import { HelpCard } from "@/components/dashboard/help-card";
+import { WeeklyEngagement } from "@/components/dashboard/weekly-engagement";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { fmtInt, INTERVENTION_LABEL } from "@/lib/format";
@@ -30,7 +31,7 @@ function firstName(full: string) {
 }
 
 export default async function OverviewPage() {
-  const [profile, rows, insights, segments, artifacts, interventions, quality] = await Promise.all([
+  const [profile, rows, insights, segments, artifacts, interventions, quality, logins] = await Promise.all([
     getProfile(),
     getStudentRows(),
     getInsights(),
@@ -38,6 +39,7 @@ export default async function OverviewPage() {
     getArtifacts(["cohort"]),
     getInterventions(),
     getQualityReport(),
+    getWeeklyLogins(),
   ]);
 
   if (rows.length === 0) {
@@ -86,7 +88,9 @@ export default async function OverviewPage() {
       id: i.id,
       date: i.due_date!.slice(0, 10),
       title: names.get(i.student_id)!,
-      sub: `${INTERVENTION_LABEL[i.type] ?? i.type}${i.owner_name ? `, ${i.owner_name}` : ""}`,
+      sub: INTERVENTION_LABEL[i.type] ?? i.type,
+      owner: i.owner_name,
+      status: i.status,
       href: `/students/${i.student_id}`,
       overdue: i.due_date!.slice(0, 10) < now.date,
     }))
@@ -134,6 +138,9 @@ export default async function OverviewPage() {
             </TabsList>
 
             <TabsContent value="focus" className="grid gap-4 lg:grid-cols-[1fr_1.15fr]">
+              <Panel className="lg:col-span-2" title="Weekly engagement" description={isMentor ? "LMS logins by section, weeks 1 to 12" : "LMS logins by branch, weeks 1 to 12"}>
+                <WeeklyEngagement rows={rows} logins={logins} groupBy={groupKey} />
+              </Panel>
               <Panel
                 title="Meet first"
                 description="Highest priority, with the main reason"
@@ -229,9 +236,7 @@ export default async function OverviewPage() {
         </div>
 
         <aside className="space-y-4" aria-label="Agenda">
-          <Panel title="Agenda" description="Check-ins and follow-ups due">
-            <AgendaCalendar events={events} today={now.date} />
-          </Panel>
+          <AgendaCalendar events={events} today={now.date} />
           <HelpCard />
         </aside>
       </div>

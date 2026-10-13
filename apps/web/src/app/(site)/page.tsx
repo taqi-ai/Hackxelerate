@@ -1,8 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowUpRight, BookOpenCheck, Briefcase, CalendarCheck, ClipboardList, GraduationCap, MessageSquareText, Trophy } from "lucide-react";
-import { SignalField } from "@/components/landing/signal-field";
-import { HeroChips } from "@/components/landing/hero-chips";
+import { Headline } from "@/components/landing/headline";
+import { HeroStage } from "@/components/landing/hero-stage";
 import { Story } from "@/components/landing/story";
 import { Bento } from "@/components/landing/bento";
 import { Aurora, ClosingCta, Eyebrow, GhostCta, PrimaryCta, SectionHead } from "@/components/landing/site-kit";
@@ -47,6 +47,17 @@ export default async function Home() {
       {/* hero */}
       <section className="relative isolate overflow-hidden">
         <Aurora />
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          {[
+            ["left-[8%] top-[22%] size-2", "0s", "9s"],
+            ["left-[42%] top-[14%] size-1.5", "-3s", "11s"],
+            ["right-[10%] top-[30%] size-2", "-5s", "10s"],
+            ["left-[30%] bottom-[18%] size-1.5", "-2s", "12s"],
+            ["right-[26%] bottom-[12%] size-2", "-7s", "9s"],
+          ].map(([c, d, t]) => (
+            <span key={c} className={`absolute rounded-full bg-white/40 shadow-[0_0_14px_3px_oklch(0.8_0.1_272/0.6)] motion-safe:animate-[float_var(--t)_ease-in-out_infinite] ${c}`} style={{ animationDelay: d, ["--t" as string]: t }} />
+          ))}
+        </div>
         <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-4 pb-20 pt-32 sm:px-6 lg:min-h-[100dvh] lg:grid-cols-[1.1fr_1fr] lg:pb-24 lg:pt-24">
           <div>
             <Reveal>
@@ -54,8 +65,7 @@ export default async function Home() {
             </Reveal>
             <Reveal delay={0.06}>
               <h1 className="mt-6 font-display text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.035em] sm:text-6xl lg:text-[3.9rem] xl:text-[4.25rem]">
-                Catch the quiet slide.{" "}
-                <span className="bg-gradient-to-r from-[oklch(0.86_0.08_272)] via-[oklch(0.82_0.1_300)] to-[oklch(0.84_0.09_200)] bg-clip-text text-transparent">Then do something about it.</span>
+                <Headline lead="Catch the quiet slide." accent="Then do something about it." />
               </h1>
             </Reveal>
             <Reveal delay={0.14}>
@@ -78,8 +88,7 @@ export default async function Home() {
             </Reveal>
           </div>
           <div className="relative">
-            <HeroChips />
-            <SignalField />
+            <HeroStage />
           </div>
         </div>
       </section>

@@ -4,15 +4,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { cn } from "@/lib/utils";
 import { riskTone, scoreTone } from "@/lib/format";
 import { CountUp } from "@/components/motion";
+import { PageArt, artFor } from "@/components/page-art";
 
 export function PageHeader({ title, description, actions }: { title: string; description?: React.ReactNode; actions?: React.ReactNode }) {
   return (
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <div className="space-y-1">
+    <div className="relative mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div aria-hidden className="pointer-events-none absolute -top-4 right-0 hidden h-28 w-52 opacity-90 md:block [mask-image:linear-gradient(to_left,black_55%,transparent)]">
+        <PageArt kind={artFor(title)} />
+      </div>
+      <div className="relative space-y-1">
         <h1 className="font-display text-3xl font-semibold tracking-[-0.02em] text-balance sm:text-[2.1rem] sm:leading-[1.1]">{title}</h1>
         {description && <p className="max-w-[70ch] text-sm leading-relaxed text-muted-foreground">{description}</p>}
       </div>
-      {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
+      {actions && <div className="relative flex shrink-0 flex-wrap gap-2 md:mr-2">{actions}</div>}
     </div>
   );
 }
@@ -97,7 +101,7 @@ export function Panel({
   contentClassName?: string;
 }) {
   return (
-    <Card className={cn("edge gap-4 rounded-2xl bg-card/80 backdrop-blur-sm", className)}>
+    <Card className={cn("edge gap-4 rounded-2xl bg-card/80 backdrop-blur-sm transition-shadow duration-300 hover:shadow-[0_18px_50px_-28px_var(--brand)]", className)}>
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div className="space-y-1">
           <CardTitle className="font-display text-[1.05rem] font-semibold tracking-tight">{title}</CardTitle>

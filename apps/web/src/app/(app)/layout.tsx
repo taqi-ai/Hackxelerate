@@ -19,6 +19,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <div className="relative flex min-w-0 flex-col">
         {/* ambient brand glow behind the content */}
         <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(60%_100%_at_50%_0%,var(--glow),transparent)]" />
+        <div aria-hidden className="pointer-events-none fixed -right-32 bottom-[-12rem] -z-0 size-[32rem] rounded-full bg-[radial-gradient(closest-side,var(--glow),transparent)] opacity-70 motion-safe:animate-[drift_26s_ease-in-out_infinite_alternate]" />
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-0 bg-[radial-gradient(color-mix(in_oklch,var(--foreground)_9%,transparent)_1px,transparent_1px)] bg-[size:26px_26px] [mask-image:linear-gradient(to_bottom,black,transparent_35%)]" />
         <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b bg-background/70 px-4 backdrop-blur-xl supports-[backdrop-filter]:bg-background/55 sm:px-6">
           <MobileNav role={profile.role} />
           <div className="ml-auto flex items-center gap-1">

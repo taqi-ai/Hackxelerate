@@ -100,8 +100,8 @@ export function GhostCta({ href, children }: { href: string; children: React.Rea
 export function ClosingCta({ signedIn }: { signedIn: boolean }) {
   return (
     <section className="relative mx-auto max-w-7xl px-4 py-28 sm:px-6">
-      <div className="relative isolate overflow-hidden rounded-[2rem] border border-white/10 bg-[#0c0c14] px-6 py-16 text-center sm:px-12">
-        <Aurora className="opacity-80" />
+      <div className="relative isolate overflow-hidden rounded-[2rem] border border-white/10 bg-[#030307] px-6 py-16 text-center sm:px-12">
+        <Aurora className="opacity-30" />
         <Reveal className="relative">
           <LogoVideo className="mx-auto h-auto w-full max-w-[420px]" />
           <h2 className="mx-auto mt-6 max-w-2xl font-display text-4xl font-semibold tracking-tight text-balance sm:text-5xl">From early warning to real intervention</h2>

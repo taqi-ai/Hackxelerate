@@ -218,3 +218,22 @@ export async function getStudent360(id: string) {
 }
 
 export type Student360 = NonNullable<Awaited<ReturnType<typeof getStudent360>>>;
+
+/** weekly LMS logins per visible student (weeks 1 to 12), for the engagement heatmap */
+export const getWeeklyLogins = cache(async (): Promise<Map<string, number[]>> => {
+  const toSeries = (weekly: { week: number; logins: number }[] | null) => {
+    const out = Array<number>(12).fill(0);
+    (weekly ?? []).forEach((w) => {
+      if (w.week >= 1 && w.week <= 12) out[w.week - 1] = Number(w.logins) || 0;
+    });
+    return out;
+  };
+  if (OFFLINE) {
+    const ids = visibleIds();
+    return new Map(snapshot().lms_activity.filter((r) => ids.has(r.student_id)).map((r) => [r.student_id as string, toSeries(r.weekly)]));
+  }
+  const rows = await fetchAll<{ student_id: string; weekly: { week: number; logins: number }[] | null }>((s) =>
+    s.from("lms_activity").select("student_id, weekly").order("student_id"),
+  );
+  return new Map(rows.map((r) => [r.student_id, toSeries(r.weekly)]));
+});

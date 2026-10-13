@@ -46,7 +46,7 @@ export default async function AboutPage() {
       />
 
       <section className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="grid items-center gap-10 rounded-[2rem] border border-white/10 bg-[#0c0c14] p-8 sm:p-12 lg:grid-cols-[1fr_1.1fr]">
+        <div className="grid items-center gap-10 rounded-[2rem] border border-white/10 bg-[#030307] p-8 sm:p-12 lg:grid-cols-[1fr_1.1fr]">
           <Reveal>
             <LogoVideo className="h-auto w-full max-w-[460px]" />
           </Reveal>
