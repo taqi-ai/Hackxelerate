@@ -17,6 +17,7 @@ import { INTERVENTION_LABEL } from "@/lib/format";
 import { createIntervention } from "@/app/(app)/actions";
 import { toast } from "sonner";
 import type { StudentRow } from "@/lib/types";
+import { campusDate } from "@/lib/dates";
 
 const ALERT_TO_TYPE: Record<string, string> = {
   silent_decliner: "mentor_meeting",
@@ -29,9 +30,7 @@ const ALERT_TO_TYPE: Record<string, string> = {
 };
 
 function inDays(n: number) {
-  const d = new Date();
-  d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0, 10);
+  return campusDate(n);
 }
 
 /** minutes a meeting is likely to need: more for high risk and for several alerts */

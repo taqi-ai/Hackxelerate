@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { calculateCGPAScenario, calculateSGPA } from "@/lib/academic-calc";
 import { saveStudentPlanAction } from "@/app/(app)/actions";
 import { play } from "@/lib/sound";
+import { campusDate } from "@/lib/dates";
 
 export interface CGPASubjectInput {
   subject: string;
@@ -102,7 +103,7 @@ export function CGPACalculatorCard({
           completedCredits,
           currentSemesterCredits,
         },
-        due_date: new Date(Date.now() + 60 * 86400000).toISOString().slice(0, 10),
+        due_date: campusDate(60),
         notes: `Simulated via SGPA/CGPA Planner. Planned semester SGPA: ${interactiveSGPA}, yielding cumulative CGPA: ${scenario.projectedCGPA}.`,
       });
 

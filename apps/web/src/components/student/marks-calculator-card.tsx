@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { calculateSubjectMarkTarget, GRADE_BANDS } from "@/lib/academic-calc";
 import { saveStudentPlanAction } from "@/app/(app)/actions";
 import { play } from "@/lib/sound";
+import { campusDate } from "@/lib/dates";
 
 export interface SubjectMarksData {
   subject: string;
@@ -93,7 +94,7 @@ export function MarksCalculatorCard({
           internalScore,
           internalMax: 40,
         },
-        due_date: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+        due_date: campusDate(30),
         notes: `Simulated via Marks Target Planner. Need ${result.requiredEndSemScore}/60 in End Semester examination to secure ${result.gradeBand}.`,
       });
 

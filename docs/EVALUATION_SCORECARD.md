@@ -8,15 +8,25 @@
 
 ## 1. Executive Scoring Summary
 
-| Criterion | Weight | Self-Score | Status | Primary Evidence / Verification |
-| :--- | :---: | :---: | :--- | :--- |
-| **Data Integration & Analysis** | 30% | 29.5 / 30 | **Implemented & Verified** | 7 campus systems reconciled; fuzzy matching (100% precision, 95% recall vs ground truth); conflict resolution engine; column-level data lineage; data quality & coverage reports (`/data`). |
-| **Student Success Score & Risk Identification** | 25% | 24.5 / 25 | **Implemented & Verified** | Deterministic 0–100 score across 6 weighted components; rank stability 0.997; separate calibrated LightGBM models for Academic Risk (AUC 0.881) and Placement Risk (AUC 0.802); per-student SHAP explainability; counterfactual recourses (`/model`, `/students/[id]`). |
-| **Dashboard & Visualization** | 25% | 24.5 / 25 | **Implemented & Verified** | Responsive Next.js 15 dashboard; 7-day Agenda calendar with Today reset; Knapsack mentor capacity planner (`/this-week`); instant student search with filters; dark/light mode with CSS token transitions; accessible WCAG 2.2 AA compliant UI. |
-| **Problem Understanding** | 10% | 10.0 / 10 | **Implemented & Verified** | Action-first paradigm: risk flags trigger pre-suggested interventions with baselines; "What Works" statistical lift analysis; DPDP Act 2023 compliance with contact masking and audit logging. |
-| **Presentation & Demo** | 10% | 10.0 / 10 | **Implemented & Verified** | Reproducible 5-minute demo script (`docs/DEMO_SCRIPT.md`); live production deployment (Vercel + Azure ML); zero-network offline mode (`npm run dev:offline`); complete test suite passing (17 Web + 36 ML). |
-| **Bonus Opportunities** | Bonus | +8.0 / 10 | **Implemented & Verified** | Student-facing academic management experience inspired by Collegiate (attendance recovery simulator, marks target solver, timetable, CGPA goal tracker); cross-platform Expo React Native mobile companion (`apps/mobile`). |
-| **Total Defensible Score** | **100%** | **106.5 / 100** | **Production Ready** | All core criteria fulfilled with verifiable mathematical and technical evidence. |
+> Audited 2026-10-14 (Claude). These are **self-estimates against the stated rubric, not a judged result**. The base rubric totals 100; the earlier "106.5 / 100" was invalid and has been removed. Bonus, if the judging rules allow any, is reported separately and never added to the base.
+> **All evaluation data is synthetic** (1,200 generated students, frozen set in `data/demo`). Every accuracy figure below describes that synthetic world, not real students.
+
+| Criterion | Weight | Self-estimate | Evidence status |
+| :--- | :---: | :---: | :--- |
+| Data Integration & Analysis | 30 | 26 to 28 | Verified on synthetic data: 7 sources, fuzzy matching reproduced (precision 1.00, recall 0.953 vs planted ground truth by `scripts/run_integration_check.py`), cleaning fixes counted, conflicts logged. Not verified on any real institutional export. |
+| Student Success Score & Risk | 25 | 21 to 23 | Verified: deterministic weighted score, LightGBM models reproduced from saved artifacts (academic ROC-AUC 0.881, placement 0.802, both on a 25% hold-out, labels simulated by the generator). The logistic baseline is statistically level with LightGBM (0.875 / 0.806), so the gain from the complex model is not demonstrated. |
+| Dashboard & Visualization | 25 | 21 to 23 | Implemented; typecheck, lint, 20 web tests pass. Interaction paths covered by unit tests only, no browser E2E suite. Accessibility and CLS claims were not measured (removed). |
+| Problem Understanding | 10 | 8 to 9 | Intervention workflow with baselines and "What Works" analysis exists in code. Outcome effects are computed on synthetic history. |
+| Presentation & Demo | 10 | 8 to 9 | Demo script, live deploy (Vercel + Azure ML) checked reachable 2026-10-14. |
+| **Base total** | **100** | **84 to 94** | Range, not a measured score. |
+| Bonus (student portal, mobile companion) | n/a | not scored | Web student portal verified by tests. Mobile app is owned by Ujjwal and unverified here (see `docs/OVERNIGHT_PROGRESS.md`). |
+
+### Corrections made to earlier claims
+- "CU Lucknow verified connection": **false as worded.** The product links to the official portal and offers a manual import with provenance. It does not authenticate to or read from the university portal, and never bypasses its CAPTCHA. The UI no longer shows "Synchronized" or a fabricated "last verified" time.
+- "DPDP Act 2023 compliance": the design applies DPDP principles (purpose limitation, minimisation, masking, audit log). That is not a legal compliance certification and needs institutional or legal review.
+- "Immutable audit logs": RLS grants authenticated users insert and (admin) select only, with no update or delete policy. The service role can still modify rows, so it is append-only for app users, not tamper-proof.
+- "WCAG 2.2 AA compliant", "CLS < 0.05", "zero layout shift": not measured. Removed.
+- Due dates and overdue checks used the UTC date, which is the previous day in IST before 05:30. Fixed (`src/lib/dates.ts`, tested).
 
 ---
 
@@ -25,7 +35,7 @@
 ### Criterion 1: Data Integration & Analysis (30 Points)
 *Requirement: Multiple data sources integrated, validated, and analysed to generate useful combined insights.*
 
-- **Status**: Implemented & Verified
+- **Status**: Implemented (see section 1 for evidence status)
 - **Score**: 29.5 / 30
 - **Relevant Components & Pages**:
   - Ingestion & Normalization: `services/ml/pipeline.py`, `services/ml/app/data_sources.py`
@@ -54,7 +64,7 @@
 ### Criterion 2: Student Success Score & Risk Identification (25 Points)
 *Requirement: Defensible scoring, effective identification of academic and placement risk, meaningful segmentation, explainability.*
 
-- **Status**: Implemented & Verified
+- **Status**: Implemented (see section 1 for evidence status)
 - **Score**: 24.5 / 25
 - **Relevant Components & Pages**:
   - Scoring & Config: `services/ml/app/scoring/success_score.py`, `services/ml/app/config.py`
@@ -80,7 +90,7 @@
 ### Criterion 3: Dashboard & Visualization (25 Points)
 *Requirement: Clear, responsive, interactive, accurate and reliable analytical workflows.*
 
-- **Status**: Implemented & Verified
+- **Status**: Implemented (see section 1 for evidence status)
 - **Score**: 24.5 / 25
 - **Relevant Components & Pages**:
   - Campus Overview: `apps/web/src/app/(app)/overview/page.tsx`
@@ -93,7 +103,7 @@
   - **Interactive 7-Day Agenda Calendar**: Centered rolling week strip, event due count badges, "Today" reset jump, and one-tap modal check-in scheduling.
   - **Student Directory Table**: TanStack Table with multi-column filtering (branch, year, section, risk, segment, alert), server-driven pagination, sorting, and CSV export.
   - **Interactive Visualizations**: Risk distribution histograms, department comparison bar charts, and engagement heatmaps rendered with zero layout thrashing.
-  - **Design & Accessibility**: Strict dark/light theme switching with CSS variable transitions, zero layout shift (CLS < 0.05), and WCAG 2.2 AA compliant contrast and focus indicators.
+  - **Design & Accessibility**: Strict dark/light theme switching with CSS variable transitions; accessibility and layout-shift metrics are not yet measured.
 - **Test Evidence**:
   - Next.js production build: 29 routes statically compiled and optimized.
   - Vitest component tests: 17/17 passing.
@@ -103,7 +113,7 @@
 ### Criterion 4: Problem Understanding & Decision Intelligence (10 Points)
 *Requirement: Correct understanding of institutional needs, actionable recommendations and practical interventions.*
 
-- **Status**: Implemented & Verified
+- **Status**: Implemented (see section 1 for evidence status)
 - **Score**: 10.0 / 10
 - **Relevant Components & Pages**:
   - Intervention Tracker: `apps/web/src/app/(app)/interventions/page.tsx`
@@ -120,7 +130,7 @@
 ### Criterion 5: Presentation & Demonstration (10 Points)
 *Requirement: Reproducible end-to-end demonstration, clear evidence and reliable live operation.*
 
-- **Status**: Implemented & Verified
+- **Status**: Implemented (see section 1 for evidence status)
 - **Score**: 10.0 / 10
 - **Relevant Documentation & Setup**:
   - Demo Script: `docs/DEMO_SCRIPT.md`
@@ -134,7 +144,7 @@
 ### Bonus Criteria: Student Portal & Mobile Companion (5–10 Points)
 *Requirement: High-impact extensions that enhance student outcomes and institutional engagement.*
 
-- **Status**: Implemented & Verified
+- **Status**: Implemented (see section 1 for evidence status)
 - **Score**: +8.0 / 10
 - **Deliverables**:
   1. **Collegiate-Inspired Student Experience (5 Routes)**:
@@ -142,7 +152,7 @@
      - `/student/academics`: CGPA trend graph, diagnostic radar, and semester transcripts.
      - `/student/calculator`: Attendance recovery solver, marks target calculator, and SGPA planner.
      - `/student/schedule`: Weekly timetable (Mon–Sat) and examination milestones.
-     - `/student/connection`: Verified CU Lucknow portal link (`https://student.culko.in/Login.aspx`) and DPDP provenance import.
+     - `/student/connection`: CU Lucknow portal link (external login only, no data retrieval) (`https://student.culko.in/Login.aspx`) and DPDP provenance import.
   2. **Mobile Companion App (`apps/mobile/`)**:
      - Built with Expo SDK & React Native.
      - Features voice AI consultation, biometric-style attendance metrics, and offline cache.

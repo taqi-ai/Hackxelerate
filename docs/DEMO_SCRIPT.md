@@ -133,7 +133,7 @@
 - **Key Points for Judges**:
   - Transparent documentation of model weights and LightGBM ROC-AUC metrics (0.881 academic, 0.802 placement).
   - Open disclosure of four disparate impact checks marked for human review (lateral entry and residence).
-  - DPDP Act 2023 compliance: all student emails and phone numbers are masked, audit logging is active, and students cannot view peer records.
+  - DPDP-aligned design (not a legal certification): all student emails and phone numbers are masked, audit logging is active, and students cannot view peer records.
 
 ---
 
