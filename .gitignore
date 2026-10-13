@@ -18,3 +18,16 @@ motion/out/
 .DS_Store
 Thumbs.db
 *.log
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# generated data (the frozen judging set lives in data/demo and IS committed)
+data/raw/
+services/ml/artifacts/runs/
+
+# internal team brief (not for evaluators)
+master promptinitialclaude.md

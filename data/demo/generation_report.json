@@ -1,0 +1,82 @@
+{
+  "erp_academics": {
+    "rows": 23620,
+    "duplicate_rows": 180,
+    "missing_internal": 1171,
+    "out_of_range": 12,
+    "attendance_conflicts": 36,
+    "branch_conflicts": 12
+  },
+  "attendance_register": {
+    "sheets": [
+      "Aug",
+      "Sep",
+      "Oct"
+    ],
+    "student_month_gaps": 144,
+    "merged_header_rows": 2
+  },
+  "lms_activity_log": {
+    "rows": 14400,
+    "email_variants": 144,
+    "students_with_two_accounts": 24,
+    "date_formats": 2,
+    "missing_minutes": 566
+  },
+  "clubs_events": {
+    "rows": 4279,
+    "identifier": "name only",
+    "date_formats": 3,
+    "initials_or_variants": 619
+  },
+  "placement_cell": {
+    "rows": 1236,
+    "duplicate_rows": 36,
+    "never_visited": 306,
+    "out_of_range": 6
+  },
+  "skills_assessment": {
+    "records": 1138,
+    "on_0_10_scale": 158,
+    "nested": true
+  },
+  "feedback_forms": {
+    "rows": 1326,
+    "anonymous": 416,
+    "languages": {
+      "en": 651,
+      "hinglish": 344,
+      "hi": 331
+    }
+  },
+  "cohort": {
+    "seed": 42,
+    "students": 1200,
+    "mentors": 22,
+    "by_branch": {
+      "CSE": 324,
+      "ECE": 241,
+      "CSE-AIML": 230,
+      "CSE-Data Science": 203,
+      "ME": 202
+    },
+    "by_year": {
+      "2": 606,
+      "3": 594
+    },
+    "silent_decliners": 80,
+    "engaged_but_slipping": 69,
+    "post_midsem_dropoff": 167,
+    "academic_fail_rate": 0.24,
+    "placement_intent": 740,
+    "unplaced_rate_among_placement_intent": 0.266,
+    "planted_patterns": [
+      "LMS activity decays after week 5 for silent decliners (~8%) whose current scores look average",
+      "LMS + attendance drop-off after mid-sem (week 8) for a motivation/consistency/financial-stress driven group",
+      "Gatekeeper courses (Mathematics-II, Data Structures, Signals & Systems, Thermodynamics) predict later failure",
+      "High CGPA alone does not predict placement; soft skills and mock-interview preparation dominate",
+      "Engaged-but-slipping group: high extracurricular activity, falling academics",
+      "Context effects are mediated only: day scholars' commute lowers attendance; schooling medium affects communication scores"
+    ]
+  }
+}
