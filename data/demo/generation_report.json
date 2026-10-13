@@ -1,8 +1,8 @@
 {
   "erp_academics": {
-    "rows": 23620,
+    "rows": 23330,
     "duplicate_rows": 180,
-    "missing_internal": 1171,
+    "missing_internal": 1158,
     "out_of_range": 12,
     "attendance_conflicts": 36,
     "branch_conflicts": 12
@@ -21,55 +21,55 @@
     "email_variants": 144,
     "students_with_two_accounts": 24,
     "date_formats": 2,
-    "missing_minutes": 566
+    "missing_minutes": 557
   },
   "clubs_events": {
-    "rows": 4279,
+    "rows": 4223,
     "identifier": "name only",
     "date_formats": 3,
-    "initials_or_variants": 619
+    "initials_or_variants": 622
   },
   "placement_cell": {
     "rows": 1236,
     "duplicate_rows": 36,
-    "never_visited": 306,
+    "never_visited": 305,
     "out_of_range": 6
   },
   "skills_assessment": {
-    "records": 1138,
-    "on_0_10_scale": 158,
+    "records": 1139,
+    "on_0_10_scale": 151,
     "nested": true
   },
   "feedback_forms": {
-    "rows": 1326,
-    "anonymous": 416,
+    "rows": 1319,
+    "anonymous": 424,
     "languages": {
-      "en": 651,
-      "hinglish": 344,
-      "hi": 331
+      "en": 662,
+      "hinglish": 365,
+      "hi": 292
     }
   },
   "cohort": {
     "seed": 42,
     "students": 1200,
-    "mentors": 22,
+    "mentors": 21,
     "by_branch": {
-      "CSE": 324,
-      "ECE": 241,
-      "CSE-AIML": 230,
-      "CSE-Data Science": 203,
-      "ME": 202
+      "CSE": 294,
+      "ECE": 271,
+      "CSE-AIML": 238,
+      "ME": 206,
+      "CSE-Data Science": 191
     },
     "by_year": {
-      "2": 606,
-      "3": 594
+      "2": 628,
+      "3": 572
     },
-    "silent_decliners": 80,
-    "engaged_but_slipping": 69,
-    "post_midsem_dropoff": 167,
-    "academic_fail_rate": 0.24,
-    "placement_intent": 740,
-    "unplaced_rate_among_placement_intent": 0.266,
+    "silent_decliners": 106,
+    "engaged_but_slipping": 78,
+    "post_midsem_dropoff": 145,
+    "academic_fail_rate": 0.247,
+    "placement_intent": 734,
+    "unplaced_rate_among_placement_intent": 0.386,
     "planted_patterns": [
       "LMS activity decays after week 5 for silent decliners (~8%) whose current scores look average",
       "LMS + attendance drop-off after mid-sem (week 8) for a motivation/consistency/financial-stress driven group",

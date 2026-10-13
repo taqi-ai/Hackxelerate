@@ -73,6 +73,10 @@ GATEKEEPERS = {"Mathematics-II", "Data Structures", "Signals & Systems", "Thermo
 CORE_LABS = {"Data Structures", "Database Management Systems", "Operating Systems", "Computer Networks",
              "Analog Circuits", "Digital System Design", "VLSI Design", "Thermodynamics", "Fluid Mechanics", "Heat Transfer"}
 
+COMMON_M = ["Rahul", "Amit", "Rohit", "Ankit", "Aditya", "Abhishek", "Arjun", "Vikas"]
+COMMON_F = ["Priya", "Neha", "Pooja", "Sneha", "Anjali", "Aditi", "Shreya", "Kavya"]
+COMMON_SURNAMES = ["Kumar", "Sharma", "Singh", "Verma", "Gupta", "Yadav"]
+
 INTENTS = ["placement", "higher_studies", "govt_exams", "entrepreneurship", "undecided"]
 INTENT_P = [0.62, 0.13, 0.10, 0.05, 0.10]
 
@@ -148,6 +152,9 @@ def make_cohort(ctx: Ctx, n: int) -> pd.DataFrame:
         gender = "F" if rng.random() < 0.38 else "M"
         first = fake.first_name_female() if gender == "F" else fake.first_name_male()
         last = fake.last_name()
+        if rng.random() < 0.18:  # very common names -> realistic same-name collisions on campus
+            first = ctx.py.choice(COMMON_F if gender == "F" else COMMON_M)
+            last = ctx.py.choice(COMMON_SURNAMES)
         hosteller = bool(rng.random() < 0.45)
         first_gen = bool(rng.random() < 0.25)
         lateral = bool(year == 3 and rng.random() < 0.08)
@@ -288,11 +295,21 @@ def make_outcomes(ctx: Ctx, df: pd.DataFrame, weekly: pd.DataFrame) -> None:
     gk = (df.gatekeeper_total.fillna(df.gatekeeper_total.median()) - 60) / 12
     logit = (-2.95 - 1.15 * df.ability - 0.55 * df.motivation - 0.45 * df.consistency + 0.9 * df.financial_stress
              + 1.5 * df.silent_decliner + 1.2 * df.post_midsem_dropoff + 0.9 * df.engaged_slipping
-             - 0.45 * gk - 0.035 * (att - 75) + 0.35 * np.minimum(df.backlogs_true, 3) + rng.normal(0, 0.5, len(df)))
+             - 0.45 * gk - 0.02 * (att - 75) + 0.35 * np.minimum(df.backlogs_true, 3)
+             # real-world cliff: attendance shortage (<65%) means detention / debarment from end-sem exams
+             + 1.4 * (att < 65)
+             # weak gatekeeper foundations hurt far more once a student starts disengaging
+             + 0.8 * ((gk < -0.5) & (df.silent_decliner | df.post_midsem_dropoff))
+             + rng.normal(0, 0.5, len(df)))
     df["p_academic_fail"] = sigmoid(logit)
     df["end_sem_fail_or_backlog"] = rng.random(len(df)) < df.p_academic_fail
-    pl = (0.75 + 0.45 * df.ability + 0.95 * df.soft + 0.85 * df.prep - 1.0 * df.silent_decliner
-          + 0.35 * df.cs_family + rng.normal(0, 0.5, len(df)))
+    pl = (0.95 + 0.45 * df.ability + 0.95 * df.soft + 0.85 * df.prep - 1.0 * df.silent_decliner
+          + 0.35 * df.cs_family
+          # recruiter eligibility cut-offs: CGPA below 6.5 or any active backlog closes most doors
+          - 1.3 * (df.cgpa_true < 6.5) - 0.9 * (df.backlogs_true > 0)
+          # preparation pays off most when paired with communication skills
+          + 0.6 * ((df.soft > 0.4) & (df.prep > 0.4))
+          + rng.normal(0, 0.5, len(df)))
     df["p_placed"] = sigmoid(pl)
     placed = rng.random(len(df)) < df.p_placed
     df["placed_by_final_year"] = np.where(df.career_intent == "placement", placed, None)
@@ -344,6 +361,10 @@ def write_erp(ctx: Ctx, df: pd.DataFrame, marks: pd.DataFrame, weekly: pd.DataFr
         rows.append({
             "Roll No": r.student_id, "Student Name": s["name"],
             "Branch": s.branch if r.student_id not in branch_conflicts else py.choice([b[0] for b in BRANCHES.values() if b[0] != s.branch]),
+            "Section": s.section, "Mentor ID": s.mentor_id, "Gender": s.gender,
+            "Residence": "Hosteller" if s.hosteller else "Day Scholar",
+            "First Generation Learner": "Y" if s.first_generation else "N",
+            "Lateral Entry": "Y" if s.lateral_entry else "N", "Schooling Medium": s.schooling_medium,
             "Semester": r.sem, "Subject": r.subject, "Internal (40)": r.internal,
             "End Sem (60)": r.end_sem, "Total (100)": r.total,
             "SGPA": sgpa.loc[r.student_id].get(r.sem, np.nan) if r.sem in sgpa.columns else np.nan,
@@ -511,7 +532,7 @@ def write_placement(ctx: Ctx, df: pd.DataFrame, truth_links: list) -> None:
     pl.loc[oor, "Aptitude Score"] = [112, -5, 140, 101, -1, 250]
     by_roll = {roll_placement(s): s.student_id for s in df.itertuples()}
     for i, r in enumerate(pl.Roll):
-        truth_links.append(("placement_cell", f"row {i + 2}", by_roll[r]))
+        truth_links.append(("placement_cell", f"Placement Readiness row {i + 3}", by_roll[r]))
     with pd.ExcelWriter(ctx.out / "placement_cell.xlsx", engine="openpyxl") as xw:
         pl.to_excel(xw, sheet_name="Placement Readiness", index=False, startrow=1)
         xw.sheets["Placement Readiness"]["A1"] = "Training & Placement Cell - Readiness Tracker (2026-27)"

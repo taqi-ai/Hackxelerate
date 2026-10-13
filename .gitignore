@@ -31,3 +31,7 @@ services/ml/artifacts/runs/
 
 # internal team brief (not for evaluators)
 master promptinitialclaude.md
+
+# offline demo snapshot (regenerate: python services/ml/scripts/publish_demo.py)
+apps/web/demo-data/
+services/ml/artifacts/uploads/
