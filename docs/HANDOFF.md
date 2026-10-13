@@ -8,3 +8,4 @@ One line per finished or in-progress task. Newest at the bottom. Format: `date |
 2026-10-13 | claude | WIP branch claude/ml-auth-cache: ML token auth, result cache, parallel publish, faster CI, logo assets, Azure OpenAI wiring. NOT merged: web must mint tokens first (see below) | claude/ml-auth-cache | merged
 2026-10-13 | claude | Merged claude/ml-auth-cache: ML token auth, pipeline cache, parallel publish, faster CI/CD, logo, Azure OpenAI | main | done
 2026-10-13 | gemini | Ascora mobile companion (apps/mobile): Expo, React Native, Voice AI tab, browser simulator, live Supabase RLS | gemini/mobile-app | done, PR opened
+2026-10-13 | gemini | Mobile app UX polish: ScoreRing scaling fix, onboarding welcome screen, Platform Hub tab, synthesized audio engine, scrollbar suppression, lint/typecheck clean | gemini/mobile-app | done, PR #1 updated
