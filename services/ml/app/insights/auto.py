@@ -59,7 +59,7 @@ def compute(f: pd.DataFrame, comps: pd.DataFrame, scores: pd.DataFrame, students
             ins.append(dict(kind="gatekeeper", severity="warning", rank=2,
                             title=f"{subj} is the strongest early signal of academic trouble",
                             body=f"Among {n} students who took it, their {subj} score alone separates students now at academic risk "
-                                 f"with AUC {auc:.2f}, ahead of {runner}. Strengthening support in {subj} is the highest-leverage fix.",
+                                 f"with AUC {auc:.2f}, ahead of {runner}. A correlation, not proof of cause, but a sensible place to target early support.",
                             metric=dict(subject=subj, auc=round(float(auc), 3), n=int(n),
                                         ranking=[dict(subject=r[1], auc=round(float(r[0]), 3)) for r in res[:6]],
                                         sources=["erp_academics"])))

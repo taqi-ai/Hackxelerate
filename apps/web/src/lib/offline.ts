@@ -45,4 +45,6 @@ export function artifact(key: string) {
 }
 
 /** interventions created during an offline session live in memory (reset on server restart) */
-export const offlineInterventions: Intervention[] = [];
+// anchored on globalThis: server actions and pages can load separate module instances in dev
+const g = globalThis as unknown as { __ascoraInterventions?: Intervention[] };
+export const offlineInterventions: Intervention[] = (g.__ascoraInterventions ??= []);
