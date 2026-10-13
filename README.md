@@ -39,7 +39,7 @@ cd services/ml
 python -m venv .venv
 .venv/Scripts/python -m pip install -r requirements.txt     # Windows; use .venv/bin/python on macOS/Linux
 cp .env.example .env                                          # fill in values
-.venv/Scripts/python -m pytest -q                             # 31 tests
+.venv/Scripts/python -m pytest -q                             # 36 tests
 .venv/Scripts/python scripts/publish_demo.py --no-publish     # run the pipeline locally, write the offline snapshot
 .venv/Scripts/python -m uvicorn app.main:app --port 8000
 
@@ -55,14 +55,20 @@ npm run dev:offline          # no Supabase, no internet: serves demo-data/snapsh
 
 To publish a fresh run to Supabase, set `ASCORA_INGEST_TOKEN` in `services/ml/.env` (generate a random string, store its SHA-256 in `private.ingest_secret`), then run `publish_demo.py` without `--no-publish`.
 
+## Azure AI, security and deploys
+
+- **LLM:** Azure OpenAI `gpt-4.1-mini` (resource `ascora-ai-koreacentral`, the region the student subscription allows), with Gemini as fallback and a deterministic fallback when neither is available. It only rewords insights and turns questions into a validated filter; it is never in the scoring path.
+- **ML service auth:** the web app mints a short-lived signed token (`/api/ml-token`) only for signed-in users; the ML service verifies it (HMAC, expiry, role). Pipeline endpoints are admin-only. With no secret configured the service refuses protected calls.
+- **Deploys:** web deploys on every push to Vercel (functions in Tokyo, next to Supabase). The ML service deploys through `deploy-ml.yml`: tests, then a ~3 MB code zip; heavy dependencies live on the server and reinstall only when `requirements.txt` changes.
+
 ## Tests and CI
 
-- `services/ml`: 31 tests (normalisation, entity resolution, conflicts, scoring, matching accuracy on the demo set).
+- `services/ml`: 36 tests (normalisation, entity resolution, conflicts, scoring, matching accuracy on the demo set).
 - GitHub Actions: web lint, typecheck and build; ML tests; motion typecheck; secret scan.
 - Vercel deploys every push to `main`.
 
 ## Known limitations
 
 - Synthetic data: accuracy figures show the pipeline works, not performance at a real college.
-- The ML service runs locally until it is deployed (planned: Azure App Service). Until then the live site shows the last published run; the pipeline runner and what-if simulator need the service.
+- The ML service runs on one small Azure B1 machine. A cold pipeline run takes about 4 minutes there (about 25 seconds on a laptop); repeat runs on unchanged input reuse a cached result.
 - Four fairness checks are marked "review needed" (see `/fairness`).

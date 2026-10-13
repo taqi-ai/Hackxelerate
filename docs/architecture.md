@@ -54,7 +54,7 @@ flowchart LR
 | Web | Next.js 15 (App Router), TypeScript, Tailwind 4, shadcn/ui, Recharts, TanStack Table | Server-rendered pages read Supabase directly under the user's session |
 | Auth and data | Supabase Postgres, Auth, row-level security | Mentors see only their own students, enforced in the database, not the UI |
 | ML service | FastAPI, pandas, rapidfuzz, scikit-learn, LightGBM, SHAP | All heavy compute lives here, never on Vercel |
-| LLM | Gemini Flash via `google-genai`, optional | Wording only (insight sentences, question-to-filter). Never in the scoring path. Cached; deterministic fallback when absent |
+| LLM | Azure OpenAI gpt-4.1-mini (Gemini fallback), optional | Wording only (insight sentences, question-to-filter). Never in the scoring path. Cached; deterministic fallback when absent |
 
 ## Data flow
 
@@ -82,5 +82,5 @@ flowchart LR
 
 ## Known limitations
 
-- ML service deployment to Azure is a separate step (not done yet); until then the live site reads published data and the pipeline and what-if run locally.
+- The ML service runs on a single small Azure machine; heavy runs are slow there but cached.
 - Synthetic data only.
