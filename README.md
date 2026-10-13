@@ -20,6 +20,7 @@ The password is shown on the login page for the demo accounts.
 | Path | Contents |
 |---|---|
 | `apps/web` | Next.js 15 dashboard (Supabase Auth, role-based pages) |
+| `apps/mobile` | Expo React Native companion app (Android, iOS, Web simulator) |
 | `services/ml` | FastAPI service: integration pipeline, Success Score, risk models, SHAP, segments, what-if, Ask Ascora |
 | `data/generator` | Synthetic cohort generator: 1,200 students, 7 deliberately messy source files, hidden ground truth |
 | `data/demo` | The frozen dataset used for judging |
@@ -48,6 +49,13 @@ cp .env.example .env.local                                    # fill in values
 npm install
 npm run dev                  # against Supabase
 npm run dev:offline          # no Supabase, no internet: serves demo-data/snapshot.json
+
+# 3. Mobile app (Expo / React Native)
+cd apps/mobile
+cp .env.example .env                                          # fill in values (EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY)
+npm install
+npm run web                  # runs interactive device simulator on port 8082 (iPhone, Android, Tablet)
+npx expo start               # runs native Expo Go for physical Android/iOS devices
 ```
 
 `npm run dev:offline` is the venue-Wi-Fi insurance. It skips auth, so it is refused on Vercel.
@@ -63,6 +71,7 @@ To publish a fresh run to Supabase, set `ASCORA_INGEST_TOKEN` in `services/ml/.e
 ## Tests and CI
 
 - `services/ml`: 36 tests (normalisation, entity resolution, conflicts, scoring, matching accuracy on the demo set).
+- `apps/mobile`: ESLint and TypeScript checks (`npm run lint`, `npm run typecheck`).
 - GitHub Actions: web lint, typecheck and build; ML tests; secret scan; ML deploy to Azure.
 - Vercel deploys every push to `main`.
 
