@@ -7,7 +7,7 @@ import { play } from "@/lib/sound";
 
 /**
  * The hero's signature moment: seven campus systems stream into one student.
- * All values are the real (synthetic) record of student CU24AIML0039 from the demo run.
+ * All values are the actual record of student CU24AIML0039 in the sample cohort.
  */
 const SOURCES = ["ERP marks", "Attendance register", "LMS activity", "Clubs & events", "Placement cell", "Skills assessment", "Feedback forms"];
 const TREND = [70, 70, 85, 85, 37, 48, 85, 70, 60, 10, 32, 5]; // weekly engagement index, weeks 1-12

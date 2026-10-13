@@ -22,8 +22,8 @@ async function fetchAll<T>(build: (s: Supa) => any, pageSize = 1000): Promise<T[
 export const getProfile = cache(async (): Promise<(Profile & { email: string }) | null> => {
   if (OFFLINE) {
     return OFFLINE_ROLE === "admin"
-      ? { id: "offline-admin", full_name: "Dr. Meera Iyer (HOD, Demo Admin)", role: "admin", mentor_id: null, email: "admin@ascora.test" }
-      : { id: "offline-mentor", full_name: "Prof. Eiravati Manne (Demo Mentor)", role: "mentor", mentor_id: OFFLINE_MENTOR, email: "mentor@ascora.test" };
+      ? { id: "offline-admin", full_name: "Dr. Meera Iyer", role: "admin", mentor_id: null, email: "admin@ascora.test" }
+      : { id: "offline-mentor", full_name: "Prof. Eiravati Manne", role: "mentor", mentor_id: OFFLINE_MENTOR, email: "mentor@ascora.test" };
   }
   const supabase = await createClient();
   const {

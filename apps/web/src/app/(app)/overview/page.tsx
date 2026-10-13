@@ -1,19 +1,26 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { AlertTriangle, ArrowRight, BriefcaseBusiness, DatabaseZap, GraduationCap, Info, Lightbulb, Users } from "lucide-react";
+import { AlertTriangle, ArrowRight, BriefcaseBusiness, DatabaseZap, GraduationCap, Info, Users } from "lucide-react";
 import { getArtifacts, getInsights, getInterventions, getProfile, getQualityReport, getSegments, getStudentRows } from "@/lib/data";
 import { EmptyState, PageHeader, Panel, RiskBadge, ScoreValue, Stat } from "@/components/kit";
 import { RiskByGroup, ScoreHistogram, WeeklyTrend } from "@/components/charts";
 import { Stagger, StaggerItem } from "@/components/motion";
+import { CampusHero } from "@/components/dashboard/campus-hero";
+import { AgendaCalendar, type AgendaEvent } from "@/components/dashboard/agenda-calendar";
+import { HealthHeatmap } from "@/components/dashboard/health-heatmap";
+import { HelpCard } from "@/components/dashboard/help-card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { fmtInt } from "@/lib/format";
+import { fmtInt, INTERVENTION_LABEL } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import type { StudentRow } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Overview" };
 
-function greeting() {
-  const h = Number(new Intl.DateTimeFormat("en-IN", { hour: "numeric", hour12: false, timeZone: "Asia/Kolkata" }).format(new Date()));
-  return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+function istNow() {
+  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", hour12: false }).formatToParts(new Date());
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  return { date: `${get("year")}-${get("month")}-${get("day")}`, hour: Number(get("hour")) };
 }
 
 function firstName(full: string) {
@@ -44,6 +51,8 @@ export default async function OverviewPage() {
     );
   }
 
+  const now = istNow();
+  const hello = now.hour < 12 ? "Good morning" : now.hour < 17 ? "Good afternoon" : "Good evening";
   const isMentor = profile?.role === "mentor";
   const n = rows.length;
   const avg = rows.reduce((s, r) => s + r.success_score, 0) / n;
@@ -51,12 +60,11 @@ export default async function OverviewPage() {
   const track = rows.filter((r) => r.placement_risk_level !== "N/A");
   const highP = track.filter((r) => r.placement_risk_level === "High").length;
   const decliners = rows.filter((r) => r.alerts.some((a) => a.type === "silent_decliner")).length;
-  const openInt = interventions.filter((i) => i.status === "open" || i.status === "in_progress").length;
 
   const bins = Array.from({ length: 20 }, (_, i) => ({ bin: `${i * 5}`, from: i * 5, count: 0 }));
   rows.forEach((r) => bins[Math.min(19, Math.floor(r.success_score / 5))].count++);
 
-  const groupKey = isMentor ? (r: (typeof rows)[number]) => `Y${r.year} ${r.branch} ${r.section}` : (r: (typeof rows)[number]) => r.branch;
+  const groupKey = isMentor ? (r: StudentRow) => `Y${r.year} ${r.branch} ${r.section}` : (r: StudentRow) => r.branch;
   const groups = new Map<string, { group: string; Low: number; Medium: number; High: number }>();
   rows.forEach((r) => {
     const k = groupKey(r);
@@ -65,146 +73,168 @@ export default async function OverviewPage() {
     groups.set(k, g);
   });
 
-  const priority = [...rows].sort((a, b) => b.priority - a.priority).slice(0, 6);
+  const priority = [...rows].sort((a, b) => b.priority - a.priority).slice(0, 5);
   const segCounts = new Map<number, number>();
   rows.forEach((r) => segCounts.set(r.segment_id, (segCounts.get(r.segment_id) ?? 0) + 1));
   const cohort = artifacts.cohort;
   const sources = quality?.report?.sources ? Object.keys(quality.report.sources).length : 7;
 
+  const names = new Map(rows.map((r) => [r.id, r.name]));
+  const events: AgendaEvent[] = interventions
+    .filter((i) => i.due_date && (i.status === "open" || i.status === "in_progress") && names.has(i.student_id))
+    .map((i) => ({
+      id: i.id,
+      date: i.due_date!.slice(0, 10),
+      title: names.get(i.student_id)!,
+      sub: `${INTERVENTION_LABEL[i.type] ?? i.type}${i.owner_name ? `, ${i.owner_name}` : ""}`,
+      href: `/students/${i.student_id}`,
+      overdue: i.due_date!.slice(0, 10) < now.date,
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const overdue = events.filter((e) => e.overdue).length;
+
+  const summary = isMentor
+    ? `${highA} of your ${n} mentees are at high academic risk and ${decliners} are quietly slipping. Start with the five below.`
+    : `${fmtInt(highA)} of ${fmtInt(n)} students are at high academic risk, and ${decliners} silent decliners are hiding behind average scores. Data from ${sources} campus systems.`;
+
   return (
     <>
-      <PageHeader
-        title={`${greeting()}, ${firstName(profile?.full_name ?? "")}`}
-        description={
-          isMentor
-            ? `Your ${n} mentees at a glance. Everything here is computed from your students only.`
-            : `Campus health across all ${fmtInt(n)} B.Tech 2nd and 3rd-year students and ${sources} integrated data sources, as of week 12 of the odd semester.`
-        }
-        actions={
-          <Button asChild>
-            <Link href="/this-week">
-              Who to meet this week <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        }
-      />
+      <h1 className="sr-only">Overview</h1>
+      <div className="grid gap-4 xl:grid-cols-[1fr_340px]">
+        <div className="min-w-0 space-y-4">
+          <CampusHero
+            greeting={`${hello}, ${firstName(profile?.full_name ?? "")}`}
+            summary={summary}
+            chips={[
+              { label: `${decliners} silent decliners`, href: "/students?alert=silent_decliner" },
+              ...(overdue ? [{ label: `${overdue} overdue`, href: "/interventions" }] : []),
+            ]}
+          />
 
-      <Stagger className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-        <StaggerItem><Stat label="Students" value={n} icon={Users} hint={isMentor ? "Your mentees" : `${cohort?.mentors ?? "-"} faculty mentors`} href="/students" /></StaggerItem>
-        <StaggerItem><Stat label="Avg Success Score" value={avg} decimals={1} icon={GraduationCap} hint="0-100, cohort percentile based" href="/model" /></StaggerItem>
-        <StaggerItem><Stat
-          label="High academic risk"
-          value={highA}
-          tone="high"
-          icon={AlertTriangle}
-          hint={`${((100 * highA) / n).toFixed(0)}% of students`}
-          href="/students?academic=High"
-        /></StaggerItem>
-        <StaggerItem><Stat
-          label="High placement risk"
-          value={highP}
-          tone="medium"
-          icon={BriefcaseBusiness}
-          hint={`of ${fmtInt(track.length)} on the placement track`}
-          href="/students?placement=High"
-        /></StaggerItem>
-        <StaggerItem><Stat
-          label="Silent decliners"
-          value={decliners}
-          tone="brand"
-          icon={Lightbulb}
-          hint={`${openInt} open interventions`}
-          href="/students?alert=silent_decliner"
-        /></StaggerItem>
-      </Stagger>
+          <Stagger className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <StaggerItem>
+              <Stat label="Students" value={n} icon={Users} hint={isMentor ? "Your mentees" : `${cohort?.mentors ?? "-"} faculty mentors`} href="/students" />
+            </StaggerItem>
+            <StaggerItem>
+              <Stat label="Avg Success Score" value={avg} decimals={1} icon={GraduationCap} hint="Out of 100" href="/model" />
+            </StaggerItem>
+            <StaggerItem>
+              <Stat label="High academic risk" value={highA} tone="high" icon={AlertTriangle} hint={`${((100 * highA) / n).toFixed(0)}% of students`} href="/students?academic=High" />
+            </StaggerItem>
+            <StaggerItem>
+              <Stat label="High placement risk" value={highP} tone="medium" icon={BriefcaseBusiness} hint={`of ${fmtInt(track.length)} on placement track`} href="/students?placement=High" />
+            </StaggerItem>
+          </Stagger>
 
-      <section className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-        <Panel title="Success Score distribution" description="Red below 40, green from 65. Hover a bar for the count.">
-          <ScoreHistogram data={bins.map((b) => ({ ...b, bin: b.bin }))} />
-        </Panel>
-        <Panel title={isMentor ? "Academic risk by section" : "Academic risk by branch"} description="Number of students per risk level">
-          <RiskByGroup data={[...groups.values()].sort((a, b) => b.High - a.High)} />
-        </Panel>
-      </section>
+          <Tabs defaultValue="focus" className="gap-4">
+            <TabsList className="h-10 max-w-full justify-start overflow-x-auto rounded-full p-1">
+              <TabsTrigger value="focus" className="rounded-full px-4">Focus</TabsTrigger>
+              <TabsTrigger value="trends" className="rounded-full px-4">Trends</TabsTrigger>
+              <TabsTrigger value="groups" className="rounded-full px-4">Groups</TabsTrigger>
+            </TabsList>
 
-      <section className="mt-4 grid gap-4 lg:grid-cols-[1fr_1.4fr]">
-        <Panel
-          title="Meet first"
-          description="Ranked by risk, urgency of alerts, and how fixable the drivers are"
-          action={
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/this-week">All</Link>
-            </Button>
-          }
-          contentClassName="px-0"
-        >
-          <ul className="divide-y">
-            {priority.map((r) => (
-              <li key={r.id}>
-                <Link href={`/students/${r.id}`} className="flex items-center gap-3 px-6 py-2.5 transition-colors hover:bg-accent/50">
-                  <ScoreValue score={r.success_score} className="w-8 text-lg" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium">{r.name}</span>
-                    <span className="block truncate text-xs text-muted-foreground">
-                      {r.alerts[0]?.text ?? `${r.persona}`}
-                    </span>
-                  </span>
-                  <RiskBadge level={r.academic_risk_level} label="Acad." />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </Panel>
-
-        <Panel title="Insights from combined data" description="Computed across sources. These only exist because the data was joined.">
-          <div className="grid gap-3">
-            {insights.slice(0, 4).map((ins) => (
-              <article
-                key={ins.id}
-                className={cn(
-                  "rounded-lg border-l-2 bg-muted/40 px-4 py-3",
-                  ins.severity === "critical" ? "border-l-risk-high" : ins.severity === "warning" ? "border-l-risk-medium" : "border-l-brand",
-                )}
+            <TabsContent value="focus" className="grid gap-4 lg:grid-cols-[1fr_1.15fr]">
+              <Panel
+                title="Meet first"
+                description="Highest priority, with the main reason"
+                action={
+                  <Button asChild variant="ghost" size="sm">
+                    <Link href="/this-week">
+                      Plan <ArrowRight className="size-3.5" />
+                    </Link>
+                  </Button>
+                }
+                contentClassName="px-0"
               >
-                <h3 className="text-sm font-medium">{ins.title}</h3>
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{ins.body}</p>
-              </article>
-            ))}
-            {insights.length === 0 && (
-              <EmptyState icon={Info} title="No insights yet">
-                Insights appear after the pipeline runs.
-              </EmptyState>
-            )}
-          </div>
-        </Panel>
-      </section>
+                <ul className="divide-y">
+                  {priority.map((r) => (
+                    <li key={r.id}>
+                      <Link href={`/students/${r.id}`} className="flex items-center gap-3 px-6 py-3 transition-colors hover:bg-accent/50">
+                        <ScoreValue score={r.success_score} className="w-8 text-lg" />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-medium">{r.name}</span>
+                          <span className="block truncate text-xs text-muted-foreground">{r.alerts[0]?.text ?? r.persona}</span>
+                        </span>
+                        <RiskBadge level={r.academic_risk_level} />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </Panel>
 
-      <section className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-        <Panel title="Campus engagement this semester" description="Average weekly LMS logins and assignment completion. Mid-sem exams were in week 8.">
-          {cohort?.weekly ? <WeeklyTrend data={cohort.weekly} /> : <EmptyState title="No weekly data" />}
-        </Panel>
-        <Panel
-          title="Segments"
-          description="Groups that need different kinds of help"
-          action={
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/segments">Open</Link>
-            </Button>
-          }
-          contentClassName="px-0"
-        >
-          <ul className="divide-y">
-            {segments.map((s) => (
-              <li key={s.id}>
-                <Link href={`/segments#seg-${s.id}`} className="flex items-center justify-between gap-3 px-6 py-2.5 text-sm hover:bg-accent/50">
-                  <span className="truncate">{s.persona}</span>
-                  <span className="tabular text-muted-foreground">{fmtInt(segCounts.get(s.id) ?? 0)}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </Panel>
-      </section>
+              <Panel title="What the joined data shows" description="Insights that only exist because the sources were combined">
+                <div className="grid gap-3">
+                  {insights.slice(0, 3).map((ins) => (
+                    <article
+                      key={ins.id}
+                      className={cn(
+                        "rounded-xl border-l-2 bg-muted/40 px-4 py-3",
+                        ins.severity === "critical" ? "border-l-risk-high" : ins.severity === "warning" ? "border-l-risk-medium" : "border-l-brand",
+                      )}
+                    >
+                      <h3 className="text-sm font-medium">{ins.title}</h3>
+                      <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{ins.body}</p>
+                    </article>
+                  ))}
+                  {insights.length === 0 && (
+                    <EmptyState icon={Info} title="No insights yet">
+                      Insights appear after the pipeline runs.
+                    </EmptyState>
+                  )}
+                </div>
+              </Panel>
+            </TabsContent>
+
+            <TabsContent value="trends" className="grid gap-4 lg:grid-cols-2">
+              <Panel title="Success Score distribution" description="Red below 40, green from 65">
+                <ScoreHistogram data={bins} />
+              </Panel>
+              <Panel title="Engagement this semester" description="Weekly LMS logins and assignment completion. Mid-sem exams in week 8.">
+                {cohort?.weekly ? <WeeklyTrend data={cohort.weekly} /> : <EmptyState title="No weekly data" />}
+              </Panel>
+            </TabsContent>
+
+            <TabsContent value="groups" className="grid gap-4">
+              <Panel title={isMentor ? "Strengths by section" : "Strengths by branch"} description="Where each group is strong, and where it needs support">
+                <HealthHeatmap rows={rows} groupBy={groupKey} />
+              </Panel>
+              <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
+                <Panel title={isMentor ? "Academic risk by section" : "Academic risk by branch"} description="Students per risk level">
+                  <RiskByGroup data={[...groups.values()].sort((a, b) => b.High - a.High)} />
+                </Panel>
+                <Panel
+                  title="Segments"
+                  description="Groups that need different kinds of help"
+                  action={
+                    <Button asChild variant="ghost" size="sm">
+                      <Link href="/segments">Open</Link>
+                    </Button>
+                  }
+                  contentClassName="px-0"
+                >
+                  <ul className="divide-y">
+                    {segments.map((s) => (
+                      <li key={s.id}>
+                        <Link href={`/segments#seg-${s.id}`} className="flex items-center justify-between gap-3 px-6 py-2.5 text-sm hover:bg-accent/50">
+                          <span className="truncate">{s.persona}</span>
+                          <span className="tabular text-muted-foreground">{fmtInt(segCounts.get(s.id) ?? 0)}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </Panel>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        <aside className="space-y-4" aria-label="Agenda">
+          <Panel title="Agenda" description="Check-ins and follow-ups due">
+            <AgendaCalendar events={events} today={now.date} />
+          </Panel>
+          <HelpCard />
+        </aside>
+      </div>
     </>
   );
 }

@@ -13,6 +13,7 @@ import { StudentTimeline } from "./timeline";
 import { SourceTabs } from "./source-tabs";
 import { WhatIf } from "./what-if";
 import { InterventionPanel } from "./intervention-panel";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -81,47 +82,6 @@ export default async function Student360({ params }: { params: Promise<{ id: str
         </section>
       )}
 
-      <section className="grid gap-4 lg:grid-cols-2">
-        <Panel title="Why this academic risk?" description="Strongest model drivers for this student (SHAP), in plain language">
-          <DriverList drivers={score.shap_academic} />
-        </Panel>
-        {placementTrack ? (
-          <Panel title="Why this placement risk?" description="Placement-track students only. Drivers from the placement model.">
-            <DriverList drivers={score.shap_placement} />
-          </Panel>
-        ) : (
-          <Panel title={`Readiness for ${INTENT_LABEL[score.intent] ?? "their goal"}`} description="Measured against the student's own goal, not placement">
-            <Readiness ready={ready} />
-          </Panel>
-        )}
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-[1fr_1.15fr]">
-        <Panel title="Score breakdown" description="Six components, each a cohort percentile. The cohort median is 50.">
-          <ComponentRadar compare data={comps.map(([k, v]) => ({ k: COMPONENT_LABEL[k], v, c: 50 }))} />
-          <ul className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm">
-            {comps.map(([k, v]) => (
-              <li key={k} className="flex items-center justify-between gap-2">
-                <span className="text-muted-foreground">{COMPONENT_LABEL[k]}</span>
-                <span className={cn("tabular font-medium", scoreTone(v))}>{v.toFixed(0)}</span>
-              </li>
-            ))}
-          </ul>
-        </Panel>
-        <Panel title="Smallest changes that help" description="Model-estimated counterfactual using only things a student can change">
-          <Recourse score={score} />
-          <div className="mt-5 border-t pt-5">
-            <WhatIf studentId={st.id} placementTrack={placementTrack} />
-          </div>
-        </Panel>
-      </section>
-
-      {placementTrack && ready && (
-        <Panel title="Placement readiness" description="Goal-specific readiness and gaps">
-          <Readiness ready={ready} />
-        </Panel>
-      )}
-
       <InterventionPanel
         studentId={st.id}
         studentName={st.name}
@@ -131,13 +91,68 @@ export default async function Student360({ params }: { params: Promise<{ id: str
         current={{ success_score: score.success_score, academic_risk_prob: score.academic_risk_prob, placement_risk_prob: score.placement_risk_prob }}
       />
 
-      <Panel title="This semester, week by week" description="LMS activity and submissions by week, attendance by month, SGPA by semester">
-        <StudentTimeline lms={d.lms} attendance={d.attendance} academic={d.academic} />
-      </Panel>
 
-      <Panel title="Data from every source" description="Hover a value to see the exact file, sheet and row it came from">
-        <SourceTabs d={d} />
-      </Panel>
+      <Tabs defaultValue="why" className="gap-4">
+        <TabsList className="h-10 max-w-full justify-start overflow-x-auto rounded-full p-1">
+          <TabsTrigger value="why" className="rounded-full px-4">Why flagged</TabsTrigger>
+          <TabsTrigger value="improve" className="rounded-full px-4">What helps</TabsTrigger>
+          <TabsTrigger value="history" className="rounded-full px-4">This semester</TabsTrigger>
+          <TabsTrigger value="sources" className="rounded-full px-4">Sources</TabsTrigger>
+        </TabsList>
+        <TabsContent value="why" className="grid gap-4">
+          <section className="grid gap-4 lg:grid-cols-2">
+            <Panel title="Why this academic risk?" description="Strongest model drivers for this student (SHAP), in plain language">
+              <DriverList drivers={score.shap_academic} />
+            </Panel>
+            {placementTrack ? (
+              <Panel title="Why this placement risk?" description="Placement-track students only. Drivers from the placement model.">
+                <DriverList drivers={score.shap_placement} />
+              </Panel>
+            ) : (
+              <Panel title={`Readiness for ${INTENT_LABEL[score.intent] ?? "their goal"}`} description="Measured against the student's own goal, not placement">
+                <Readiness ready={ready} />
+              </Panel>
+            )}
+          </section>
+        </TabsContent>
+        <TabsContent value="improve" className="grid gap-4">
+          <section className="grid gap-4 lg:grid-cols-[1fr_1.15fr]">
+            <Panel title="Score breakdown" description="Six components, each a cohort percentile. The cohort median is 50.">
+              <ComponentRadar compare data={comps.map(([k, v]) => ({ k: COMPONENT_LABEL[k], v, c: 50 }))} />
+              <ul className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm">
+                {comps.map(([k, v]) => (
+                  <li key={k} className="flex items-center justify-between gap-2">
+                    <span className="text-muted-foreground">{COMPONENT_LABEL[k]}</span>
+                    <span className={cn("tabular font-medium", scoreTone(v))}>{v.toFixed(0)}</span>
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+            <Panel title="Smallest changes that help" description="Model-estimated counterfactual using only things a student can change">
+              <Recourse score={score} />
+              <div className="mt-5 border-t pt-5">
+                <WhatIf studentId={st.id} placementTrack={placementTrack} />
+              </div>
+            </Panel>
+          </section>
+
+          {placementTrack && ready && (
+            <Panel title="Placement readiness" description="Goal-specific readiness and gaps">
+              <Readiness ready={ready} />
+            </Panel>
+          )}
+        </TabsContent>
+        <TabsContent value="history">
+          <Panel title="This semester, week by week" description="LMS activity and submissions by week, attendance by month, SGPA by semester">
+            <StudentTimeline lms={d.lms} attendance={d.attendance} academic={d.academic} />
+          </Panel>
+        </TabsContent>
+        <TabsContent value="sources">
+          <Panel title="Data from every source" description="Hover a value to see the exact file, sheet and row it came from">
+            <SourceTabs d={d} />
+          </Panel>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

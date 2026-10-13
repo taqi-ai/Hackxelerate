@@ -1,10 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PREFIXES = ["/login", "/auth", "/api/ml-token"];
+const PUBLIC_PREFIXES = ["/login", "/auth", "/api/ml-token", "/product", "/how-it-works", "/trust", "/about", "/manifest.webmanifest"];
 
 export async function middleware(request: NextRequest) {
-  // offline demo mode: no Supabase, no auth (local machine only; see lib/offline.ts)
+  // offline mode: no Supabase, no auth (local machine only; see lib/offline.ts)
   if (process.env.ASCORA_OFFLINE === "1" && !process.env.VERCEL) {
     if (request.nextUrl.pathname === "/login") return NextResponse.redirect(new URL("/overview", request.url));
     return NextResponse.next();
@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
   const path = request.nextUrl.pathname;
-  // the landing page is public; the token route answers 401 itself (JSON, not a redirect)
+  // the marketing pages are public; the token route answers 401 itself (JSON, not a redirect)
   const isPublic = path === "/" || PUBLIC_PREFIXES.some((p) => path.startsWith(p));
 
   if (!user && !isPublic) {

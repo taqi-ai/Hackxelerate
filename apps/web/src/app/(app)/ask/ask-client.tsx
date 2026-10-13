@@ -29,7 +29,7 @@ type Filter = {
 };
 type Query = { filters: Filter; sort_by: string; sort_dir: "asc" | "desc"; limit: number; group_by: string; explanation: string };
 
-/** Cached example questions: the filter JSON is precomputed, so the demo works with no ML service or internet. */
+/** Cached example questions: the filter JSON is precomputed, so answers work with no ML service or internet. */
 const PRESETS: { q: string; query: Query }[] = [
   {
     q: "Students at high academic risk with core attendance below 65%",

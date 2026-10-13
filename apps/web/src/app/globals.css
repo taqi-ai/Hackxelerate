@@ -220,6 +220,14 @@
   }
 }
 
+/* "Reduce motion" chosen in Settings applies even when the OS setting is off */
+[data-reduce-motion] *, [data-reduce-motion] *::before, [data-reduce-motion] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -237,4 +245,20 @@
 @keyframes drift {
   from { transform: translate(0, 0) scale(1); }
   to { transform: translate(120px, -60px) scale(1.15); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes aurora {
+  0% { transform: translate(-10%, -6%) rotate(0deg) scale(1); }
+  50% { transform: translate(8%, 6%) rotate(25deg) scale(1.15); }
+  100% { transform: translate(-10%, -6%) rotate(0deg) scale(1); }
 }

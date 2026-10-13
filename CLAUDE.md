@@ -31,15 +31,14 @@ Role: lead engineer / architect / QA / deploy for the team. Goal: qualify for To
 - Locked challenge: **KPMG in India, Challenge 04: Smart Campus Analytics** (student success score, at-risk identification, dashboard).
 - The full build brief is `master promptinitialclaude.md` (gitignored, not for evaluators). Rubric: Data Integration 30, Score and Risk 25, Dashboard 25, Problem Understanding 10, Demo 10.
 - Live: https://ascora-five.vercel.app. Supabase project ref `xomihahbrxacgrwclect` (ap-northeast-1). Vercel project `ascora`, root `apps/web`, Git-connected.
-- Azure is NOT set up yet; the ML service (FastAPI) runs locally until the user supplies Azure. Do not touch Azure until told.
+- Azure: `ascora-rg` (Central India) hosts the ML service `ascora-ml`; Azure OpenAI `ascora-ai-koreacentral` (gpt-4.1-mini). Never touch `lawyerup-prod`.
 
 ## Layout
 - `apps/web`: Next.js 15 dashboard. `npm run dev`, `npm run dev:offline` (snapshot mode, local only).
 - `services/ml`: FastAPI service. `.venv` is local (gitignored). `pytest -q` for tests; `scripts/publish_demo.py` runs the full pipeline.
 - `data/generator`, `data/demo`: synthetic data and the frozen judging set (`data/raw` is gitignored).
 - `supabase/migrations`: 0001-0005 applied to the live project.
-- `docs`: score-note, architecture, demo-script, pitch-outline (deliverables); PREP, RULEBOOK_SUMMARY, REQUIREMENTS_MATRIX, EVALUATOR_QA, FINAL_GATE.
-- `motion`: Remotion videos (placeholder intro; build the real trailer once the logo exists).
+- `docs`: score-note, architecture, demo-script, pitch-outline (deliverables); RULEBOOK_SUMMARY, REQUIREMENTS_MATRIX, EVALUATOR_QA, FINAL_GATE.
 - `ASSETS_NEEDED.md`: assets the user must provide; never invent or download assets.
 
 ## Conventions
@@ -47,5 +46,5 @@ Role: lead engineer / architect / QA / deploy for the team. Goal: qualify for To
 - Secrets only in `.env`/`.env.local` (gitignored). The ML service never holds the Supabase service-role key; it uses the token-gated `ascora_ingest` RPC.
 - Git Bash rewrites leading `/` in arguments: use `MSYS_NO_PATHCONV=1` for `vercel api /v9/...`.
 - Don't run `npm run build` while the dev server runs (they share `.next`); stop the dev server first.
-- Remotion agent skills are in `.claude/skills/`; use them for video work.
+- Design skills: taste-skill, web-design-guidelines, frontend-design (installed globally). Brand assets in `assets/brand` (logo, mark, icon, logo teaser video).
 - No em-dashes in user-facing copy.

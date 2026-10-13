@@ -2,27 +2,39 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "remotion-studio",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "motion", "run", "dev", "--", "--port=3100", "--no-open"],
-      "port": 3100
-    },
-    {
       "name": "web-offline",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "apps/web", "run", "dev:offline"],
+      "runtimeArgs": [
+        "--prefix",
+        "apps/web",
+        "run",
+        "dev:offline"
+      ],
       "port": 3000
     },
     {
       "name": "web",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "apps/web", "run", "dev"],
+      "runtimeArgs": [
+        "--prefix",
+        "apps/web",
+        "run",
+        "dev"
+      ],
       "port": 3000
     },
     {
       "name": "ml-api",
       "runtimeExecutable": "services/ml/.venv/Scripts/python.exe",
-      "runtimeArgs": ["-m", "uvicorn", "app.main:app", "--app-dir", "services/ml", "--port", "8000"],
+      "runtimeArgs": [
+        "-m",
+        "uvicorn",
+        "app.main:app",
+        "--app-dir",
+        "services/ml",
+        "--port",
+        "8000"
+      ],
       "port": 8000
     }
   ]

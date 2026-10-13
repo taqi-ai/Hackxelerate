@@ -38,3 +38,7 @@ services/ml/artifacts/uploads/
 
 # pipeline result cache
 services/ml/artifacts/cache/
+
+# agent tooling installed per machine
+.agents/
+.claude/skills/

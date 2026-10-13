@@ -67,7 +67,7 @@ function MergeVisual() {
 
 const ASK = "3rd year students with no mock interviews and high placement risk";
 
-function AskDemo() {
+function AskPreview() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.6 });
   const reduce = useReducedMotion();
@@ -136,13 +136,13 @@ export function Bento() {
               />
             </div>
           ))}
-          <p className="pt-1 text-xs text-white/40">Held-out test set, synthetic cohort. A plain baseline scores close; we say so.</p>
+          <p className="pt-1 text-xs text-white/40">Held-out test set from the sample cohort. A plain baseline scores close; we say so.</p>
         </div>
       </Tile>
       <Tile className="lg:col-span-2">
         <h3 className="font-display text-2xl font-semibold tracking-tight text-white">Ask in plain English</h3>
         <p className="mt-2 text-white/60">Azure OpenAI turns a question into a validated filter. Never raw SQL.</p>
-        <AskDemo />
+        <AskPreview />
       </Tile>
       <Tile className="p-0 sm:p-0 lg:col-span-4">
         <div className="p-6 pb-0 sm:p-8 sm:pb-0">

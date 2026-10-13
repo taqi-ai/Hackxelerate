@@ -1,9 +1,9 @@
 "use client";
 
-import { play } from "@/lib/sound";
-
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { play } from "@/lib/sound";
+import { getPrefs } from "@/lib/prefs";
 import { Clock } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { EmptyState, RiskBadge, ScoreValue } from "@/components/kit";
@@ -28,6 +28,8 @@ function minutesFor(r: StudentRow) {
 
 export function Planner({ rows }: { rows: StudentRow[] }) {
   const [hours, setHours] = useState(3);
+  // start from the default set in Settings (read after mount: it lives in this browser only)
+  useEffect(() => setHours(getPrefs().hours), []);
 
   const plan = useMemo(() => {
     const budget = hours * 60;

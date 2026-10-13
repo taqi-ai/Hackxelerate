@@ -25,7 +25,6 @@ The password is shown on the login page for the demo accounts.
 | `data/demo` | The frozen dataset used for judging |
 | `supabase/migrations` | Schema, row-level security, ingest RPCs |
 | `docs` | Score note, architecture, demo script, pitch outline, requirements matrix, fairness and model notes |
-| `motion` | Remotion project for the demo video |
 
 Start with [docs/score-note.md](docs/score-note.md) (the deliverable explaining the Success Score) and [docs/architecture.md](docs/architecture.md).
 
@@ -64,7 +63,7 @@ To publish a fresh run to Supabase, set `ASCORA_INGEST_TOKEN` in `services/ml/.e
 ## Tests and CI
 
 - `services/ml`: 36 tests (normalisation, entity resolution, conflicts, scoring, matching accuracy on the demo set).
-- GitHub Actions: web lint, typecheck and build; ML tests; motion typecheck; secret scan.
+- GitHub Actions: web lint, typecheck and build; ML tests; secret scan; ML deploy to Azure.
 - Vercel deploys every push to `main`.
 
 ## Known limitations

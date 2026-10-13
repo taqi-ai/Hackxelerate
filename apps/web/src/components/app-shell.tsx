@@ -13,7 +13,7 @@ import { openCommandPalette } from "@/components/command-palette";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/lib/types";
 
-const GROUPS = ["Insight", "Action", "Trust"] as const;
+const GROUPS = ["Insight", "Action", "Trust", "Account"] as const;
 
 function NavLinks({ role, onNavigate, layoutKey }: { role: Role; onNavigate?: () => void; layoutKey: string }) {
   const path = usePathname();
@@ -78,9 +78,9 @@ export function AppSidebar({ role, name }: { role: Role; name: string }) {
         </kbd>
       </button>
       <NavLinks role={role} layoutKey="desk" />
-      <div className="mt-auto rounded-xl border bg-background/40 p-3">
+      <div className="mt-auto rounded-xl border bg-gradient-to-br from-brand/10 to-transparent p-3">
         <p className="truncate text-sm font-medium">{name}</p>
-        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">Synthetic demo data. Scores support mentors; they never replace their judgement.</p>
+        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">Scores support mentors. They never replace their judgement.</p>
       </div>
     </aside>
   );

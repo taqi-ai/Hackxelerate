@@ -85,10 +85,10 @@ export function PipelineRunner() {
   }
 
   return (
-    <Panel title="Run the pipeline" description="Use the frozen demo set, or upload your own CSV, Excel and JSON exports.">
+    <Panel title="Run the pipeline" description="Use the bundled campus exports, or upload your own CSV, Excel and JSON exports.">
       <div className="flex flex-wrap items-center gap-2">
         <Button onClick={() => start("demo")} disabled={busy}>
-          {busy ? <Loader2 className="size-4 animate-spin" /> : <Play className="size-4" />} Run on demo data
+          {busy ? <Loader2 className="size-4 animate-spin" /> : <Play className="size-4" />} Run on campus exports
         </Button>
         <input ref={fileRef} type="file" multiple accept=".csv,.xlsx,.json" className="sr-only" onChange={(e) => setFiles([...(e.target.files ?? [])])} aria-label="Choose source files" />
         <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={busy}>

@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   MessageSquareText,
   ScanSearch,
+  Settings,
   Shapes,
   ShieldCheck,
   Users,
@@ -20,4 +21,5 @@ export const NAV_ITEMS = [
   { href: "/data", label: "Data integration", icon: DatabaseZap, roles: ["admin"], group: "Trust", hint: "Sources, matching, conflicts" },
   { href: "/model", label: "Score & models", icon: ScanSearch, roles: ["admin", "mentor"], group: "Trust", hint: "Formula, accuracy, drivers" },
   { href: "/fairness", label: "Fairness & privacy", icon: ShieldCheck, roles: ["admin"], group: "Trust", hint: "Audit and safeguards" },
+  { href: "/settings", label: "Settings", icon: Settings, roles: ["admin", "mentor"], group: "Account", hint: "Theme, defaults, security, status" },
 ] as const;

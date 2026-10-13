@@ -8,12 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { play } from "@/lib/sound";
+import { getPrefs } from "@/lib/prefs";
 
-const DEMO = [
+const QUICK = [
   { label: "HOD / Admin", email: "admin@ascora.test", hint: "Whole campus, data integration, models" },
   { label: "Faculty mentor", email: "mentor@ascora.test", hint: "Only their 64 assigned students" },
 ];
-const DEMO_PASSWORD = "AscoraDemo#2026";
+const SHARED_PASSWORD = "AscoraDemo#2026";
 
 export function LoginForm({ next }: { next?: string }) {
   const router = useRouter();
@@ -27,18 +28,18 @@ export function LoginForm({ next }: { next?: string }) {
     setError(null);
     if (!email.trim() || !password) {
       play("error");
-      setError("Enter your email and password, or pick a demo account below.");
+      setError("Enter your email and password, or pick an account below.");
       return;
     }
     start(async () => {
       const { error } = await createClient().auth.signInWithPassword({ email, password });
       if (error) {
         play("error");
-        setError(error.message === "Invalid login credentials" ? "That email and password don't match an account. Check them, or use a demo account below." : error.message);
+        setError(error.message === "Invalid login credentials" ? "That email and password don't match an account. Check them, or pick an account below." : error.message);
         return;
       }
       play("success");
-      router.replace(next && next.startsWith("/") && next !== "/" ? next : "/overview");
+      router.replace(next && next.startsWith("/") && next !== "/" ? next : getPrefs().home);
       router.refresh();
     });
   }
@@ -74,15 +75,15 @@ export function LoginForm({ next }: { next?: string }) {
       </form>
 
       <div className="space-y-3">
-        <p className="text-sm font-medium">Demo accounts</p>
+        <p className="text-sm font-medium">Quick sign-in</p>
         <div className="grid gap-2">
-          {DEMO.map((d) => (
+          {QUICK.map((d) => (
             <button
               key={d.email}
               type="button"
               onClick={() => {
                 setEmail(d.email);
-                setPassword(DEMO_PASSWORD);
+                setPassword(SHARED_PASSWORD);
               }}
               className="press rounded-xl border bg-background/50 px-3.5 py-2.5 text-left hover:border-ring/40 hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring"
             >
@@ -92,7 +93,7 @@ export function LoginForm({ next }: { next?: string }) {
           ))}
         </div>
         <p className="text-xs text-muted-foreground">
-          Demo password: <span className="font-mono">{DEMO_PASSWORD}</span>. All data in this demo is synthetic.
+          Shared password: <span className="font-mono">{SHARED_PASSWORD}</span>. Pick a role to fill the form, then sign in.
         </p>
       </div>
     </div>
