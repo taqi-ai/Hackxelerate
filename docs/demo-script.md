@@ -8,13 +8,17 @@
 
 ## Story
 
+0. **Landing page (https://ascora-five.vercel.app).** Let the hero play once: seven sources stream into Arjun Gupta (CU24AIML0039, CGPA 9.15), who looks fine on paper, then the silent-decliner flag and a planned check-in appear. Press Replay if needed. Scroll the four-step story (Flag, Explain, Act, Measure). Then Try the live demo.
+
 1. **Data integration (admin, Data integration).** "Seven campus systems, none agree on how to identify a student." Press Run on demo data. Point at the steps: roll formats normalised, fuzzy matching, duplicates merged, conflicts found. Show matching precision 100% and recall 95% against ground truth, and the review queue: "Ambiguous links never feed scores until a person confirms them."
 2. **Overview.** Cohort health, then the top insight: "63 silent decliners hidden behind average scores." Open the hackathon insight.
-3. **Student 360.** Open a student with a good CGPA flagged as a silent decliner. Read the plain-language drivers, then the "smallest changes that help". Move a what-if slider and watch risk update from the live model.
+3. **Student 360.** Press Ctrl+K, type "Arjun", open Arjun Gupta (CGPA 9.15, silent decliner). Read the plain-language drivers, then the "smallest changes that help". Move a what-if slider and watch risk update from the live model.
 4. **Close the loop.** Plan an intervention (type is pre-suggested from the top driver). Switch to the mentor account and show "Who to meet this week": enter 3 hours and see the ranked list.
 5. **Segments.** "High academics, low placement readiness" with its recommended action.
 6. **Transparency.** Score and models: formula and weights, the stability table (rank correlation 0.997), model metrics, early-warning curve. Then Fairness: be upfront that four checks are marked for review.
 7. **Closing line.** "Most early-warning systems stop at the red flag. Ascora is built for what happens after it."
+
+Sound is on by default and subtle; the speaker icon in the header mutes it.
 
 ## Judge questions to expect
 
