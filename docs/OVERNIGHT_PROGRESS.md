@@ -27,3 +27,10 @@
 ## Open risks
 - Students can write their own `external_connections` row (provenance label spoofable). Low impact.
 - No browser E2E suite; no APK/OTA verification; no measured Web Vitals.
+
+## Ujjwal's mobile branch (`origin/gemini/mobile-and-offline-fixes` @ baf915e), reviewed 2026-10-14
+- Touches `apps/mobile` plus one web change (`user-menu.tsx`: skip Supabase signOut when env missing). No overlap with PR #5.
+- `npm ci`, `tsc --noEmit`, `eslint`: clean. `expo export --platform android`: Hermes bundle builds (4.1 MB).
+- Only a public Supabase publishable key is embedded (safe by design).
+- No APK: no Android SDK on this machine, no `eas.json`, no `android.package`, no `expo-updates`, no signing identity. Needs an Expo/EAS account or Android SDK from the team.
+- Not merged: no PR open yet. Nothing installed on a device or emulator.
