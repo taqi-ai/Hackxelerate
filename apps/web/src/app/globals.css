@@ -326,3 +326,18 @@ html.no-intro .intro-overlay { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .hero-line > span, .hero-fade, .hero-plane { animation: none; }
 }
+
+/* touch screens (Android and iOS): icon-only controls get at least a 40 px target */
+@media (pointer: coarse) {
+  button.size-8, a.size-8, button.size-9, a.size-9, button.size-7, a.size-7 { min-width: 2.5rem; min-height: 2.5rem; }
+  [role="tab"], [role="radio"], [role="combobox"] { min-height: 2.5rem; }
+}
+
+/* iOS notch / Android cutouts in landscape: keep content inside the safe area */
+@supports (padding: env(safe-area-inset-left)) {
+  body { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+}
+/* iOS zooms into any focused field under 16px: keep form text at 16px on phones */
+@media (max-width: 767px) {
+  input, select, textarea { font-size: 16px; }
+}

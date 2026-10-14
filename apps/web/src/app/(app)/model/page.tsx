@@ -67,7 +67,7 @@ export default async function ModelPage() {
         description="Nothing here is a black box. The Success Score is a weighted sum you can read, and each risk model shows its accuracy, calibration and the drivers behind every flag."
       />
       <Tabs defaultValue="score">
-        <TabsList>
+        <TabsList className="max-w-full justify-start overflow-x-auto">
           <TabsTrigger value="score">Success Score</TabsTrigger>
           <TabsTrigger value="academic">Academic risk model</TabsTrigger>
           <TabsTrigger value="placement">Placement risk model</TabsTrigger>
