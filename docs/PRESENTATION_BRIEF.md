@@ -177,3 +177,40 @@ Team roles above are as provided by the team lead. Adjust the speaking split if 
 3. Open /mobile and launch the app.
 4. Keep `npm run dev:offline` ready on a laptop in case the venue Wi-Fi fails.
 5. Keep the demo to 4 moments: overview, one student's reasons, plan an intervention, segments.
+
+---
+
+## 14. Slide plan (8 slides, about 6 minutes), mapped to the rubric
+
+| # | Slide | Speaker | Rubric it earns | Say this |
+|---|---|---|---|---|
+| 1 | Problem | Taqi | Problem understanding 10 | Signals of a slipping student sit in 7 systems; flags alone do not change outcomes (Course Signals lesson). |
+| 2 | What Ascora does | Ashmit | Problem understanding | One view of every student, a score you can read, two separate risks, and a loop from flag to action to measured result. |
+| 3 | Architecture | Taqi | Data integration 30 | Section 2 diagram: 7 files, the Python pipeline, Supabase with RLS, web and mobile. |
+| 4 | Integration pipeline | Taqi | Data integration 30 | 12 steps, match quality 1.00 / 0.95 with a review queue, 60 conflicts by rule, lineage to file and row. |
+| 5 | Score and risk | Taqi | Score and risk 25 + segmentation bonus | Formula 30/20/15/15/10/10, stable at ≥ 0.997, two models with baseline shown, threshold rationale, 6 segments with actions. |
+| 6 | Explainability and trust | Harsh | Dashboard 25 + explainable bonus | SHAP reasons in plain words, what-helps counterfactuals, fairness audit, RLS, masking, audit log. |
+| 7 | Live demo | Lakshya drives, Ujjwal shows mobile | Dashboard 25, demo 10 | Section 15 flow. |
+| 8 | Honest limits and next steps | Taqi | Presentation 10 | Synthetic data, recalibration on real history, APK next, CU portal via official export. |
+
+## 15. Demo video and live demo shot list (about 3 minutes)
+
+| Time | Screen | Show | Line |
+|---|---|---|---|
+| 0:00 | Landing | Intro, hero | "Ascora: from early warning to real intervention." |
+| 0:10 | Data integration | Pipeline steps, match quality, conflicts | "Seven messy sources become one student record, with every value traceable." |
+| 0:35 | Overview | Counts, risk by branch, heatmap, agenda | "A head of department sees the whole campus at a glance." |
+| 0:55 | Students table | Filter High academic risk, sort by priority | "Who needs help first." |
+| 1:10 | Student 360 | Score breakdown, both risks, reasons, what helps, sources tab | "Every flag explains itself." |
+| 1:40 | Plan intervention, then Interventions | Suggested type, baseline, status Done | "The flag becomes an action we can measure." |
+| 2:00 | This week | Hours slider, ranked meetings, Schedule | "A realistic plan for a mentor's week." |
+| 2:15 | Segments | Silent decliners, recommended action | "Groups that need different kinds of help." |
+| 2:30 | Score and models | Formula, AUC with baseline, thresholds, fairness | "Nothing is a black box." |
+| 2:45 | Mentor login | Same app shows only their 64 students | "Access is enforced by the database." |
+| 2:55 | /mobile | Launch the app | "The same data on a mentor's phone." |
+
+## 16. Making the demo video for free
+
+Cheapest and most reliable: record the screen yourself (OBS Studio, or the built-in Windows recorder with Win+Alt+R) while one person follows section 15 and narrates live. Then trim it in any free editor. This costs nothing and no AI credits.
+
+Open Montage (installed skills `playwright-recording`, `hyperframes`, `ffmpeg`) can also do it free, because it runs locally: Playwright records a scripted browser walkthrough, HyperFrames adds title cards, and ffmpeg joins them. The catches: narration would need a paid text-to-speech API or your own recorded voice, and the scripted recording needs the signed-in demo login typed into the script by you. It takes more setup than a manual recording. Use it only for a short polished intro clip, not the whole demo.
