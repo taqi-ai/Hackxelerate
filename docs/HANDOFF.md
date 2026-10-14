@@ -15,7 +15,5 @@ One line per finished or in-progress task. Newest at the bottom. Format: `date |
 2026-10-13 | gemini | Student Portal UX Polish & CI verification: timetable, transcript diagnostics, scenario solver, CI test step, demo cookie fallback | gemini/student-portal | done, PR #2 updated
 2026-10-14 | gemini | Evaluation Maximisation: evaluation scorecard, scoring spec, demo script, theme transition, agenda calendar 7-day strip, capacity planner check-in action | gemini/evaluation-maximisation | done, PR opened
 2026-10-14 | gemini | Mobile auth keys, offline fallback safety, UI polish pushed to separate branch | gemini/mobile-and-offline-fixes | pushed
-2026-10-14 | gemini | Exact website-to-mobile UI/UX synchronization: PageArt across all tabs, BrandMark tiles, exact OKLCH tokens, lint & typecheck clean | gemini/mobile-and-offline-fixes | done
-
-
 2026-10-14 | claude | Audit + release: new hero, /mobile web simulator, student crash fix, honest mobile Ask, a11y, Tokyo region; PRs #5 #9 live | main | done, see OVERNIGHT_PROGRESS.md
+2026-10-14 | gemini | Mobile package config: com.ascora.mobile package id + expo run scripts | gemini/mobile-package-config | pushed
