@@ -120,7 +120,7 @@ Fairness: gender, residence, first-generation, lateral entry and schooling mediu
 ## 11. Who presents what, and their likely questions
 
 ### Taqi: organiser and team lead (overall, every area)
-**Presents:** opening pitch, problem, architecture slide, data pipeline, score and models, closing.
+**Presents:** the 30-second opening and the closing line only. Backup for any unanswered question. (The answers below are for whoever takes that question; most now go to Ujjwal and Ashmit.)
 **Likely questions and answers:**
 - *Why not one risk score?* Academic and placement risk have different causes and different fixes. Blending them hides who needs which help.
 - *How do you know matching works?* The generator planted the true identity of every row. We compare: precision 1.00, recall 0.95; uncertain links go to a human review queue instead of being guessed.
@@ -129,28 +129,28 @@ Fairness: gender, residence, first-generation, lateral entry and schooling mediu
 - *Scale to a real college?* Pipeline runs per upload, publishes in batches, the web reads under RLS; heavy compute is isolated on the ML service.
 
 ### Ashmit Tiwari: brand and marketing (logo teaser, promo graphics, look and feel, USP)
-**Presents:** the brand and USP slide, the landing page story, why the design is calm and action-first.
+**Presents:** slide 2 (what Ascora does and the USP), slide 5 (score, risk and segments) and slide 8 (limits and next steps). Learn sections 4, 5, 9 and 12 of this brief.
 **Likely questions:**
 - *What is your USP?* Most early-warning tools stop at the red flag. Ascora starts there: a reason, a plan, an owner, and a check on whether it worked.
 - *Why this visual style?* Mentors use it every week: dark, calm, low noise, numbers with reasons next to them, nothing alarming in red unless it is real risk.
 - *Who is the user?* HODs (whole campus), mentors (their own students), and students (their own planner view).
 
 ### Harsh Gupta: brand and marketing (promo graphics, theme and UI appeal, story)
-**Presents:** the user journey on the landing page and mobile, trust and privacy messaging, accessibility.
+**Presents:** slide 6 (explainability and trust) and drives and narrates the live demo (section 15). Learn sections 5, 7, 8 and 15.
 **Likely questions:**
 - *Is it accessible?* Automated WCAG 2.2 AA checks (axe-core) pass on the main pages in light and dark mode; keyboard focus and reduced motion are respected. No manual screen-reader test yet.
 - *How do you protect students?* Scores support mentors and are never shown as labels; contacts are masked; every profile view is logged; sensitive attributes are never model inputs.
 - *Why should a college trust it?* Every number links back to its source row and every flag shows its reasons.
 
 ### Lakshya Singh Parihar: development, frontend (with Taqi)
-**Presents:** live dashboard walkthrough: Overview, Students table, Student 360, Segments, This week, Interventions.
+**Presents:** nothing on stage. Operates the laptop during the demo and keeps the offline backup (`npm run dev:offline`) ready.
 **Likely questions:**
 - *Stack?* Next.js 15 App Router, TypeScript, Tailwind 4, shadcn/ui, Recharts, TanStack Table, on Vercel.
 - *How does the dashboard know what to show each user?* Server components read Supabase with the user's own session, so the database's row-level security filters rows; the UI never decides access.
 - *How did you make it fast?* Functions run in Tokyo next to the database, the heavy cohort read is cached per user for two minutes (RLS still applies), visited tabs are reused for 30 seconds, and page transitions are pure CSS.
 
 ### Ujjwal Gupta: development, backend and mobile port
-**Presents:** the mobile app, the backend services, deployment.
+**Presents:** slide 3 (architecture), slide 4 (integration pipeline), and the mobile app in the demo. Learn sections 2, 3, 7 and 9, and the Taqi answers on matching and leakage.
 **Likely questions:**
 - *Is the mobile app real?* Yes, Expo / React Native, same Supabase accounts and RLS. It runs in the browser at /mobile; a signed APK has not been produced yet.
 - *How does the web talk to the ML service securely?* The web mints a short-lived signed token for the signed-in user; the FastAPI service checks it and the role before what-if, Ask or pipeline runs.
@@ -184,14 +184,16 @@ Team roles above are as provided by the team lead. Adjust the speaking split if 
 
 | # | Slide | Speaker | Rubric it earns | Say this |
 |---|---|---|---|---|
-| 1 | Problem | Taqi | Problem understanding 10 | Signals of a slipping student sit in 7 systems; flags alone do not change outcomes (Course Signals lesson). |
-| 2 | What Ascora does | Ashmit | Problem understanding | One view of every student, a score you can read, two separate risks, and a loop from flag to action to measured result. |
-| 3 | Architecture | Taqi | Data integration 30 | Section 2 diagram: 7 files, the Python pipeline, Supabase with RLS, web and mobile. |
-| 4 | Integration pipeline | Taqi | Data integration 30 | 12 steps, match quality 1.00 / 0.95 with a review queue, 60 conflicts by rule, lineage to file and row. |
-| 5 | Score and risk | Taqi | Score and risk 25 + segmentation bonus | Formula 30/20/15/15/10/10, stable at ≥ 0.997, two models with baseline shown, threshold rationale, 6 segments with actions. |
+| 1 | Problem | Taqi (30 seconds, opening only) | Problem understanding 10 | Signals of a slipping student sit in 7 systems; flags alone do not change outcomes (Course Signals lesson). |
+| 2 | What Ascora does and the USP | Ashmit | Problem understanding | One view of every student, a score you can read, two separate risks, and a loop from flag to action to measured result. |
+| 3 | Architecture | Ujjwal | Data integration 30 | Section 2 diagram: 7 files, the Python pipeline, Supabase with RLS, web and mobile, where each part runs. |
+| 4 | Integration pipeline | Ujjwal | Data integration 30 | 12 steps, match quality 1.00 / 0.95 with a review queue, 60 conflicts by rule, lineage to file and row. |
+| 5 | Score, risk and segments | Ashmit | Score and risk 25 + segmentation bonus | Formula 30/20/15/15/10/10, stable at ≥ 0.997, two models with baseline shown, threshold rationale, 6 segments with actions. |
 | 6 | Explainability and trust | Harsh | Dashboard 25 + explainable bonus | SHAP reasons in plain words, what-helps counterfactuals, fairness audit, RLS, masking, audit log. |
-| 7 | Live demo | Lakshya drives, Ujjwal shows mobile | Dashboard 25, demo 10 | Section 15 flow. |
-| 8 | Honest limits and next steps | Taqi | Presentation 10 | Synthetic data, recalibration on real history, APK next, CU portal via official export. |
+| 7 | Live demo | Harsh drives and narrates, Ujjwal shows mobile, Lakshya operates the laptop / backup offline mode | Dashboard 25, demo 10 | Section 15 flow. |
+| 8 | Honest limits and next steps | Ashmit, closing line by Taqi | Presentation 10 | Synthetic data, recalibration on real history, APK next, CU portal via official export. |
+
+Q&A routing: data, pipeline, backend, mobile, security → **Ujjwal**. Score, models, USP, business value → **Ashmit**. Dashboard, explainability, privacy, accessibility, demo → **Harsh**. Taqi steps in only if a question is left unanswered. Lakshya takes no questions unless asked directly about the frontend.
 
 ## 15. Demo video and live demo shot list (about 3 minutes)
 
