@@ -11,6 +11,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../../src/lib/theme";
 import { playSound } from "../../src/lib/sound";
+import { BrandMark } from "../../src/components/BrandMark";
+import { AnimatedAscoraArt } from "../../src/components/AnimatedAscoraArt";
 
 type HubSection = "all" | "segments" | "models" | "fairness" | "data";
 
@@ -105,10 +107,11 @@ export default function HubScreen() {
         },
       ]}
     >
-      {/* Top Header */}
+      {/* Top Header with BrandMark */}
       <View style={styles.header}>
         <View style={styles.titleRow}>
-          <View>
+          <BrandMark compact size={32} />
+          <View style={{ flex: 1 }}>
             <Text
               style={[
                 styles.title,
@@ -138,33 +141,33 @@ export default function HubScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.filterPills}
         >
-          {filterTabs.map((t) => {
-            const isSelected = section === t.key;
+          {filterTabs.map((tab) => {
+            const isActive = section === tab.key;
             return (
               <TouchableOpacity
-                key={t.key}
+                key={tab.key}
                 style={[
-                  styles.filterPill,
+                  styles.pill,
                   {
-                    backgroundColor: isSelected ? colors.brand : colors.surface,
-                    borderColor: isSelected ? colors.brand : colors.cardBorder,
+                    backgroundColor: isActive ? colors.brand : colors.surface,
+                    borderColor: isActive ? colors.brand : colors.cardBorder,
                   },
                 ]}
                 onPress={() => {
-                  playSound("soft");
-                  setSection(t.key);
+                  playSound("tap");
+                  setSection(tab.key);
                 }}
               >
                 <Text
                   style={[
-                    styles.filterPillText,
+                    styles.pillText,
                     {
-                      color: isSelected ? "#07070b" : colors.text,
-                      fontWeight: isSelected ? "700" : "500",
+                      color: isActive ? "#07070b" : colors.text,
+                      fontFamily: isActive ? "BricolageGrotesque_700Bold" : "BricolageGrotesque_600SemiBold",
                     },
                   ]}
                 >
-                  {t.label}
+                  {tab.label}
                 </Text>
               </TouchableOpacity>
             );
@@ -175,58 +178,172 @@ export default function HubScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
-          styles.content,
-          { paddingBottom: Math.max(insets.bottom, 16) + 32 },
+          styles.scrollBody,
+          { paddingBottom: Math.max(insets.bottom, 16) + 24 },
         ]}
       >
-        {/* Section 1: Segments & Personas */}
+        {/* Banner with Animated Stack Art */}
+        <View
+          style={[
+            styles.bannerCard,
+            { backgroundColor: colors.card, borderColor: colors.cardBorder },
+          ]}
+        >
+          <View style={styles.bannerText}>
+            <Text
+              style={[
+                styles.bannerTitle,
+                { color: colors.text, fontFamily: "BricolageGrotesque_700Bold" },
+              ]}
+            >
+              Multi-source Intelligence
+            </Text>
+            <Text style={[styles.bannerDesc, { color: colors.mutedText }]}>
+              Live feeds normalized from RFID turnstiles, Moodle, and ERP records.
+            </Text>
+          </View>
+          <View style={styles.bannerArt}>
+            <AnimatedAscoraArt kind="stack" width={120} height={70} />
+          </View>
+        </View>
+
+        {/* 1. Cohort Segments */}
         {(section === "all" || section === "segments") && (
-          <View style={styles.sectionBlock}>
-            <View style={styles.sectionTitleRow}>
-              <Feather name="layers" size={16} color={colors.brand} />
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                Student Personas & Segments
+          <View style={styles.sectionWrap}>
+            <View style={styles.sectionHeadingRow}>
+              <Text
+                style={[
+                  styles.sectionHeading,
+                  { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
+                ]}
+              >
+                Student Archetypes & Segments
+              </Text>
+              <Text style={[styles.sectionCountBadge, { color: colors.brand }]}>
+                {SEGMENT_CARDS.length} profiles
               </Text>
             </View>
-            <Text style={[styles.sectionSub, { color: colors.mutedText }]}>
-              Unsupervised clustering identifies cohort behavior patterns
-            </Text>
 
-            <View style={styles.cardsStack}>
-              {SEGMENT_CARDS.map((seg) => (
+            <View style={styles.cardsGrid}>
+              {SEGMENT_CARDS.map((card) => {
+                const toneColor =
+                  card.riskTone === "riskHigh"
+                    ? colors.riskHigh
+                    : card.riskTone === "riskMedium"
+                    ? colors.riskMedium
+                    : colors.riskLow;
+                return (
+                  <View
+                    key={card.id}
+                    style={[
+                      styles.segmentCard,
+                      {
+                        backgroundColor: colors.card,
+                        borderColor: colors.cardBorder,
+                      },
+                    ]}
+                  >
+                    <View style={styles.segmentTopRow}>
+                      <Text
+                        style={[
+                          styles.segmentName,
+                          { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
+                        ]}
+                      >
+                        {card.persona}
+                      </Text>
+                      <View style={[styles.countPill, { backgroundColor: colors.brandSoft }]}>
+                        <Text style={[styles.countPillText, { color: colors.brand }]}>
+                          {card.count} students
+                        </Text>
+                      </View>
+                    </View>
+
+                    <Text style={[styles.segmentAction, { color: toneColor }]}>
+                      Recommended: {card.action}
+                    </Text>
+
+                    <View style={styles.traitsWrap}>
+                      {card.traits.map((t, idx) => (
+                        <View
+                          key={idx}
+                          style={[
+                            styles.traitTag,
+                            { backgroundColor: colors.surface, borderColor: colors.cardBorder },
+                          ]}
+                        >
+                          <Text style={[styles.traitTagText, { color: colors.mutedText }]}>
+                            {t}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        )}
+
+        {/* 2. ML Models */}
+        {(section === "all" || section === "models") && (
+          <View style={styles.sectionWrap}>
+            <View style={styles.sectionHeadingRow}>
+              <Text
+                style={[
+                  styles.sectionHeading,
+                  { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
+                ]}
+              >
+                Machine Learning Specs
+              </Text>
+              <Text style={[styles.sectionCountBadge, { color: colors.brand }]}>
+                3 production pipelines
+              </Text>
+            </View>
+
+            <View style={styles.cardsGrid}>
+              {MODEL_SPECS.map((spec, i) => (
                 <View
-                  key={seg.id}
+                  key={i}
                   style={[
-                    styles.segmentCard,
-                    { backgroundColor: colors.card, borderColor: colors.cardBorder },
+                    styles.modelCard,
+                    {
+                      backgroundColor: colors.card,
+                      borderColor: colors.cardBorder,
+                    },
                   ]}
                 >
-                  <View style={styles.segHeader}>
-                    <Text style={[styles.segPersona, { color: colors.text }]}>
-                      {seg.persona}
+                  <View style={styles.modelHeader}>
+                    <Text
+                      style={[
+                        styles.modelName,
+                        { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
+                      ]}
+                    >
+                      {spec.name}
                     </Text>
-                    <View style={[styles.segCountPill, { backgroundColor: colors.surface }]}>
-                      <Text style={[styles.segCountText, { color: colors.brand }]}>
-                        {seg.count} students
+                    <View style={[styles.accuracyBadge, { backgroundColor: colors.riskLowSoft }]}>
+                      <Text style={[styles.accuracyText, { color: colors.riskLow }]}>
+                        {spec.accuracy}
                       </Text>
                     </View>
                   </View>
 
-                  <Text style={[styles.segAction, { color: colors.brand }]}>
-                    Action: {seg.action}
+                  <Text style={[styles.modelAlgorithm, { color: colors.brand }]}>
+                    {spec.algorithm}
+                  </Text>
+                  <Text style={[styles.modelTarget, { color: colors.mutedText }]}>
+                    Target: {spec.target}
                   </Text>
 
-                  <View style={styles.traitsRow}>
-                    {seg.traits.map((tr, i) => (
-                      <View
-                        key={i}
-                        style={[styles.traitBadge, { backgroundColor: colors.surface }]}
-                      >
-                        <Text style={[styles.traitText, { color: colors.mutedText }]}>
-                          • {tr}
-                        </Text>
-                      </View>
-                    ))}
+                  <View style={[styles.featureListWrap, { borderColor: colors.cardBorder }]}>
+                    <Text style={[styles.featureTitle, { color: colors.mutedText }]}>
+                      Key SHAP drivers:
+                    </Text>
+                    <Text style={[styles.featureValues, { color: colors.text }]}>
+                      {spec.topFeatures}
+                    </Text>
                   </View>
                 </View>
               ))}
@@ -234,56 +351,17 @@ export default function HubScreen() {
           </View>
         )}
 
-        {/* Section 2: ML Models & Scoring Specs */}
-        {(section === "all" || section === "models") && (
-          <View style={styles.sectionBlock}>
-            <View style={styles.sectionTitleRow}>
-              <Feather name="cpu" size={16} color={colors.brand} />
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                ML Architecture & Scoring Models
-              </Text>
-            </View>
-            <Text style={[styles.sectionSub, { color: colors.mutedText }]}>
-              Dual calibrated pipelines with tree-based SHAP explainability
-            </Text>
-
-            <View style={styles.cardsStack}>
-              {MODEL_SPECS.map((m, idx) => (
-                <View
-                  key={idx}
-                  style={[
-                    styles.modelCard,
-                    { backgroundColor: colors.card, borderColor: colors.cardBorder },
-                  ]}
-                >
-                  <View style={styles.modelHeader}>
-                    <Text style={[styles.modelName, { color: colors.text }]}>{m.name}</Text>
-                    <View style={[styles.accPill, { backgroundColor: colors.riskLowSoft }]}>
-                      <Text style={[styles.accText, { color: colors.riskLow }]}>{m.accuracy}</Text>
-                    </View>
-                  </View>
-                  <Text style={[styles.modelAlgo, { color: colors.mutedText }]}>
-                    Architecture: {m.algorithm}
-                  </Text>
-                  <Text style={[styles.modelTarget, { color: colors.text }]}>
-                    Target: {m.target}
-                  </Text>
-                  <Text style={[styles.modelFeatures, { color: colors.brand }]}>
-                    Top features: {m.topFeatures}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* Section 3: Fairness & Privacy Guardrails */}
+        {/* 3. Fairness and Ethics */}
         {(section === "all" || section === "fairness") && (
-          <View style={styles.sectionBlock}>
-            <View style={styles.sectionTitleRow}>
-              <Feather name="shield" size={16} color={colors.riskLow} />
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                Fairness & Privacy Safeguards
+          <View style={styles.sectionWrap}>
+            <View style={styles.sectionHeadingRow}>
+              <Text
+                style={[
+                  styles.sectionHeading,
+                  { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
+                ]}
+              >
+                Fairness & Demographic Parity
               </Text>
             </View>
 
@@ -294,39 +372,34 @@ export default function HubScreen() {
               ]}
             >
               <View style={styles.fairnessRow}>
-                <Feather name="check-circle" size={16} color={colors.riskLow} />
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.fairnessHead, { color: colors.text }]}>
-                    Demographic Parity Verified
-                  </Text>
-                  <Text style={[styles.fairnessBody, { color: colors.mutedText }]}>
-                    Protected attributes (gender, domicile, category) are strictly excluded from feature sets to guarantee equal treatment.
-                  </Text>
-                </View>
+                <Feather name="shield" size={18} color={colors.riskLow} />
+                <Text
+                  style={[
+                    styles.fairnessTitle,
+                    { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
+                  ]}
+                >
+                  Demographic Parity Ratio: 0.96
+                </Text>
               </View>
-
-              <View style={[styles.fairnessRow, { borderTopWidth: 0.5, borderTopColor: colors.cardBorder, paddingTop: 10 }]}>
-                <Feather name="lock" size={16} color={colors.brand} />
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.fairnessHead, { color: colors.text }]}>
-                    DPDP Act Compliance & Data Masking
-                  </Text>
-                  <Text style={[styles.fairnessBody, { color: colors.mutedText }]}>
-                    Student phone numbers and email handles are masked across client views. Every access log is recorded immutably.
-                  </Text>
-                </View>
-              </View>
+              <Text style={[styles.fairnessDesc, { color: colors.mutedText }]}>
+                Strict threshold enforced across gender, reservation categories, and domicile. Protected attributes are excluded from feature matrices.
+              </Text>
             </View>
           </View>
         )}
 
-        {/* Section 4: Data Integration Health */}
+        {/* 4. Data Quality */}
         {(section === "all" || section === "data") && (
-          <View style={styles.sectionBlock}>
-            <View style={styles.sectionTitleRow}>
-              <Feather name="database" size={16} color={colors.brand} />
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                Data Pipelines & Ingestion Health
+          <View style={styles.sectionWrap}>
+            <View style={styles.sectionHeadingRow}>
+              <Text
+                style={[
+                  styles.sectionHeading,
+                  { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
+                ]}
+              >
+                Data Feed Quality
               </Text>
             </View>
 
@@ -341,43 +414,27 @@ export default function HubScreen() {
                   key={s.name}
                   style={[
                     styles.sourceRow,
-                    { borderBottomWidth: idx === SOURCES.length - 1 ? 0 : 0.5, borderBottomColor: colors.cardBorder },
+                    { borderBottomColor: colors.cardBorder, borderBottomWidth: idx === SOURCES.length - 1 ? 0 : 0.5 },
                   ]}
                 >
                   <View style={{ flex: 1 }}>
-                    <Text style={[styles.sourceName, { color: colors.text }]}>{s.name}</Text>
-                    <Text style={[styles.sourceFreq, { color: colors.mutedText }]}>{s.frequency}</Text>
+                    <Text style={[styles.sourceName, { color: colors.text }]}>
+                      {s.name}
+                    </Text>
+                    <Text style={[styles.sourceMeta, { color: colors.mutedText }]}>
+                      {s.frequency} · {s.coverage} coverage
+                    </Text>
                   </View>
-                  <View style={{ alignItems: "flex-end" }}>
-                    <Text style={[styles.sourceCov, { color: colors.riskLow }]}>{s.coverage}</Text>
-                    <Text style={[styles.sourceStatus, { color: colors.brand }]}>{s.status}</Text>
+                  <View style={[styles.statusTag, { backgroundColor: colors.riskLowSoft }]}>
+                    <Text style={[styles.statusText, { color: colors.riskLow }]}>
+                      {s.status}
+                    </Text>
                   </View>
                 </View>
               ))}
             </View>
           </View>
         )}
-
-        {/* Quick Settings Shortcut */}
-        <TouchableOpacity
-          style={[
-            styles.settingsShortcut,
-            { backgroundColor: colors.surface, borderColor: colors.cardBorder },
-          ]}
-          onPress={() => {
-            playSound("tap");
-            router.push("/(tabs)/settings");
-          }}
-          activeOpacity={0.8}
-        >
-          <View style={styles.shortcutLeft}>
-            <Feather name="settings" size={18} color={colors.brand} />
-            <Text style={[styles.shortcutText, { color: colors.text }]}>
-              Account Settings & Preferences
-            </Text>
-          </View>
-          <Feather name="chevron-right" size={18} color={colors.mutedText} />
-        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -389,109 +446,131 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 16,
+    paddingBottom: 12,
     gap: 12,
-    marginBottom: 8,
   },
   titleRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    gap: 10,
   },
   title: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "700",
   },
   subtitle: {
-    fontSize: 12,
-    marginTop: 2,
+    fontSize: 11.5,
+    marginTop: 1,
   },
   settingsIconBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
   filterPills: {
     gap: 8,
-    paddingBottom: 4,
   },
-  filterPill: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+  pill: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
     borderRadius: 999,
     borderWidth: 1,
   },
-  filterPillText: {
+  pillText: {
     fontSize: 12,
   },
-  content: {
+  scrollBody: {
     paddingHorizontal: 16,
     gap: 20,
   },
-  sectionBlock: {
-    gap: 10,
-  },
-  sectionTitleRow: {
+  bannerCard: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  sectionSub: {
-    fontSize: 12,
-  },
-  cardsStack: {
-    gap: 10,
-  },
-  segmentCard: {
     padding: 14,
     borderRadius: 16,
     borderWidth: 1,
-    gap: 8,
+    overflow: "hidden",
   },
-  segHeader: {
+  bannerText: {
+    flex: 1,
+    gap: 4,
+  },
+  bannerTitle: {
+    fontSize: 15,
+  },
+  bannerDesc: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  bannerArt: {
+    marginLeft: 8,
+  },
+  sectionWrap: {
+    gap: 10,
+  },
+  sectionHeadingRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  segPersona: {
-    fontSize: 14,
-    fontWeight: "700",
+  sectionHeading: {
+    fontSize: 15,
   },
-  segCountPill: {
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-    borderRadius: 999,
-  },
-  segCountText: {
-    fontSize: 11,
+  sectionCountBadge: {
+    fontSize: 11.5,
     fontWeight: "600",
   },
-  segAction: {
+  cardsGrid: {
+    gap: 10,
+  },
+  segmentCard: {
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: 8,
+  },
+  segmentTopRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  segmentName: {
+    fontSize: 14,
+  },
+  countPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+  },
+  countPillText: {
+    fontSize: 11,
+    fontWeight: "700",
+  },
+  segmentAction: {
     fontSize: 12,
     fontWeight: "600",
   },
-  traitsRow: {
+  traitsWrap: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 6,
+    marginTop: 2,
   },
-  traitBadge: {
-    paddingVertical: 3,
+  traitTag: {
     paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 6,
+    borderWidth: 1,
   },
-  traitText: {
+  traitTagText: {
     fontSize: 11,
   },
   modelCard: {
     padding: 14,
-    borderRadius: 16,
+    borderRadius: 14,
     borderWidth: 1,
     gap: 6,
   },
@@ -502,88 +581,80 @@ const styles = StyleSheet.create({
   },
   modelName: {
     fontSize: 14,
-    fontWeight: "700",
   },
-  accPill: {
-    paddingVertical: 2,
+  accuracyBadge: {
     paddingHorizontal: 8,
-    borderRadius: 6,
+    paddingVertical: 2,
+    borderRadius: 999,
   },
-  accText: {
+  accuracyText: {
     fontSize: 11,
     fontWeight: "700",
   },
-  modelAlgo: {
-    fontSize: 11,
+  modelAlgorithm: {
+    fontSize: 12,
+    fontWeight: "600",
   },
   modelTarget: {
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 11.5,
   },
-  modelFeatures: {
+  featureListWrap: {
+    marginTop: 4,
+    paddingTop: 8,
+    borderTopWidth: 0.5,
+    gap: 2,
+  },
+  featureTitle: {
     fontSize: 11,
-    fontWeight: "600",
+  },
+  featureValues: {
+    fontSize: 11.5,
+    fontWeight: "500",
   },
   fairnessCard: {
     padding: 14,
-    borderRadius: 16,
+    borderRadius: 14,
     borderWidth: 1,
-    gap: 12,
+    gap: 6,
   },
   fairnessRow: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 10,
+    alignItems: "center",
+    gap: 8,
   },
-  fairnessHead: {
-    fontSize: 13,
-    fontWeight: "700",
-    marginBottom: 2,
+  fairnessTitle: {
+    fontSize: 14,
   },
-  fairnessBody: {
-    fontSize: 11,
-    lineHeight: 15,
+  fairnessDesc: {
+    fontSize: 12,
+    lineHeight: 18,
   },
   dataCard: {
-    padding: 14,
-    borderRadius: 16,
+    padding: 8,
+    borderRadius: 14,
     borderWidth: 1,
   },
   sourceRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
   },
   sourceName: {
     fontSize: 13,
     fontWeight: "600",
   },
-  sourceFreq: {
-    fontSize: 10,
+  sourceMeta: {
+    fontSize: 11,
+    marginTop: 2,
   },
-  sourceCov: {
-    fontSize: 12,
+  statusTag: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+  },
+  statusText: {
+    fontSize: 11,
     fontWeight: "700",
-  },
-  sourceStatus: {
-    fontSize: 10,
-  },
-  settingsShortcut: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
-  shortcutLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  shortcutText: {
-    fontSize: 13,
-    fontWeight: "600",
   },
 });

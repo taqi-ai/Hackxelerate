@@ -19,7 +19,10 @@ import { RiskBadge } from "../../src/components/RiskBadge";
 import { StudentRowSkeleton } from "../../src/components/Skeleton";
 import { EmptyState } from "../../src/components/EmptyState";
 import { triggerHaptic } from "../../src/lib/haptics";
+import { BrandMark } from "../../src/components/BrandMark";
+import { AnimatedAscoraArt } from "../../src/components/AnimatedAscoraArt";
 import type { StudentRow } from "../../src/lib/types";
+
 
 type FilterType = "all" | "academic_high" | "placement_high" | "silent_decliner";
 
@@ -194,18 +197,27 @@ export default function StudentsScreen() {
     >
       {/* Top Header */}
       <View style={styles.header}>
-        <Text
-          style={[
-            styles.title,
-            { color: colors.text, fontFamily: "BricolageGrotesque_700Bold" },
-          ]}
-        >
-          Students Directory
-        </Text>
-        <Text style={[styles.subtitle, { color: colors.mutedText }]}>
-          Continuous risk profiling and success indicators
-        </Text>
+        <View style={styles.headerTitleRow}>
+          <BrandMark compact size={32} />
+          <View style={{ flex: 1 }}>
+            <Text
+              style={[
+                styles.title,
+                { color: colors.text, fontFamily: "BricolageGrotesque_700Bold" },
+              ]}
+            >
+              Students
+            </Text>
+            <Text style={[styles.subtitle, { color: colors.mutedText }]}>
+              Continuous risk profiling and success indicators
+            </Text>
+          </View>
+          <View style={styles.headerArt}>
+            <AnimatedAscoraArt kind="orbit" width={80} height={44} />
+          </View>
+        </View>
       </View>
+
 
       {/* Search Input */}
       <View style={styles.searchRow}>
@@ -345,7 +357,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 12,
   },
+  headerTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  headerArt: {
+    opacity: 0.8,
+  },
   title: {
+
     fontSize: 22,
     fontWeight: "700",
   },
