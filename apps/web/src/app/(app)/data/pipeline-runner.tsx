@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Panel } from "@/components/kit";
 import { ML_API, mlFetch, mlToken, MlUnavailable } from "@/lib/ml-api";
 import { cn } from "@/lib/utils";
+import { refreshCohortAction } from "@/app/(app)/actions";
 
 type Step = { key: string; label: string; status: string; seconds: number | null; metrics: Record<string, unknown>; detail: string[] };
 type Run = { run_id: string; status: "running" | "done" | "error"; steps: Step[]; summary: Record<string, any>; error: string | null };
@@ -71,6 +72,7 @@ export function PipelineRunner() {
       const done = await poll(run_id);
       if (done.status === "done") {
         play("success");
+        await refreshCohortAction();
         router.refresh();
       } else {
         play("error");

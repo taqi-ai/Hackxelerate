@@ -1,6 +1,8 @@
 import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
+import { unstable_cache } from "next/cache";
+import { createClient as createPlainClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { previewConnection, previewStudent, readDemoImport, readDemoPlans, searchPreview } from "@/lib/demo-preview";
 import {
@@ -144,8 +146,33 @@ export const getStudentRows = cache(async (): Promise<StudentRow[]> => {
     const students = new Map(s.students.map((st) => [st.id, st]));
     return s.student_scores.filter((r) => ids.has(r.student_id)).map((r) => toRow(r, students.get(r.student_id)));
   }
-  const rows = await fetchAll<any>((s) => s.from("student_scores").select(ROW_COLS).order("student_id"));
-  return rows.map((r) => toRow(r, r.students));
+  // The cohort read is the heaviest query in the app (up to 1,200 rows) and every dashboard tab needs it.
+  // Cache it per user for two minutes: the key is the user id and the query runs with that user's own token,
+  // so row-level security still decides the rows and one user's result is never served to another.
+  const direct = async () =>
+    (await fetchAll<any>((s) => s.from("student_scores").select(ROW_COLS).order("student_id"))).map((r) => toRow(r, r.students));
+  const supabase = await createClient();
+  const [{ data: auth }, { data: sess }] = await Promise.all([supabase.auth.getUser(), supabase.auth.getSession()]);
+  const token = sess.session?.access_token;
+  if (!auth.user || !token) return direct();
+  return unstable_cache(
+    async () => {
+      const db = createPlainClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+        global: { headers: { Authorization: `Bearer ${token}` } },
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+      const out: any[] = [];
+      for (let from = 0; ; from += 1000) {
+        const { data, error } = await db.from("student_scores").select(ROW_COLS).order("student_id").range(from, from + 999);
+        if (error) throw new Error(error.message);
+        out.push(...(data ?? []));
+        if (!data || data.length < 1000) break;
+      }
+      return out.map((r) => toRow(r, r.students));
+    },
+    ["cohort-rows-v1", auth.user.id],
+    { revalidate: 120, tags: ["cohort"] },
+  )().catch(direct);
 });
 
 export const getArtifacts = cache(async (keys: string[]): Promise<Record<string, any>> => {

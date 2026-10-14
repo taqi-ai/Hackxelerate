@@ -1,7 +1,7 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
@@ -282,5 +282,12 @@ export async function importManualAcademicRecordAction(input: z.infer<typeof Imp
   }
   revalidatePath("/student");
   revalidatePath("/student/connection");
+  return { ok: true };
+}
+
+/** After a pipeline run publishes new scores, drop the cached cohort so every tab shows the new data. */
+export async function refreshCohortAction(): Promise<ActionResult> {
+  revalidateTag("cohort");
+  revalidatePath("/", "layout");
   return { ok: true };
 }
