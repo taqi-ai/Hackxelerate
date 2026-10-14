@@ -66,7 +66,7 @@ export function HeroLanding({ signedIn }: { signedIn: boolean }) {
                 className="inline-flex h-12 items-center gap-2 rounded-full border border-white/15 px-5 text-[15px] font-medium text-white/90 transition-[transform,border-color,background-color] duration-200 hover:border-white/35 hover:bg-white/[0.04] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[oklch(0.75_0.12_272)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07070b]"
               >
                 <Smartphone className="size-4" aria-hidden />
-                Try the mobile app
+                Get the Android app
               </Link>
             </div>
           </div>

@@ -100,7 +100,7 @@ Fairness: gender, residence, first-generation, lateral entry and schooling mediu
 
 - Data is synthetic; accuracy shows the pipeline works, not real-college performance.
 - No live university portal connection: CU Lucknow is an external link plus manual import.
-- Android app is built and testable in the browser; no signed APK yet.
+- Android app: signed APK 1.0.0 downloadable from /mobile; it also runs in the browser there.
 - Sample timetable and exam dates on the student schedule page are labelled as samples (no timetable source in the data).
 
 ---
@@ -140,7 +140,7 @@ Fairness: gender, residence, first-generation, lateral entry and schooling mediu
 ### Ujjwal Gupta: development, backend and mobile port
 **Presents:** slide 3 (architecture), slide 4 (integration pipeline), and the mobile app in the demo. Learn sections 2, 3, 7 and 9, and the Taqi answers on matching and leakage.
 **Likely questions:**
-- *Is the mobile app real?* Yes, Expo / React Native, same Supabase accounts and RLS. It runs in the browser at /mobile; a signed APK has not been produced yet.
+- *Is the mobile app real?* Yes, Expo / React Native, same Supabase accounts and RLS. It runs in the browser at /mobile; a signed APK (1.0.0) downloads from /mobile.
 - *How does the web talk to the ML service securely?* The web mints a short-lived signed token for the signed-in user; the FastAPI service checks it and the role before what-if, Ask or pipeline runs.
 - *Where does it run?* Web on Vercel, database on Supabase, ML on Azure App Service (Central India), language model on Azure OpenAI.
 - *What if the ML service is down?* Precomputed scores and reasons stay visible; what-if shows a clear "service offline" message; there is a full offline demo mode for bad Wi-Fi.
@@ -178,7 +178,7 @@ Fairness: gender, residence, first-generation, lateral entry and schooling mediu
 | 5 | Score, risk and segments | Ashmit | Score and risk 25 + segmentation bonus | Formula 30/20/15/15/10/10, stable at ≥ 0.997, two models with baseline shown, threshold rationale, 6 segments with actions. |
 | 6 | Explainability and trust | Harsh | Dashboard 25 + explainable bonus | SHAP reasons in plain words, what-helps counterfactuals, fairness audit, RLS, masking, audit log. |
 | 7 | Live demo | Harsh drives and narrates, Ujjwal shows mobile, Lakshya operates the laptop / backup offline mode | Dashboard 25, demo 10 | Section 15 flow. |
-| 8 | Honest limits and next steps | Ashmit, closing line by Taqi | Presentation 10 | Synthetic data, recalibration on real history, APK next, CU portal via official export. |
+| 8 | Honest limits and next steps | Ashmit, closing line by Taqi | Presentation 10 | Synthetic data, recalibration on real history, CU portal via official export. |
 
 Q&A routing: data, pipeline, backend, mobile, security → **Ujjwal**. Score, models, USP, business value → **Ashmit**. Dashboard, explainability, privacy, accessibility, demo → **Harsh**. Taqi steps in only if a question is left unanswered. Lakshya takes no questions unless asked directly about the frontend.
 
