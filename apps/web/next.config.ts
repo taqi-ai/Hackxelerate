@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: { "/**/*": ["./demo-data/preview/**/*"] },
   images: { formats: ["image/avif", "image/webp"] },
   experimental: {
+    // keep visited dashboard tabs in the client router cache for 30 s: switching back is instant,
+    // and every mutation calls revalidatePath, which clears it
+    staleTimes: { dynamic: 30, static: 180 },
     // import only what is used from these big barrel packages: smaller client bundles
     optimizePackageImports: ["recharts", "lucide-react", "@tanstack/react-table", "radix-ui"],
   },

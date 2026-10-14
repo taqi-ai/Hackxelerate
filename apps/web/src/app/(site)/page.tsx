@@ -4,6 +4,7 @@ import { ArrowUpRight, BookOpenCheck, Briefcase, CalendarCheck, ClipboardList, G
 import { Headline } from "@/components/landing/headline";
 import { HeroStage } from "@/components/landing/hero-stage";
 import { HeroLanding } from "@/components/landing/hero-landing";
+import { Intro } from "@/components/landing/intro";
 import { Story } from "@/components/landing/story";
 import { Bento } from "@/components/landing/bento";
 import { Aurora, ClosingCta, Eyebrow, GhostCta, PrimaryCta, SectionHead } from "@/components/landing/site-kit";
@@ -46,6 +47,7 @@ export default async function Home() {
   return (
     <>
       {/* first screen: promise, both ways in, the real product */}
+      <Intro />
       <HeroLanding signedIn={!!profile} />
 
       {/* the original hero, kept as the second beat: how the seven systems become one view */}

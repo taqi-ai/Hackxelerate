@@ -36,7 +36,7 @@ export function HeroLanding({ signedIn }: { signedIn: boolean }) {
       <div className="mx-auto max-w-7xl px-4 pt-28 sm:px-6 lg:pt-32">
         <div className="grid items-end gap-10 lg:grid-cols-12">
           <div className="lg:col-span-8">
-            <p className="hero-fade text-sm text-white/65" style={{ animationDelay: "60ms" }}>
+            <p className="hero-fade text-sm text-white/65" style={{ "--d": "60ms" } as React.CSSProperties}>
               Smart Campus Analytics for KPMG in India, HacXLerate 2026
             </p>
             <h1
@@ -44,16 +44,16 @@ export function HeroLanding({ signedIn }: { signedIn: boolean }) {
               className="mt-5 font-display text-[2.35rem] font-medium leading-[0.98] tracking-[-0.045em] text-[#f4f4f7] sm:text-6xl lg:text-[5.4rem]"
             >
               <span className="hero-line">
-                <span style={{ animationDelay: "120ms" }}>From early warning</span>
+                <span style={{ "--d": "120ms" } as React.CSSProperties}>From early warning</span>
               </span>
               <span className="hero-line">
-                <span style={{ animationDelay: "220ms" }}>to real intervention.</span>
+                <span style={{ "--d": "220ms" } as React.CSSProperties}>to real intervention.</span>
               </span>
             </h1>
-            <p className="hero-fade mt-7 max-w-[34rem] text-lg leading-relaxed text-white/70" style={{ animationDelay: "420ms" }}>
+            <p className="hero-fade mt-7 max-w-[34rem] text-lg leading-relaxed text-white/70" style={{ "--d": "420ms" } as React.CSSProperties}>
               Ascora reads seven campus systems as one, explains which students need support and why, and tracks what mentors do next.
             </p>
-            <div className="hero-fade mt-9 flex flex-wrap items-center gap-3" style={{ animationDelay: "540ms" }}>
+            <div className="hero-fade mt-9 flex flex-wrap items-center gap-3" style={{ "--d": "540ms" } as React.CSSProperties}>
               <Link
                 href={signedIn ? "/overview" : "/login"}
                 className="group inline-flex h-12 items-center gap-2 rounded-full bg-[#f4f4f7] pl-6 pr-5 text-[15px] font-medium text-[#0a0a10] transition-[transform,background-color] duration-200 hover:bg-white active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[oklch(0.75_0.12_272)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07070b]"
@@ -74,7 +74,7 @@ export function HeroLanding({ signedIn }: { signedIn: boolean }) {
           {/* the phone sits in the right column and overlaps the product plane below it */}
           <div className="relative hidden lg:col-span-4 lg:block">
             <motion.div style={{ y: phoneY }} className="relative z-20 ml-auto -mb-56 w-[15.5rem] xl:w-[17rem]">
-              <div className="hero-plane rounded-[2.4rem] border border-white/15 bg-[#050508] p-2 shadow-[0_40px_90px_-30px_rgb(0_0_0/0.95),0_0_0_1px_rgb(255_255_255/0.04)_inset]" style={{ animationDelay: "650ms" }}>
+              <div className="hero-plane rounded-[2.4rem] border border-white/15 bg-[#050508] p-2 shadow-[0_40px_90px_-30px_rgb(0_0_0/0.95),0_0_0_1px_rgb(255_255_255/0.04)_inset]" style={{ "--d": "650ms" } as React.CSSProperties}>
                 <Image
                   src="/assets/ui/mobile-home.webp"
                   alt="The Ascora mobile app"
@@ -90,7 +90,7 @@ export function HeroLanding({ signedIn }: { signedIn: boolean }) {
 
         {/* product plane */}
         <div ref={stage} className="relative mt-16 [perspective:2200px] lg:mt-20">
-          <div className="hero-plane" style={{ animationDelay: "380ms" }}>
+          <div className="hero-plane" style={{ "--d": "380ms" } as React.CSSProperties}>
             <motion.div
               style={{ rotateX, scale, transformOrigin: "50% 0%" }}
               className="relative overflow-hidden rounded-2xl border border-white/12 bg-[#0b0b12] shadow-[0_60px_140px_-40px_oklch(0.45_0.12_272/0.75)] will-change-transform"
