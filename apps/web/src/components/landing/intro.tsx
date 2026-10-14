@@ -13,15 +13,22 @@ export function Intro() {
   const audio = useRef<HTMLAudioElement>(null);
   useEffect(() => {
     const t = window.setTimeout(() => setGone(true), 3400);
-    // Sound: the clip is trimmed so its swell peaks as the logo lands. Start both from zero together.
-    // Browsers only allow sound before any click if the visitor has interacted with the site before;
-    // when they refuse, the intro simply plays silently.
-    if (document.documentElement.classList.contains("intro") && audio.current && video.current) {
-      video.current.currentTime = 0;
-      audio.current.currentTime = 0;
-      audio.current.volume = 0.8;
-      audio.current.play().catch(() => {});
-      video.current.play().catch(() => {});
+    // Sound starts with the logo and ends as the curtain finishes (3.2 s clip). The logo and curtain run on the
+    // page clock from first paint, so if the audio could not start at parse time, join at the elapsed moment
+    // instead of restarting; past the lift there is nothing left to play. Browsers that block sound before any
+    // click keep the intro silent.
+    const a = audio.current;
+    if (document.documentElement.classList.contains("intro") && a) {
+      const elapsed = performance.now() / 1000;
+      if (elapsed < 3) {
+        a.volume = 0.8;
+        if (a.paused) {
+          a.currentTime = elapsed;
+          a.play().catch(() => {});
+        }
+      } else {
+        a.pause();
+      }
     }
     return () => {
       window.clearTimeout(t);
@@ -40,7 +47,13 @@ export function Intro() {
       {!gone && (
         <div aria-hidden className="intro-overlay fixed inset-0 z-[100] grid place-items-center bg-black">
           <div className="intro-logo w-[min(560px,78vw)]">
-            <audio ref={audio} src="/assets/intro-sound.wav" preload="auto" />
+            <audio ref={audio} src="/assets/intro-sound-v2.wav" preload="auto" autoPlay />
+            {/* repeat visits and reduced motion: silence the clip before it can start */}
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `(function(){var a=document.currentScript&&document.currentScript.previousElementSibling;if(a&&document.documentElement.classList.contains("no-intro")){a.muted=true;a.removeAttribute("autoplay");a.pause();}})()`,
+              }}
+            />
             <video
               ref={video}
               className="pointer-events-none h-auto w-full select-none"
