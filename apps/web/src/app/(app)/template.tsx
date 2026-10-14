@@ -1,16 +1,6 @@
-"use client";
-
-import { motion } from "framer-motion";
-
-/** Each page fades and rises in: a calm transition that makes navigation feel continuous. */
+/** Each page rises in with a CSS animation (see .page-enter). Pure CSS on purpose: a JS-driven
+ *  `opacity: 0` start state leaves the server-rendered page invisible until hydration finishes,
+ *  which looks like a blank screen on a slow connection. */
 export default function Template({ children }: { children: React.ReactNode }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
-    </motion.div>
-  );
+  return <div className="page-enter">{children}</div>;
 }

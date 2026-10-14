@@ -24,13 +24,15 @@
     },
     "web": {
       "bundler": "metro",
-      "favicon": "./assets/icon-512-transparent.png"
+      "favicon": "./assets/icon-512-transparent.png",
+      "output": "single"
     },
     "plugins": [
       "expo-router"
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": true,
+      "baseUrl": "/mobile-sim"
     }
   }
 }

@@ -10,6 +10,7 @@ const PUBLIC_PREFIXES = [
   "/trust",
   "/about",
   "/manifest.webmanifest",
+  "/mobile",
 ];
 
 const INSTITUTIONAL_PREFIXES = [
@@ -39,6 +40,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // If user is accessing via Demo Student session
+  if (demoStudentCookie) {
+    if (path === "/login") {
+      return NextResponse.redirect(new URL("/student", request.url));
+    }
+    if (INSTITUTIONAL_PREFIXES.some((p) => path.startsWith(p))) {
+      return NextResponse.redirect(new URL("/student", request.url));
+    }
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -63,17 +75,6 @@ export async function middleware(request: NextRequest) {
 
   const isPublic = path === "/" || PUBLIC_PREFIXES.some((p) => path.startsWith(p));
 
-  // If user is accessing via Demo Student session
-  if (demoStudentCookie) {
-    if (path === "/login") {
-      return NextResponse.redirect(new URL("/student", request.url));
-    }
-    if (INSTITUTIONAL_PREFIXES.some((p) => path.startsWith(p))) {
-      return NextResponse.redirect(new URL("/student", request.url));
-    }
-    return response;
-  }
-
   // Not authenticated and trying to access private page
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
@@ -96,5 +97,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|assets/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|assets/|mobile-sim|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
 };

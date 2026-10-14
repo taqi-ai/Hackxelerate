@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { ArrowUpRight, BookOpenCheck, Briefcase, CalendarCheck, ClipboardList, GraduationCap, MessageSquareText, Trophy } from "lucide-react";
 import { Headline } from "@/components/landing/headline";
 import { HeroStage } from "@/components/landing/hero-stage";
+import { HeroShowcase } from "@/components/landing/hero-showcase";
 import { Story } from "@/components/landing/story";
 import { Bento } from "@/components/landing/bento";
 import { Aurora, ClosingCta, Eyebrow, GhostCta, PrimaryCta, SectionHead } from "@/components/landing/site-kit";
@@ -44,8 +45,11 @@ export default async function Home() {
   const profile = await getProfile().catch(() => null);
   return (
     <>
-      {/* hero */}
-      <section className="relative isolate overflow-hidden">
+      {/* first screen: promise, both ways in, the real product */}
+      <HeroShowcase signedIn={!!profile} />
+
+      {/* the original hero, kept as the second beat: how the seven systems become one view */}
+      <section id="platform" className="relative isolate scroll-mt-0 overflow-hidden border-t border-white/10">
         <Aurora />
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
           {[

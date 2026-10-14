@@ -13,7 +13,7 @@ import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useTheme } from "../../src/lib/theme";
 import { VoiceAiVisualizer } from "../../src/components/VoiceAiVisualizer";
-import { fetchDashboardStats, fetchTopPriorityStudents } from "../../src/lib/api";
+import { fetchDashboardStats, fetchStudentRows } from "../../src/lib/api";
 import { triggerHaptic } from "../../src/lib/haptics";
 import { BrandMark } from "../../src/components/BrandMark";
 import { AnimatedAscoraArt } from "../../src/components/AnimatedAscoraArt";
@@ -37,79 +37,104 @@ export default function AiScreen() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [response, setResponse] = useState<InsightResponse | null>(null);
   const [stats, setStats] = useState({ highAcademic: 0, silentDecliners: 0 });
-  const [priorityStudents, setPriorityStudents] = useState<StudentRow[]>([]);
 
   useEffect(() => {
     (async () => {
       try {
-        const [st, top] = await Promise.all([
-          fetchDashboardStats(),
-          fetchTopPriorityStudents(3),
-        ]);
+        const st = await fetchDashboardStats();
         setStats({
           highAcademic: st.highAcademic,
           silentDecliners: st.silentDecliners,
         });
-        setPriorityStudents(top);
       } catch (err) {
         console.error("AiScreen stats load error:", err);
       }
     })();
   }, []);
 
-  const handleRunQuery = (queryText: string) => {
+  /** Answers are built only from the rows the signed-in user can see: no invented figures. */
+  const handleRunQuery = async (queryText: string) => {
     if (!queryText.trim()) return;
     triggerHaptic("medium");
     setIsProcessing(true);
     setResponse(null);
-
-    // Simulate real-time campus intelligence reasoning based on live cohort data
-    setTimeout(() => {
-      let resp: InsightResponse;
+    try {
       const lower = queryText.toLowerCase();
-
-      if (lower.includes("brief") || lower.includes("morning")) {
-        resp = {
+      const filter = /silent|decliner|lms|login/.test(lower)
+        ? "silent_decliner"
+        : /placement|interview|job|mock/.test(lower)
+          ? "placement_high"
+          : "academic_high";
+      const [st, res] = await Promise.all([
+        fetchDashboardStats(),
+        fetchStudentRows({ filter, orderByPriority: true, pageSize: 100 }),
+      ]);
+      const rows = res.rows;
+      if (st.totalStudents === 0) {
+        setResponse({
           query: queryText,
-          summary: `Current campus status reveals ${stats.highAcademic} students requiring priority attention. An emerging cluster of ${stats.silentDecliners} students shows LMS activity drop preceding exam week.`,
-          keyPoints: [
-            "LMS submissions dropped by 18% among 2nd-year AIML students over the last 14 days.",
-            "Core course attendance remains steady at 78% across mechanical and electrical cohorts.",
-            "3 students exhibit simultaneous CGPA and mock interview risks.",
-          ],
-          suggestedAction: "Initiate peer tutoring for AIML mathematics and dispatch mock interview invitations.",
-          recommendedStudents: priorityStudents,
-        };
-      } else if (lower.includes("silent") || lower.includes("decliner")) {
-        resp = {
-          query: queryText,
-          summary: `Identified ${stats.silentDecliners} silent decliners who have intact academic records but zero LMS logins in the past 2 weeks.`,
-          keyPoints: [
-            "Silent decliners often disengage weeks before test performance reflects risk.",
-            "Average login frequency dropped from 4.2 to 0.4 logins/week for this segment.",
-            "Early faculty mentor outreach recovers 84% of silent decliners according to retrospective cohort data.",
-          ],
-          suggestedAction: "Schedule proactive 15-minute informal check-ins before Friday.",
-          recommendedStudents: priorityStudents.slice(0, 2),
-        };
-      } else {
-        resp = {
-          query: queryText,
-          summary: `Synthesized recommendations across current risk models: High priority cohort comprises students with both academic backlogs and missed mock interviews.`,
-          keyPoints: [
-            "SHAP drivers pinpoint assignment completion as the strongest actionable lever.",
-            "Counterfactual recourse indicates +15% attendance lowers academic risk level from High to Medium.",
-            "Mentoring capacity needed: approximately 2.5 hours this week.",
-          ],
-          suggestedAction: "Review This Week Planner to allocate knapsack-optimized 25-minute mentoring blocks.",
-          recommendedStudents: priorityStudents,
-        };
+          summary: "No student data is available for this account, so there is nothing to summarise yet.",
+          keyPoints: ["Sign in with a head of department or mentor account to see cohort data."],
+          suggestedAction: "Check your connection and sign in again.",
+        });
+        triggerHaptic("error");
+        return;
       }
-
-      setResponse(resp);
+      const label =
+        filter === "silent_decliner"
+          ? "silent decliners"
+          : filter === "placement_high"
+            ? "students at high placement risk"
+            : "students at high academic risk";
+      const total =
+        filter === "silent_decliner" ? st.silentDecliners : filter === "placement_high" ? st.highPlacement : st.highAcademic;
+      // most common alert types among the listed students, counted from their real alerts
+      const counts = new Map<string, { n: number; text: string }>();
+      rows.forEach((r) => {
+        const seen = new Set<string>();
+        r.alerts.forEach((al) => {
+          if (seen.has(al.type)) return;
+          seen.add(al.type);
+          const cur = counts.get(al.type);
+          counts.set(al.type, { n: (cur?.n ?? 0) + 1, text: cur?.text ?? al.text });
+        });
+      });
+      const top = [...counts.entries()].sort((x, y) => y[1].n - x[1].n).slice(0, 3);
+      const ACTION: Record<string, string> = {
+        attendance_drop: "a mentor meeting about attendance",
+        backlogs: "peer tutoring for the backlog subjects",
+        no_mock: "a mock interview",
+        assignments: "peer tutoring on assignments",
+        silent_decliner: "a short informal check-in before marks drop",
+        lms_silent: "a short informal check-in before marks drop",
+      };
+      const first = top[0]?.[0];
+      {
+        const avg = rows.length ? Math.round(rows.reduce((sum, r) => sum + r.success_score, 0) / rows.length) : null;
+        setResponse({
+          query: queryText,
+          summary:
+            `${total} of ${st.totalStudents} students you can see are ${label}` +
+            (avg !== null ? `. The ${rows.length} highest priority of them average a Success Score of ${avg}, against ${st.avgScore} for everyone.` : "."),
+          keyPoints: top.length
+            ? top.map(([, v]) => `${v.n} of the top ${rows.length}: ${v.text}`)
+            : ["No alert details are available for these students."],
+          suggestedAction: first && ACTION[first] ? `Most common driver points to ${ACTION[first]}. Open a student to book it.` : "Open a student to see their drivers and book an intervention.",
+          recommendedStudents: rows.slice(0, 3),
+        });
+        triggerHaptic("success");
+      }
+    } catch (err) {
+      setResponse({
+        query: queryText,
+        summary: "Could not load the cohort data right now.",
+        keyPoints: [err instanceof Error ? err.message : "Unknown error"],
+        suggestedAction: "Try again in a moment.",
+      });
+      triggerHaptic("error");
+    } finally {
       setIsProcessing(false);
-      triggerHaptic("success");
-    }, 900);
+    }
   };
 
   const SUGGESTED_PROMPTS = [
@@ -145,7 +170,7 @@ export default function AiScreen() {
               Ask Ascora
             </Text>
             <Text style={[styles.subtitle, { color: colors.mutedText }]}>
-              Natural language campus synthesis & voice streaming
+              Plain-language summaries of your live cohort data
             </Text>
           </View>
           <View style={styles.headerArt}>
@@ -244,7 +269,7 @@ export default function AiScreen() {
           <View style={styles.responseHeader}>
             <View style={[styles.aiBadge, { backgroundColor: colors.brandSoft }]}>
               <Feather name="check" size={12} color={colors.brand} />
-              <Text style={[styles.aiBadgeText, { color: colors.brand }]}>AI Synthesis Result</Text>
+              <Text style={[styles.aiBadgeText, { color: colors.brand }]}>Live data summary</Text>
             </View>
             <Text style={[styles.queryQuery, { color: colors.mutedText }]}>
               &quot;{response.query}&quot;
