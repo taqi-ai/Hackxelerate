@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+
 import { useState, useMemo, useTransition } from "react";
 import { AlertCircle, CheckCircle2, Calculator, Sparkles, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -104,6 +106,7 @@ export function MarksCalculatorCard({
         setTimeout(() => setSavedSuccess(false), 3000);
       } else {
         play("error");
+        toast.error(res.error);
       }
     });
   }

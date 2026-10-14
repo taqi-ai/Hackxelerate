@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
+  // the public student preview reads these read-only files at request time (see lib/demo-preview.ts)
+  outputFileTracingIncludes: { "/**/*": ["./demo-data/preview/**/*"] },
   images: { formats: ["image/avif", "image/webp"] },
   experimental: {
     // import only what is used from these big barrel packages: smaller client bundles

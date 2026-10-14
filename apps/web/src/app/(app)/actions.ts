@@ -6,6 +6,8 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { OFFLINE, offlineConnections, offlineInterventions, offlinePlans, one, visibleIds } from "@/lib/offline";
+import { getProfile, isPreview } from "@/lib/data";
+import { DEMO_PLAN_LIMIT, readDemoPlans, writeDemoImport, writeDemoPlans } from "@/lib/demo-preview";
 
 const TYPES = ["mentor_meeting", "peer_tutoring", "mock_interview", "counselling_referral", "parent_call", "skill_workshop"] as const;
 
@@ -124,133 +126,158 @@ const PlanSchema = z.object({
   notes: z.string().max(1000).optional().nullable(),
 });
 
+/** Where a student's own writes go: the database (real accounts, RLS), the visitor's cookie (public preview),
+ *  or memory (local offline mode only). */
+async function studentWriteMode(studentId: string): Promise<"offline" | "preview" | "db" | "denied"> {
+  if (OFFLINE) return "offline";
+  const profile = await getProfile();
+  if (!profile) return "denied";
+  if (isPreview(profile)) return profile.student_id === studentId ? "preview" : "denied";
+  return "db";
+}
+
+const PREVIEW_PATHS = ["/student", "/student/calculator", "/student/schedule", "/student/academics"];
+function revalidateStudent() {
+  PREVIEW_PATHS.forEach((p) => revalidatePath(p));
+}
+
 export async function saveStudentPlanAction(input: z.infer<typeof PlanSchema>): Promise<ActionResult> {
   const parsed = PlanSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
   const v = parsed.data;
   const now = new Date().toISOString();
-
-  if (OFFLINE) {
-    offlinePlans.unshift({
-      id: randomUUID(),
-      student_id: v.student_id,
-      title: v.title,
-      category: v.category,
-      target_value: v.target_value,
-      current_value: v.current_value,
-      due_date: v.due_date ?? null,
-      status: "active",
-      notes: v.notes ?? null,
-      created_at: now,
-      updated_at: now,
-    });
-  } else {
-    const supabase = await createClient();
-    const { error } = await supabase.from("student_plans").insert({
-      student_id: v.student_id,
-      title: v.title,
-      category: v.category,
-      target_value: v.target_value,
-      current_value: v.current_value,
-      due_date: v.due_date ?? null,
-      status: "active",
-      notes: v.notes ?? null,
-    });
-    if (error) {
-      // In-memory fallback if table not yet migrated
-      offlinePlans.unshift({
-        id: randomUUID(),
-        student_id: v.student_id,
-        title: v.title,
-        category: v.category,
-        target_value: v.target_value,
-        current_value: v.current_value,
-        due_date: v.due_date ?? null,
-        status: "active",
-        notes: v.notes ?? null,
-        created_at: now,
-        updated_at: now,
-      });
-    }
-  }
-
-  revalidatePath("/student");
-  revalidatePath("/student/calculator");
-  revalidatePath("/student/schedule");
-  return { ok: true };
-}
-
-export async function updateStudentPlanStatusAction(planId: string, status: "active" | "completed" | "archived"): Promise<ActionResult> {
-  if (OFFLINE) {
-    const p = offlinePlans.find((x) => x.id === planId);
-    if (p) {
-      p.status = status;
-      p.updated_at = new Date().toISOString();
-    }
-  } else {
-    const supabase = await createClient();
-    const { error } = await supabase.from("student_plans").update({ status, updated_at: new Date().toISOString() }).eq("id", planId);
-    if (error) {
-      const p = offlinePlans.find((x) => x.id === planId);
-      if (p) {
-        p.status = status;
-        p.updated_at = new Date().toISOString();
-      }
-    }
-  }
-  revalidatePath("/student/schedule");
-  return { ok: true };
-}
-
-export async function deleteStudentPlanAction(planId: string): Promise<ActionResult> {
-  if (OFFLINE) {
-    const idx = offlinePlans.findIndex((x) => x.id === planId);
-    if (idx !== -1) offlinePlans.splice(idx, 1);
-  } else {
-    const supabase = await createClient();
-    const { error } = await supabase.from("student_plans").delete().eq("id", planId);
-    if (error) {
-      const idx = offlinePlans.findIndex((x) => x.id === planId);
-      if (idx !== -1) offlinePlans.splice(idx, 1);
-    }
-  }
-  revalidatePath("/student/schedule");
-  return { ok: true };
-}
-
-export async function importManualAcademicRecordAction(input: {
-  student_id: string;
-  source: string;
-  notes?: string;
-  attendancePct?: number;
-  cgpa?: number;
-}): Promise<ActionResult> {
-  const now = new Date().toISOString();
-  const connData = {
-    id: `conn-${input.student_id}`,
-    student_id: input.student_id,
-    provider: "manual_import",
-    status: "manual_import" as const,
-    last_synced_at: now,
-    provenance: "manual_import" as const,
-    details: {
-      source: input.source,
-      notes: input.notes,
-      attendancePct: input.attendancePct,
-      cgpa: input.cgpa,
-      verified_by: "Student Verified Submission",
-    },
+  const plan = {
+    id: randomUUID(),
+    student_id: v.student_id,
+    title: v.title,
+    category: v.category,
+    target_value: v.target_value,
+    current_value: v.current_value,
+    due_date: v.due_date ?? null,
+    status: "active" as const,
+    notes: v.notes ? v.notes.slice(0, 300) : null,
     created_at: now,
     updated_at: now,
   };
 
-  offlineConnections.set(input.student_id, connData);
-
-  if (!OFFLINE) {
+  const mode = await studentWriteMode(v.student_id);
+  if (mode === "denied") return { ok: false, error: "You can only save plans for your own profile." };
+  if (mode === "offline") {
+    offlinePlans.unshift(plan);
+  } else if (mode === "preview") {
+    const current = await readDemoPlans(v.student_id);
+    if (current.length >= DEMO_PLAN_LIMIT) {
+      return { ok: false, error: `Preview mode keeps up to ${DEMO_PLAN_LIMIT} plans in this browser. Complete or delete one first.` };
+    }
+    if (!(await writeDemoPlans(v.student_id, [plan, ...current]))) return { ok: false, error: "This plan is too large to keep in preview mode." };
+  } else {
     const supabase = await createClient();
-    await supabase.from("external_connections").upsert(connData, { onConflict: "student_id" });
+    const { error } = await supabase.from("student_plans").insert({
+      student_id: plan.student_id,
+      title: plan.title,
+      category: plan.category,
+      target_value: plan.target_value,
+      current_value: plan.current_value,
+      due_date: plan.due_date,
+      status: plan.status,
+      notes: plan.notes,
+    });
+    if (error) return { ok: false, error: `Could not save the plan: ${error.message}` };
   }
+  revalidateStudent();
+  return { ok: true };
+}
 
+const PlanStatus = z.enum(["active", "completed", "archived"]);
+
+export async function updateStudentPlanStatusAction(planId: string, status: "active" | "completed" | "archived"): Promise<ActionResult> {
+  if (!PlanStatus.safeParse(status).success) return { ok: false, error: "Invalid status" };
+  const profile = OFFLINE ? null : await getProfile();
+  if (OFFLINE) {
+    const p = offlinePlans.find((x) => x.id === planId);
+    if (!p) return { ok: false, error: "Plan not found" };
+    p.status = status;
+    p.updated_at = new Date().toISOString();
+  } else if (isPreview(profile)) {
+    const plans = await readDemoPlans(profile!.student_id!);
+    const p = plans.find((x) => x.id === planId);
+    if (!p) return { ok: false, error: "Plan not found" };
+    p.status = status;
+    p.updated_at = new Date().toISOString();
+    await writeDemoPlans(profile!.student_id!, plans);
+  } else {
+    const supabase = await createClient();
+    const { error, count } = await supabase
+      .from("student_plans")
+      .update({ status, updated_at: new Date().toISOString() }, { count: "exact" })
+      .eq("id", planId);
+    if (error) return { ok: false, error: `Could not update the plan: ${error.message}` };
+    if (!count) return { ok: false, error: "Plan not found" };
+  }
+  revalidateStudent();
+  return { ok: true };
+}
+
+export async function deleteStudentPlanAction(planId: string): Promise<ActionResult> {
+  const profile = OFFLINE ? null : await getProfile();
+  if (OFFLINE) {
+    const idx = offlinePlans.findIndex((x) => x.id === planId);
+    if (idx === -1) return { ok: false, error: "Plan not found" };
+    offlinePlans.splice(idx, 1);
+  } else if (isPreview(profile)) {
+    const plans = await readDemoPlans(profile!.student_id!);
+    if (!plans.some((x) => x.id === planId)) return { ok: false, error: "Plan not found" };
+    await writeDemoPlans(profile!.student_id!, plans.filter((x) => x.id !== planId));
+  } else {
+    const supabase = await createClient();
+    const { error, count } = await supabase.from("student_plans").delete({ count: "exact" }).eq("id", planId);
+    if (error) return { ok: false, error: `Could not delete the plan: ${error.message}` };
+    if (!count) return { ok: false, error: "Plan not found" };
+  }
+  revalidateStudent();
+  return { ok: true };
+}
+
+const ImportSchema = z.object({
+  student_id: z.string().regex(/^CU\d{2}[A-Z]{2,4}\d{4}$/),
+  source: z.string().trim().min(2).max(120),
+  notes: z.string().max(300).optional(),
+  attendancePct: z.number().min(0).max(100).optional(),
+  cgpa: z.number().min(0).max(10).optional(),
+});
+
+export async function importManualAcademicRecordAction(input: z.infer<typeof ImportSchema>): Promise<ActionResult> {
+  const parsed = ImportSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  const v = parsed.data;
+  const now = new Date().toISOString();
+  const details = { source: v.source, notes: v.notes, attendancePct: v.attendancePct, cgpa: v.cgpa, entered_by: "student" };
+
+  const mode = await studentWriteMode(v.student_id);
+  if (mode === "denied") return { ok: false, error: "You can only import records for your own profile." };
+  const conn = {
+    id: `conn-${v.student_id}`,
+    student_id: v.student_id,
+    provider: "manual_import",
+    status: "manual_import" as const,
+    last_synced_at: now,
+    provenance: "manual_import" as const,
+    details,
+    created_at: now,
+    updated_at: now,
+  };
+  if (mode === "offline") {
+    offlineConnections.set(v.student_id, conn);
+  } else if (mode === "preview") {
+    await writeDemoImport(conn);
+  } else {
+    const supabase = await createClient();
+    const { error } = await supabase.from("external_connections").upsert(
+      { student_id: v.student_id, provider: "manual_import", status: "manual_import", last_synced_at: now, provenance: "manual_import", details, updated_at: now },
+      { onConflict: "student_id" },
+    );
+    if (error) return { ok: false, error: `Could not save the import: ${error.message}` };
+  }
   revalidatePath("/student");
   revalidatePath("/student/connection");
   return { ok: true };

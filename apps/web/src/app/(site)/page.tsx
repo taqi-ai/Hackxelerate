@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { ArrowUpRight, BookOpenCheck, Briefcase, CalendarCheck, ClipboardList, GraduationCap, MessageSquareText, Trophy } from "lucide-react";
 import { Headline } from "@/components/landing/headline";
 import { HeroStage } from "@/components/landing/hero-stage";
-import { HeroShowcase } from "@/components/landing/hero-showcase";
+import { HeroLanding } from "@/components/landing/hero-landing";
 import { Story } from "@/components/landing/story";
 import { Bento } from "@/components/landing/bento";
 import { Aurora, ClosingCta, Eyebrow, GhostCta, PrimaryCta, SectionHead } from "@/components/landing/site-kit";
@@ -46,7 +46,7 @@ export default async function Home() {
   return (
     <>
       {/* first screen: promise, both ways in, the real product */}
-      <HeroShowcase signedIn={!!profile} />
+      <HeroLanding signedIn={!!profile} />
 
       {/* the original hero, kept as the second beat: how the seven systems become one view */}
       <section id="platform" className="relative isolate scroll-mt-0 overflow-hidden border-t border-white/10">
@@ -68,9 +68,9 @@ export default async function Home() {
               <Eyebrow>Smart Campus Analytics for KPMG in India</Eyebrow>
             </Reveal>
             <Reveal delay={0.06}>
-              <h1 className="mt-6 font-display text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.035em] sm:text-6xl lg:text-[3.9rem] xl:text-[4.25rem]">
+              <h2 className="mt-6 font-display text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.035em] sm:text-6xl lg:text-[3.9rem] xl:text-[4.25rem]">
                 <Headline lead="Catch the quiet slide." accent="Then do something about it." />
-              </h1>
+              </h2>
             </Reveal>
             <Reveal delay={0.14}>
               <p className="mt-6 max-w-[34rem] text-lg leading-relaxed text-white/65">
@@ -79,7 +79,7 @@ export default async function Home() {
             </Reveal>
             <Reveal delay={0.22}>
               <div className="mt-9 flex flex-wrap items-center gap-3">
-                <PrimaryCta href={profile ? "/overview" : "/login"}>{profile ? "Open dashboard" : "Get started"}</PrimaryCta>
+                <PrimaryCta href={profile ? "/overview" : "/login"}>{profile ? "Open dashboard" : "Open live demo"}</PrimaryCta>
                 <GhostCta href="/how-it-works">See how it works</GhostCta>
               </div>
             </Reveal>

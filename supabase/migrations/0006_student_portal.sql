@@ -38,7 +38,8 @@ create table if not exists public.external_connections (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
-create index if not exists idx_external_connections_student on public.external_connections(student_id);
+-- one provenance record per student (the app upserts on student_id)
+create unique index if not exists idx_external_connections_student on public.external_connections(student_id);
 
 -- 5. RLS helper for student identity
 create or replace function private.my_student_id() returns text
@@ -84,6 +85,7 @@ alter table public.external_connections enable row level security;
 create policy "external connections read" on public.external_connections for select to authenticated
   using (private.is_admin() or student_id = private.my_student_id());
 
+-- a student may only record their own manual import; portal provenance is never self-asserted
 create policy "external connections write" on public.external_connections for all to authenticated
   using (private.is_admin() or student_id = private.my_student_id())
-  with check (private.is_admin() or student_id = private.my_student_id());
+  with check (private.is_admin() or (student_id = private.my_student_id() and provenance = 'manual_import'));
