@@ -44,3 +44,8 @@ services/ml/artifacts/cache/
 .claude/skills/
 supabase/.temp/
 data/culko_login.html
+
+# exported web build of the mobile app (served at /mobile-sim): keep everything, including icon fonts under build/
+!apps/web/public/mobile-sim/
+!apps/web/public/mobile-sim/**/
+!apps/web/public/mobile-sim/**
