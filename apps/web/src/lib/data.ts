@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { previewConnection, previewStudent, readDemoImport, readDemoPlans, searchPreview } from "@/lib/demo-preview";
 import {
   artifact,
   offlineConnections,
@@ -58,31 +59,16 @@ export const getProfile = cache(async (): Promise<(Profile & { email: string }) 
         };
       }
     } else {
-      try {
-        const supabase = await createClient();
-        const { data: st } = await supabase.from("students").select("id, name, email, mentor_id").eq("id", demoStudentId).maybeSingle();
-        if (st) {
-          return {
-            id: `student-${st.id}`,
-            full_name: st.name,
-            role: "student",
-            mentor_id: st.mentor_id,
-            student_id: st.id,
-            email: st.email ?? `${st.id.toLowerCase()}@cumail.in`,
-          };
-        }
-      } catch {
-        // Fallback to snapshot if Supabase fails
-      }
-      const st = snapshot().students.find((s) => s.id === demoStudentId);
-      if (st) {
+      // public student preview: read-only synthetic data, no database identity (see lib/demo-preview.ts)
+      const pv = await previewStudent(demoStudentId);
+      if (pv) {
         return {
-          id: `student-${st.id}`,
-          full_name: st.name,
+          id: `student-${pv.student.id}`,
+          full_name: pv.student.name,
           role: "student",
-          mentor_id: st.mentor_id,
-          student_id: st.id,
-          email: st.email ?? `${st.id.toLowerCase()}@cumail.in`,
+          mentor_id: pv.student.mentor_id,
+          student_id: pv.student.id,
+          email: pv.student.email ?? "",
         };
       }
     }
@@ -102,6 +88,11 @@ export const getProfile = cache(async (): Promise<(Profile & { email: string }) 
   if (!data) return null;
   return { ...(data as Profile), email: user.email ?? "" };
 });
+
+/** a visitor previewing a demo student (no database identity) */
+export function isPreview(profile: { id: string; role: string } | null | undefined) {
+  return !OFFLINE && profile?.role === "student" && profile.id.startsWith("student-");
+}
 
 const ROW_COLS =
   "student_id, success_score, academic_risk_prob, academic_risk_level, placement_risk_prob, placement_risk_level, intent, segment_id, persona, priority, alerts, components, metrics, students!inner(name, email, branch, year, section, mentor_id)";
@@ -139,17 +130,13 @@ export const getStudentRows = cache(async (): Promise<StudentRow[]> => {
       const sc = s.student_scores.find((x) => x.student_id === profile.student_id);
       return st && sc ? [toRow(sc, st)] : [];
     }
-    try {
-      const supabase = await createClient();
-      const { data: sc } = await supabase.from("student_scores").select(ROW_COLS).eq("student_id", profile.student_id).maybeSingle();
-      if (sc) return [toRow(sc, sc.students)];
-    } catch {
-      // Fallback to snapshot
+    if (isPreview(profile)) {
+      const pv = await previewStudent(profile.student_id);
+      return pv?.score ? [toRow(pv.score, pv.student)] : [];
     }
-    const s = snapshot();
-    const st = s.students.find((x) => x.id === profile.student_id);
-    const sc = s.student_scores.find((x) => x.student_id === profile.student_id);
-    return st && sc ? [toRow(sc, st)] : [];
+    const supabase = await createClient();
+    const { data: sc } = await supabase.from("student_scores").select(ROW_COLS).eq("student_id", profile.student_id).maybeSingle();
+    return sc ? [toRow(sc, sc.students)] : [];
   }
   if (OFFLINE) {
     const s = snapshot();
@@ -277,6 +264,10 @@ export async function getStudent360(id: string) {
       links: s.source_links.filter((l) => l.student_id === id),
     };
   }
+  if (isPreview(profile)) {
+    const pv = await previewStudent(id);
+    return pv ? { ...pv, score: pv.score as StudentScore | null } : null;
+  }
   const supabase = await createClient();
   const [student, score, academic, attendance, lms, engagement, placement, skills, feedback, conflicts, links] = await Promise.all([
     supabase.from("students").select("*, mentors(name)").eq("id", id).maybeSingle(),
@@ -291,27 +282,8 @@ export async function getStudent360(id: string) {
     supabase.from("conflicts").select("*").eq("student_id", id),
     supabase.from("source_links").select("source, raw_ref, raw_key, match_method, match_confidence, status").eq("student_id", id),
   ]);
-  if (!student.data) {
-    const s = snapshot();
-    const st = s.students.find((x) => x.id === id);
-    if (st) {
-      const mentor = s.mentors.find((m) => m.id === st.mentor_id);
-      return {
-        student: { ...st, mentors: mentor ? { name: mentor.name } : null },
-        score: one("student_scores", id) as StudentScore | null,
-        academic: one("academic", id),
-        attendance: one("attendance", id),
-        lms: one("lms_activity", id),
-        engagement: one("engagement", id),
-        placement: one("placement", id),
-        skills: one("skills", id),
-        feedback: s.feedback.filter((f) => f.student_id === id),
-        conflicts: s.conflicts.filter((c) => c.student_id === id),
-        links: s.source_links.filter((l) => l.student_id === id),
-      };
-    }
-    return null;
-  }
+  // RLS returns nothing for a student this user may not see
+  if (!student.data) return null;
   try {
     // DPDP: record who viewed which profile (RLS lets users write only their own audit rows)
     await supabase.from("audit_log").insert({ action: "view_student_360", student_id: id });
@@ -376,25 +348,8 @@ export async function searchDemoStudents(query = "", branch?: string, year?: num
       section: s.section as string,
     }));
   }
-  const supabase = await createClient();
-  let builder = supabase.from("students").select("id, name, branch, year, section").order("id").limit(limit);
-  if (q) {
-    builder = builder.or(`id.ilike.%${q}%,name.ilike.%${q}%`);
-  }
-  if (branch && branch !== "all") {
-    builder = builder.eq("branch", branch);
-  }
-  if (year) {
-    builder = builder.eq("year", year);
-  }
-  const { data } = await builder;
-  return (data ?? []).map((s: any) => ({
-    id: s.id,
-    name: s.name,
-    branch: s.branch,
-    year: s.year,
-    section: s.section,
-  }));
+  // the picker is public: it searches the synthetic cohort's read-only index, never the database
+  return searchPreview(query, branch, year, limit);
 }
 
 /** Retrieve personal planning targets for a student */
@@ -406,6 +361,7 @@ export async function getStudentPlans(studentId?: string): Promise<StudentPlan[]
   if (OFFLINE) {
     return offlinePlans.filter((p) => p.student_id === targetId);
   }
+  if (isPreview(profile)) return readDemoPlans(targetId);
 
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -413,11 +369,7 @@ export async function getStudentPlans(studentId?: string): Promise<StudentPlan[]
     .select("*")
     .eq("student_id", targetId)
     .order("created_at", { ascending: false });
-
-  if (error) {
-    // Fallback to offline plans if table not yet migrated on remote Supabase
-    return offlinePlans.filter((p) => p.student_id === targetId);
-  }
+  if (error) throw new Error(`Could not load plans: ${error.message}`);
   return (data ?? []) as StudentPlan[];
 }
 
@@ -442,6 +394,8 @@ export async function getExternalConnection(studentId?: string): Promise<Externa
       }
     );
   }
+
+  if (isPreview(profile)) return (await readDemoImport(targetId)) ?? previewConnection(targetId);
 
   const supabase = await createClient();
   const { data, error } = await supabase

@@ -17,7 +17,7 @@ const FEATURES = [
     title: "One calm view of campus health",
     body: "Start with three numbers and the one insight that matters most. Everything else is a click away, not crammed onto the first screen.",
     points: ["Success Score distribution and risk counts", "Plain-language insights, ranked by impact", "Upcoming check-ins and follow-ups"],
-    img: "/assets/shots/overview.webp",
+    img: "/assets/ui/overview.webp",
     alt: "Ascora overview dashboard",
   },
   {
@@ -25,7 +25,7 @@ const FEATURES = [
     title: "Every reason behind a flag, in plain words",
     body: "Each student's score is broken into its parts and compared with the cohort. Drivers a mentor can change are marked, with the smallest changes that would help.",
     points: ["Score ring with five components", "Model drivers explained, not just ranked", "What-if sliders that re-score live"],
-    img: "/assets/shots/student.webp",
+    img: "/assets/ui/student.webp",
     alt: "Student 360 profile",
   },
   {
@@ -33,7 +33,7 @@ const FEATURES = [
     title: "A plan that fits a mentor's real hours",
     body: "Mentors enter how much time they have. Ascora ranks who to meet for the most expected benefit and suggests the right kind of support.",
     points: ["Time-boxed meeting list", "Intervention pre-suggested from the top driver", "Logged with a baseline to measure later"],
-    img: "/assets/shots/thisweek.webp",
+    img: "/assets/ui/thisweek.webp",
     alt: "Mentor weekly planner",
   },
   {
@@ -41,7 +41,7 @@ const FEATURES = [
     title: "Groups that need the same kind of help",
     body: "Students are clustered by pattern, not by a single score, so a department can run one programme for many students instead of many one-off talks.",
     points: ["Named segments with their defining traits", "Recommended action per segment", "Open members in one click"],
-    img: "/assets/shots/segments.webp",
+    img: "/assets/ui/segments.webp",
     alt: "Student segments view",
   },
   {
@@ -49,7 +49,7 @@ const FEATURES = [
     title: "Seven messy exports, one trustworthy record",
     body: "Roll numbers in five formats, typos in names, duplicate rows and conflicting values are resolved by rule, and anything ambiguous waits for a person.",
     points: ["Header auto-mapping for CSV, Excel and JSON", "Fuzzy matching with precision and recall reported", "Review queue for uncertain links"],
-    img: "/assets/shots/data.webp",
+    img: "/assets/ui/data.webp",
     alt: "Data integration pipeline",
   },
   {
@@ -57,7 +57,7 @@ const FEATURES = [
     title: "Open formula, audited models",
     body: "The Success Score formula and weights are published inside the product. Model accuracy, calibration, stability and fairness are on their own pages.",
     points: ["Weights and stability under perturbation", "AUC, calibration and early-warning curve", "Fairness checks, including the ones that need review"],
-    img: "/assets/shots/model.webp",
+    img: "/assets/ui/model.webp",
     alt: "Score and model transparency",
   },
 ];
@@ -83,7 +83,7 @@ export default async function ProductPage() {
         lead="Ascora keeps each page focused on one decision, and hides detail until you ask for it."
       >
         <div className="mt-9">
-          <PrimaryCta href={profile ? "/overview" : "/login"}>{profile ? "Open dashboard" : "Get started"}</PrimaryCta>
+          <PrimaryCta href={profile ? "/overview" : "/login"}>{profile ? "Open dashboard" : "Open live demo"}</PrimaryCta>
         </div>
       </PageHero>
 

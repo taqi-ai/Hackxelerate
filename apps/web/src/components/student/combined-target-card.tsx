@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+
 import { useState, useMemo, useTransition } from "react";
 import {
   Clock,
@@ -129,6 +131,7 @@ export function CombinedTargetCard({
         setTimeout(() => setSavedSuccess(false), 3000);
       } else {
         play("error");
+        toast.error(res.error);
       }
     });
   }

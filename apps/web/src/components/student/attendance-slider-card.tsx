@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+
 import { useState, useMemo, useTransition } from "react";
 import { AlertCircle, CheckCircle2, Sparkles } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
@@ -82,6 +84,7 @@ export function AttendanceSliderCard({
         setTimeout(() => setSavedSuccess(false), 3000);
       } else {
         play("error");
+        toast.error(res.error);
       }
     });
   }

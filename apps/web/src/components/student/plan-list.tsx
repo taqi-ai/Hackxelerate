@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+
 import { useState, useTransition } from "react";
 import { CheckCircle2, Circle, Clock, Trash2, Calendar, Target, Award, BookOpen } from "lucide-react";
 import type { StudentPlan } from "@/lib/types";
@@ -30,6 +32,9 @@ export function PlanList({
       const res = await updateStudentPlanStatusAction(plan.id, nextStatus);
       if (res.ok) {
         play(nextStatus === "completed" ? "success" : "toggle");
+      } else {
+        play("error");
+        toast.error(res.error);
       }
       setPendingId(null);
     });
@@ -42,6 +47,9 @@ export function PlanList({
       const res = await deleteStudentPlanAction(id);
       if (res.ok) {
         play("soft");
+      } else {
+        play("error");
+        toast.error(res.error);
       }
       setPendingId(null);
     });

@@ -83,7 +83,7 @@ export default async function StudentSchedulePage() {
     <div className="space-y-6">
       <PageHeader
         title="Schedule & Tasks"
-        description="Weekly lecture and lab timetable, upcoming semester examinations, and personal targets committed across your courses."
+        description="Your saved targets, plus a sample weekly timetable and exam calendar built from your registered courses."
         actions={
           <div className="flex items-center gap-2">
             <StudentSelectorDialog currentStudentId={student.id} />
@@ -114,8 +114,8 @@ export default async function StudentSchedulePage() {
 
             <TabsContent value="timetable" className="space-y-4">
               <Panel
-                title="Weekly Class Schedule"
-                description={`Semester ${currentSem} lecture, laboratory, and tutorial schedule`}
+                title="Weekly Class Schedule (sample layout)"
+                description={`Built from your Semester ${currentSem} courses. The demo sources hold no timetable, so slots, rooms and faculty are illustrative until a college timetable is connected.`}
               >
                 <div className="pt-2">
                   <WeeklyTimetable
@@ -128,8 +128,8 @@ export default async function StudentSchedulePage() {
 
             <TabsContent value="exams" className="space-y-4">
               <Panel
-                title="Official Academic Timetable"
-                description={`Semester ${currentSem} examinations and milestone deadlines`}
+                title="Exam and Deadline Calendar (sample dates)"
+                description={`Example milestones for your Semester ${currentSem} courses. No exam calendar is in the demo sources, so dates and venues are placeholders.`}
               >
                 <div className="space-y-3 pt-2">
                   {upcomingMilestones.map((m) => (

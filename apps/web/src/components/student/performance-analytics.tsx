@@ -13,7 +13,7 @@ import { play } from "@/lib/sound";
 
 interface SubjectScore {
   subject: string;
-  internal: number;
+  internal: number | null;
   attendancePct: number;
   end_sem?: number | null;
 }
@@ -22,7 +22,7 @@ export function PerformanceAnalytics({
   subjects,
   overallAttendance,
   cgpa,
-  lmsScore = 75,
+  lmsScore,
 }: {
   subjects: SubjectScore[];
   overallAttendance: number;
@@ -31,63 +31,37 @@ export function PerformanceAnalytics({
 }) {
   const [expanded, setExpanded] = useState(false);
 
-  // Compute multi-dimensional normalized metrics (scale: 0 - 100)
+  // Normalised metrics (0 to 100), each computed from data this student actually has. Missing data is left out, never filled in.
   const metrics = useMemo(() => {
-    if (subjects.length === 0) {
-      return [
-        { name: "Attendance Participation", value: overallAttendance, benchmark: 75, note: "Overall attendance percentage" },
-        { name: "Continuous Evaluation", value: 65, benchmark: 60, note: "Internal assessment marks" },
-        { name: "Lab & Practicals", value: 78, benchmark: 70, note: "Laboratory continuous evaluation" },
-        { name: "LMS Engagement", value: lmsScore, benchmark: 70, note: "Digital portal activity" },
-        { name: "Terminal Exam Trajectory", value: Number((cgpa * 10).toFixed(1)), benchmark: 60, note: "CGPA equivalent percentage" },
-      ];
+    const out: { name: string; value: number; benchmark: number; note: string }[] = [];
+    const att = subjects.length ? subjects.reduce((acc, s) => acc + s.attendancePct, 0) / subjects.length : overallAttendance;
+    if (Number.isFinite(att)) {
+      out.push({ name: "Attendance Discipline", value: Number(att.toFixed(1)), benchmark: 75, note: att >= 75 ? "Meets the 75% exam eligibility rule" : "Below the 75% exam eligibility rule" });
     }
-
-    const avgInternal =
-      subjects.reduce((acc, s) => acc + s.internal, 0) / subjects.length;
-    const internalPct = Number(((avgInternal / 40) * 100).toFixed(1));
-
-    const avgAtt =
-      subjects.reduce((acc, s) => acc + s.attendancePct, 0) / subjects.length;
-
-    return [
-      {
-        name: "Attendance Discipline",
-        value: Number(avgAtt.toFixed(1)),
-        benchmark: 75,
-        note: `${avgAtt >= 75 ? "Meets university exam threshold" : "Below 75% requirement"}`,
-      },
-      {
+    const withInternal = subjects.filter((s) => typeof s.internal === "number" && Number.isFinite(s.internal));
+    if (withInternal.length) {
+      const avgInternal = withInternal.reduce((acc, s) => acc + (s.internal as number), 0) / withInternal.length;
+      out.push({
         name: "Continuous Assessments",
-        value: internalPct,
+        value: Number(((avgInternal / 40) * 100).toFixed(1)),
         benchmark: 60,
-        note: `Average ${avgInternal.toFixed(1)} / 40 across coursework`,
-      },
-      {
-        name: "Laboratory & Practicals",
-        value: Math.min(100, Number((internalPct * 1.12).toFixed(1))),
-        benchmark: 70,
-        note: "Hands-on implementation and lab vivas",
-      },
-      {
-        name: "LMS Portal Activity",
-        value: lmsScore,
-        benchmark: 70,
-        note: "Coursework submissions and digital attendance",
-      },
-      {
-        name: "Cumulative Standing",
-        value: Number((cgpa * 10).toFixed(1)),
-        benchmark: 60,
-        note: `Cumulative CGPA ${cgpa.toFixed(2)} on a 10.0 scale`,
-      },
-    ];
+        note: `Average ${avgInternal.toFixed(1)} / 40 across ${withInternal.length} of ${subjects.length} courses with recorded internals`,
+      });
+    }
+    if (typeof lmsScore === "number") {
+      out.push({ name: "LMS Portal Activity", value: lmsScore, benchmark: 70, note: "Coursework submissions and portal activity" });
+    }
+    if (Number.isFinite(cgpa) && cgpa > 0) {
+      out.push({ name: "Cumulative Standing", value: Number((cgpa * 10).toFixed(1)), benchmark: 60, note: `CGPA ${cgpa.toFixed(2)} as a percentage` });
+    }
+    return out;
   }, [subjects, overallAttendance, cgpa, lmsScore]);
 
   // Weakest and strongest subjects
   const insights = useMemo(() => {
-    if (subjects.length === 0) return null;
-    const sorted = [...subjects].sort((a, b) => a.internal - b.internal);
+    const scored = subjects.filter((s) => typeof s.internal === "number");
+    if (scored.length < 2) return null;
+    const sorted = [...scored].sort((a, b) => (a.internal as number) - (b.internal as number));
     const weakest = sorted[0]!;
     const strongest = sorted[sorted.length - 1]!;
     return { weakest, strongest };
@@ -203,16 +177,14 @@ export function PerformanceAnalytics({
                   <th className="p-2.5 font-semibold">Course Title</th>
                   <th className="p-2.5 font-semibold text-right">Internal (40)</th>
                   <th className="p-2.5 font-semibold text-right">Attendance</th>
-                  <th className="p-2.5 font-semibold text-center">Relative Rank</th>
                 </tr>
               </thead>
               <tbody className="divide-y font-mono text-[11px]">
-                {subjects.map((s, idx) => (
+                {subjects.map((s) => (
                   <tr key={s.subject} className="hover:bg-muted/30">
                     <td className="p-2.5 font-sans font-medium text-foreground">{s.subject}</td>
-                    <td className="p-2.5 text-right font-semibold text-foreground">{s.internal.toFixed(1)}</td>
+                    <td className="p-2.5 text-right font-semibold text-foreground">{s.internal !== null ? s.internal.toFixed(1) : "n/a"}</td>
                     <td className="p-2.5 text-right">{s.attendancePct.toFixed(1)}%</td>
-                    <td className="p-2.5 text-center text-muted-foreground">Top {((idx + 1) * 20)}%</td>
                   </tr>
                 ))}
               </tbody>

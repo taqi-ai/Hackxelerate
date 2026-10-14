@@ -107,7 +107,7 @@ export function ClosingCta({ signedIn }: { signedIn: boolean }) {
           <h2 className="mx-auto mt-6 max-w-2xl font-display text-4xl font-semibold tracking-tight text-balance sm:text-5xl">From early warning to real intervention</h2>
           <p className="mx-auto mt-4 max-w-md text-white/60">Sign in as a head of department or a faculty mentor and walk a full cohort of 1,200 students.</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <PrimaryCta href={signedIn ? "/overview" : "/login"}>{signedIn ? "Open dashboard" : "Get started"}</PrimaryCta>
+            <PrimaryCta href={signedIn ? "/overview" : "/login"}>{signedIn ? "Open dashboard" : "Open live demo"}</PrimaryCta>
             <GhostCta href="/how-it-works">How it works</GhostCta>
           </div>
         </Reveal>

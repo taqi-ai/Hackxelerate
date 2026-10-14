@@ -16,7 +16,7 @@ export function MobileSimFrame() {
           {on ? (
             <iframe key={nonce} src="/mobile-sim" title="Ascora mobile app, running in your browser" className="absolute inset-0 size-full border-0" loading="lazy" allow="clipboard-write" />
           ) : (
-            <div className="absolute inset-0 grid place-items-center bg-[url(/assets/shots/mobile-welcome.webp)] bg-cover bg-top">
+            <div className="absolute inset-0 grid place-items-center bg-[url(/assets/ui/mobile-home.webp)] bg-cover bg-top">
               <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" />
               <button
                 type="button"

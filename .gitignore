@@ -49,3 +49,7 @@ data/culko_login.html
 !apps/web/public/mobile-sim/
 !apps/web/public/mobile-sim/**/
 !apps/web/public/mobile-sim/**
+# read-only synthetic data behind the public student preview (built by apps/web/scripts/build-student-preview.mjs)
+!apps/web/demo-data/
+apps/web/demo-data/*
+!apps/web/demo-data/preview/

@@ -10,11 +10,41 @@ export const metadata: Metadata = {
 };
 
 const TEAM = [
-  { name: "Taqi", role: "Team Lead", hue: 272 },
-  { name: "Ashmit Tiwari", role: "Team member", hue: 300 },
-  { name: "Ujjwal Gupta", role: "Team member", hue: 200 },
-  { name: "Harsh Gupta", role: "Team member", hue: 162 },
-  { name: "Lakshya Singh Parihar", role: "Team member", hue: 40 },
+  {
+    name: "Taqi",
+    role: "Organiser and team lead",
+    area: "Lead",
+    did: "Ran the team and worked across every part of Ascora: product, data, models, web, design and the demo.",
+    hue: 272,
+  },
+  {
+    name: "Ashmit Tiwari",
+    role: "Brand and marketing",
+    area: "Brand",
+    did: "Logo teaser, promo graphics, the look and feel of the platform and how its USP is told.",
+    hue: 300,
+  },
+  {
+    name: "Harsh Gupta",
+    role: "Brand and marketing",
+    area: "Brand",
+    did: "Promo graphics, theme and UI appeal, and shaping the story judges and colleges hear.",
+    hue: 162,
+  },
+  {
+    name: "Lakshya Singh Parihar",
+    role: "Development, frontend",
+    area: "Development",
+    did: "Built frontend screens and components with Taqi for the web dashboard.",
+    hue: 40,
+  },
+  {
+    name: "Ujjwal Gupta",
+    role: "Development, backend and mobile",
+    area: "Development",
+    did: "Backend work and the port of Ascora to the Android app.",
+    hue: 200,
+  },
 ];
 
 const VALUES = [
@@ -72,27 +102,38 @@ export default async function AboutPage() {
           title="Five builders, one semester in"
           lead="All five of us are B.Tech AIML students in our second year (Semester 3) at CU UP campus."
         />
-        <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
           {TEAM.map((m, i) => (
-            <Reveal key={m.name} delay={i * 0.06}>
-              <li className="edge group flex h-full flex-col items-center rounded-3xl border border-white/10 bg-[#0e0e15] p-6 text-center transition-colors hover:bg-[#12121b]">
-                <span
-                  className="grid size-20 place-items-center rounded-full font-display text-2xl font-semibold text-white shadow-[0_10px_40px_-10px_var(--ring-c)] transition-transform duration-500 group-hover:scale-105"
-                  style={
-                    {
-                      background: `linear-gradient(135deg, oklch(0.7 0.14 ${m.hue}), oklch(0.45 0.12 ${m.hue + 40}))`,
-                      "--ring-c": `oklch(0.7 0.14 ${m.hue})`,
-                    } as React.CSSProperties
+            <li key={m.name} className={i === 0 ? "sm:col-span-2 lg:col-span-6" : "lg:col-span-3 xl:col-span-3"}>
+              <Reveal delay={i * 0.06} className="h-full">
+                <div
+                  className={
+                    i === 0
+                      ? "edge group grid h-full items-center gap-6 rounded-3xl border border-white/10 bg-gradient-to-br from-[oklch(0.3_0.08_272/0.35)] to-[#0e0e15] p-7 sm:grid-cols-[auto_1fr] sm:p-9"
+                      : "edge group flex h-full items-start gap-5 rounded-3xl border border-white/10 bg-[#0e0e15] p-6 transition-colors hover:bg-[#12121b]"
                   }
-                  aria-hidden
                 >
-                  {initials(m.name)}
-                </span>
-                <p className="mt-5 font-display text-lg font-semibold leading-tight">{m.name}</p>
-                <p className={m.role === "Team Lead" ? "mt-1 text-sm text-[oklch(0.84_0.08_272)]" : "mt-1 text-sm text-white/60"}>{m.role}</p>
-                <p className="mt-3 text-xs text-white/60">B.Tech AIML, 2nd year, Sem 3</p>
-              </li>
-            </Reveal>
+                  <span
+                    className={`grid shrink-0 place-items-center rounded-full font-display font-semibold text-white shadow-[0_10px_40px_-10px_var(--ring-c)] transition-transform duration-500 group-hover:scale-105 ${i === 0 ? "size-24 text-3xl" : "size-14 text-lg"}`}
+                    style={
+                      {
+                        background: `linear-gradient(135deg, oklch(0.7 0.14 ${m.hue}), oklch(0.45 0.12 ${m.hue + 40}))`,
+                        "--ring-c": `oklch(0.7 0.14 ${m.hue})`,
+                      } as React.CSSProperties
+                    }
+                    aria-hidden
+                  >
+                    {initials(m.name)}
+                  </span>
+                  <div>
+                    <p className={`font-display font-semibold leading-tight ${i === 0 ? "text-2xl sm:text-3xl" : "text-lg"}`}>{m.name}</p>
+                    <p className={i === 0 ? "mt-1 text-[oklch(0.84_0.08_272)]" : "mt-1 text-sm text-[oklch(0.84_0.08_272)]"}>{m.role}</p>
+                    <p className={`mt-3 leading-relaxed text-white/70 ${i === 0 ? "max-w-2xl" : "text-sm"}`}>{m.did}</p>
+                    <p className="mt-3 text-xs text-white/60">B.Tech AIML, 2nd year, Sem 3</p>
+                  </div>
+                </div>
+              </Reveal>
+            </li>
           ))}
         </ul>
       </section>

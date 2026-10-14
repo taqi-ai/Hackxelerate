@@ -153,7 +153,7 @@ export function Bento() {
         </div>
         <div className="relative mt-6 h-56 overflow-hidden">
           <Image
-            src="/assets/shots/segments.webp"
+            src="/assets/ui/segments.webp"
             alt="Segments page showing student personas with sizes and recommended actions"
             width={2400}
             height={1500}
