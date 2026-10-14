@@ -16,6 +16,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.ascora.mobile",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon-512-transparent.png",
         "backgroundColor": "#07070b"
