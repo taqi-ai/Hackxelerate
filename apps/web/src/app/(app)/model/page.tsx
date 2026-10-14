@@ -37,6 +37,12 @@ function ModelBlock({ m }: { m: any }) {
           <p className="mt-2 text-xs text-muted-foreground">
             Thresholds: Medium from {Math.round(x.thresholds.medium * 100)}%, High from {Math.round(x.thresholds.high * 100)}%. Trained on {x.n_train} students, tested on {x.n_test}.
           </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Why these cut-offs: High is where a flag is usually right
+            {x.precision_at_high !== null ? ` (${Math.round(x.precision_at_high * 100)}% of High flags had the outcome)` : ""}, so a mentor&apos;s limited hours go to real cases.
+            Medium is wider on purpose and catches {Math.round(x.recall_at_medium_or_high * 100)}% of students who went on to have the outcome, for lighter-touch follow-up.
+            A college can move both in one config file after checking them against its own past outcomes.
+          </p>
         </Panel>
       </div>
       <Panel title="Model card" description="Intended use, limits and prohibited uses">
