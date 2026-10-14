@@ -48,7 +48,7 @@ export default async function StudentOverviewPage() {
   const allSubjects = (academic?.subjects ?? []) as Array<{
     sem: number;
     subject: string;
-    internal: number;
+    internal: number | null;
     end_sem: number | null;
     total: number | null;
   }>;

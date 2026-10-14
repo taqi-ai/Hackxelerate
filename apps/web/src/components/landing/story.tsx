@@ -46,12 +46,12 @@ function Step({ i, active, onActive }: { i: number; active: boolean; onActive: (
   const s = STEPS[i];
   return (
     <div ref={ref} className="flex min-h-[60vh] items-center lg:min-h-[78vh]">
-      <div className={cn("max-w-md transition-opacity duration-500", active ? "opacity-100" : "opacity-35")}>
+      <div className={cn("max-w-md transition-opacity duration-500", active ? "opacity-100" : "opacity-70")}>
         <p className="mb-3 font-mono text-xs text-brand">
           {i + 1} of {STEPS.length}
         </p>
         <h3 className="font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl">{s.title}</h3>
-        <p className="mt-4 text-lg leading-relaxed text-white/65">{s.body}</p>
+        <p className="mt-4 text-lg leading-relaxed text-white/85">{s.body}</p>
         {/* phones: the screenshot sits under its step instead of in a pinned frame */}
         <div className="mt-6 overflow-hidden rounded-xl border border-white/10 lg:hidden">
           <Image src={s.img} alt={s.alt} width={2400} height={1500} className="h-auto w-full" loading="lazy" />
@@ -83,7 +83,7 @@ export function Story() {
               <span className="size-2.5 rounded-full bg-white/15" />
               <span className="size-2.5 rounded-full bg-white/15" />
               <span className="size-2.5 rounded-full bg-white/15" />
-              <span className="ml-3 truncate font-mono text-[11px] text-white/35">ascora-five.vercel.app</span>
+              <span className="ml-3 truncate font-mono text-[11px] text-white/60">ascora-five.vercel.app</span>
             </div>
             <AnimatePresence mode="popLayout" initial={false}>
               <motion.div

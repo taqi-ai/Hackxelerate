@@ -60,7 +60,7 @@ export default async function HowItWorksPage() {
                   <span className="grid size-10 place-items-center rounded-xl bg-[oklch(0.8_0.07_272/0.14)] text-[oklch(0.86_0.08_272)]">
                     <s.icon className="size-5" aria-hidden />
                   </span>
-                  <span className="font-mono text-xs text-white/40">0{i + 1}</span>
+                  <span className="font-mono text-xs text-white/60">0{i + 1}</span>
                 </div>
                 <h2 className="mt-5 font-display text-2xl font-semibold">{s.title}</h2>
                 <p className="mt-2 text-sm leading-relaxed text-white/60">{s.body}</p>
@@ -89,9 +89,9 @@ export default async function HowItWorksPage() {
                   <span className="mt-1.5 size-2.5 shrink-0 rounded-full" style={{ background: `oklch(0.75 0.12 ${w.hue})` }} />
                   <div>
                     <p className="font-medium">
-                      {w.k} <span className="font-mono text-white/50">{w.w}%</span>
+                      {w.k} <span className="font-mono text-white/60">{w.w}%</span>
                     </p>
-                    <p className="text-sm text-white/50">{w.note}</p>
+                    <p className="text-sm text-white/60">{w.note}</p>
                   </div>
                 </li>
               ))}
@@ -111,12 +111,12 @@ export default async function HowItWorksPage() {
               <div className="h-full rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.05] to-transparent p-6">
                 <dt className="text-sm text-white/60">{m.label}</dt>
                 <dd className="mt-2 font-display text-4xl font-semibold tracking-tight">{m.v}</dd>
-                <dd className="mt-1 text-xs text-white/40">{m.sub}</dd>
+                <dd className="mt-1 text-xs text-white/60">{m.sub}</dd>
               </div>
             </Reveal>
           ))}
         </dl>
-        <p className="mt-4 text-xs text-white/35">All figures come from the generated sample cohort of 1,200 students. Real use needs retraining on a college&apos;s own outcomes.</p>
+        <p className="mt-4 text-xs text-white/60">All figures come from the generated sample cohort of 1,200 students. Real use needs retraining on a college&apos;s own outcomes.</p>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 pt-32 sm:px-6">

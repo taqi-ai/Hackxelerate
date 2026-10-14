@@ -124,7 +124,7 @@ export function Bento() {
             <div key={l as string}>
               <div className="mb-1.5 flex justify-between text-sm">
                 <span className="text-white/75">{l}</span>
-                <span className="tabular text-white/50">{v}</span>
+                <span className="tabular text-white/60">{v}</span>
               </div>
               <motion.div
                 className="h-1.5 rounded-full"
@@ -136,7 +136,7 @@ export function Bento() {
               />
             </div>
           ))}
-          <p className="pt-1 text-xs text-white/40">Held-out test set from the sample cohort. A plain baseline scores close; we say so.</p>
+          <p className="pt-1 text-xs text-white/60">Held-out test set from the sample cohort. A plain baseline scores close; we say so.</p>
         </div>
       </Tile>
       <Tile className="lg:col-span-2">

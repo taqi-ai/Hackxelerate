@@ -49,7 +49,7 @@ export function MarksCalculatorCard({
     );
   }, [selectedSubjectName, currentSemesterSubjects, subjects]);
 
-  const [internalScore, setInternalScore] = useState<number>(selectedSubject.internal ?? 20);
+  const [internalScore, setInternalScore] = useState<number>(selectedSubject.internal ?? 0);
   const [targetTotal, setTargetTotal] = useState<number>(70);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -59,7 +59,7 @@ export function MarksCalculatorCard({
     setSelectedSubjectName(name);
     const sub = subjects.find((s) => s.subject === name);
     if (sub) {
-      setInternalScore(sub.internal ?? 20);
+      setInternalScore(sub.internal ?? 0);
     }
   }
 
@@ -158,6 +158,9 @@ export function MarksCalculatorCard({
                 onChange={(e) => setInternalScore(Math.min(40, Math.max(0, Number(e.target.value) || 0)))}
                 className="w-28 font-mono text-base font-semibold"
               />
+              {selectedSubject.internal == null && (
+                <span className="text-xs font-medium text-amber-600 dark:text-amber-400">Not in the ERP export for this subject. Enter your own marks.</span>
+              )}
               <span className="text-xs text-muted-foreground">
                 Sum of Mid Semester Tests, assignments, quizzes, and continuous evaluation.
               </span>

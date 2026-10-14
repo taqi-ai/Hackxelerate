@@ -38,7 +38,7 @@ function Watch() {
     <div className="w-full rounded-3xl border border-white/10 bg-[oklch(0.15_0.01_275/0.85)] p-5 shadow-[0_40px_100px_-30px_oklch(0.8_0.07_272/0.45)] backdrop-blur-xl">
       <div className="flex items-center justify-between">
         <p className="font-display text-base font-semibold text-white">Weekly engagement</p>
-        <span className="text-[11px] text-white/45">Logins per student, weeks 1 to 12</span>
+        <span className="text-[11px] text-white/60">Logins per student, weeks 1 to 12</span>
       </div>
       <div className="mt-4 grid grid-cols-[64px_repeat(12,1fr)] gap-1.5">
         {WAVE.map((row, r) => (
@@ -58,7 +58,7 @@ function Watch() {
         ))}
         <span />
         {Array.from({ length: 12 }, (_, i) => (
-          <span key={i} className={i >= 8 ? "text-center text-[10px] text-[oklch(0.8_0.12_22)]" : "text-center text-[10px] text-white/35"}>
+          <span key={i} className={i >= 8 ? "text-center text-[10px] text-[oklch(0.8_0.12_22)]" : "text-center text-[10px] text-white/60"}>
             {i + 1}
           </span>
         ))}
@@ -94,7 +94,7 @@ function Ask() {
   ];
   return (
     <div className="w-full rounded-3xl border border-white/10 bg-[oklch(0.15_0.01_275/0.85)] p-5 shadow-[0_40px_100px_-30px_oklch(0.7_0.13_320/0.4)] backdrop-blur-xl">
-      <div className="flex items-center gap-2 text-[11px] text-white/45">
+      <div className="flex items-center gap-2 text-[11px] text-white/60">
         <Sparkles className="size-3.5 text-[oklch(0.82_0.1_320)]" aria-hidden /> Ask Ascora
       </div>
       <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white">
@@ -115,7 +115,7 @@ function Ask() {
           >
             <span className="w-8 text-center font-display text-lg font-semibold text-[oklch(0.78_0.15_22)]">{r.s}</span>
             <span className="min-w-0 flex-1 truncate text-sm text-white">{r.n}</span>
-            <span className="text-xs text-white/50">Attendance {r.a}</span>
+            <span className="text-xs text-white/60">Attendance {r.a}</span>
             <span className="rounded-md bg-[oklch(0.3_0.08_22/0.6)] px-1.5 py-0.5 text-[10px] text-[oklch(0.88_0.08_22)]">High</span>
           </motion.li>
         ))}
@@ -136,7 +136,7 @@ function Act() {
       <div className="grid grid-cols-6 gap-1 text-center">
         {days.map((d, i) => (
           <motion.div key={d} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i, duration: 0.4, ease: EASE }}>
-            <p className="text-[10px] text-white/40">{d}</p>
+            <p className="text-[10px] text-white/60">{d}</p>
             <span className={i === 2 ? "mx-auto mt-1 grid size-8 place-items-center rounded-full bg-[var(--brand)] text-sm font-semibold text-[#07070b] shadow-[0_0_18px_-2px_var(--brand)]" : "mx-auto mt-1 grid size-8 place-items-center rounded-full text-sm text-white/70"}>
               {14 + i}
             </span>
@@ -156,7 +156,7 @@ function Act() {
               <p className="text-sm font-medium text-white">{c.t}</p>
               <span className="size-2 rounded-full" style={{ background: c.c, boxShadow: `0 0 10px ${c.c}` }} />
             </div>
-            <div className="mt-1 flex items-center justify-between text-[11px] text-white/50">
+            <div className="mt-1 flex items-center justify-between text-[11px] text-white/60">
               <span>{c.s}</span>
               <span className="flex items-center gap-1">
                 <CalendarCheck2 className="size-3" aria-hidden /> {c.d}
@@ -165,7 +165,7 @@ function Act() {
           </motion.li>
         ))}
       </ul>
-      <motion.p className="mt-4 text-center text-xs text-white/45" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.9 }}>
+      <motion.p className="mt-4 text-center text-xs text-white/60" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.9 }}>
         Every plan is logged with a baseline, so you can see if it worked.
       </motion.p>
     </div>
@@ -233,7 +233,7 @@ export function HeroStage() {
                 />
               )}
             </span>
-            <span className={n === i ? "mt-2 flex items-center gap-1.5 text-xs text-white" : "mt-2 flex items-center gap-1.5 text-xs text-white/40 group-hover:text-white/70"}>
+            <span className={n === i ? "mt-2 flex items-center gap-1.5 text-xs text-white" : "mt-2 flex items-center gap-1.5 text-xs text-white/60 group-hover:text-white/70"}>
               <s.icon className="size-3" aria-hidden /> {s.label}
             </span>
           </button>

@@ -68,7 +68,7 @@ export function HeroShowcase({ signedIn }: { signedIn: boolean }) {
             Test the Android app
           </Link>
         </div>
-        <p className="mt-3 text-xs text-white/50">The Android app is built, but there is no APK yet. Try it in your browser now, no install needed.</p>
+        <p className="mt-3 text-xs text-white/60">The Android app is built, but there is no APK yet. Try it in your browser now, no install needed.</p>
 
         {/* product stage */}
         <div className={cn("relative mt-14 w-full max-w-6xl animate-[page-enter_1000ms_320ms_cubic-bezier(0.22,1,0.36,1)]", RISE)}>
@@ -78,7 +78,7 @@ export function HeroShowcase({ signedIn }: { signedIn: boolean }) {
               <span className="size-2.5 rounded-full bg-white/15" />
               <span className="size-2.5 rounded-full bg-white/15" />
               <span className="size-2.5 rounded-full bg-white/15" />
-              <span className="ml-3 truncate rounded-md bg-white/[0.05] px-3 py-0.5 text-[11px] text-white/40">ascora-five.vercel.app/overview</span>
+              <span className="ml-3 truncate rounded-md bg-white/[0.05] px-3 py-0.5 text-[11px] text-white/60">ascora-five.vercel.app/overview</span>
             </div>
             <Image
               src="/assets/shots/overview.webp"
@@ -106,7 +106,7 @@ export function HeroShowcase({ signedIn }: { signedIn: boolean }) {
           </Note>
         </div>
 
-        <p className="mt-6 text-xs text-white/40">Screens show the synthetic demo cohort. No real student data is used.</p>
+        <p className="mt-6 text-xs text-white/60">Screens show the synthetic demo cohort. No real student data is used.</p>
 
         <dl className="mt-10 grid w-full max-w-4xl grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-4">
           {FACTS.map((f) => (

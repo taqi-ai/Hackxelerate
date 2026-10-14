@@ -144,9 +144,12 @@ export function SemesterTranscriptView({
                   </thead>
                   <tbody className="divide-y">
                     {semCourses.map((c) => {
-                      const att = bySubjectAttendance[c.subject] ?? overallAttendance;
+                      const attRaw = bySubjectAttendance[c.subject] ?? overallAttendance;
+                      const att = Number.isFinite(attRaw) ? attRaw : null;
                       const hasEndSem = c.end_sem !== null && c.end_sem !== undefined;
-                      const totalVal = c.total ?? (hasEndSem ? c.internal + (c.end_sem ?? 0) : null);
+                      // internal marks can be missing in the source: never turn "not recorded" into 0
+                      const internal = typeof c.internal === "number" && Number.isFinite(c.internal) ? c.internal : null;
+                      const totalVal = c.total ?? (hasEndSem && internal !== null ? internal + (c.end_sem ?? 0) : null);
                       const grade = totalVal !== null ? getGradePointFromTotal(totalVal).grade : "Pending";
                       const isFail = totalVal !== null && totalVal < 40;
 
@@ -161,16 +164,18 @@ export function SemesterTranscriptView({
                           <td className="py-3 px-3 text-center">
                             <span
                               className={`font-mono font-semibold px-2 py-0.5 rounded-md text-xs border ${
-                                att < 75
+                                att === null
+                                  ? "bg-muted text-muted-foreground border-border"
+                                  : att < 75
                                   ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
                                   : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
                               }`}
                             >
-                              {att.toFixed(1)}%
+                              {att === null ? "n/a" : `${att.toFixed(1)}%`}
                             </span>
                           </td>
                           <td className="py-3 px-3 text-right font-mono font-semibold text-foreground">
-                            {c.internal.toFixed(1)}
+                            {internal !== null ? internal.toFixed(1) : <span className="text-muted-foreground italic">Not recorded</span>}
                           </td>
                           <td className="py-3 px-3 text-right font-mono text-foreground">
                             {hasEndSem ? (c.end_sem ?? 0).toFixed(1) : <span className="text-muted-foreground italic">Scheduled</span>}

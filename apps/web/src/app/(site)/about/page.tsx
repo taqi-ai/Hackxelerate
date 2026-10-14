@@ -89,8 +89,8 @@ export default async function AboutPage() {
                   {initials(m.name)}
                 </span>
                 <p className="mt-5 font-display text-lg font-semibold leading-tight">{m.name}</p>
-                <p className={m.role === "Team Lead" ? "mt-1 text-sm text-[oklch(0.84_0.08_272)]" : "mt-1 text-sm text-white/50"}>{m.role}</p>
-                <p className="mt-3 text-xs text-white/40">B.Tech AIML, 2nd year, Sem 3</p>
+                <p className={m.role === "Team Lead" ? "mt-1 text-sm text-[oklch(0.84_0.08_272)]" : "mt-1 text-sm text-white/60"}>{m.role}</p>
+                <p className="mt-3 text-xs text-white/60">B.Tech AIML, 2nd year, Sem 3</p>
               </li>
             </Reveal>
           ))}
