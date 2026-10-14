@@ -16,13 +16,12 @@ import { createIntervention, updateInterventionStatus } from "@/app/(app)/action
 import { INTERVENTION_LABEL } from "@/lib/format";
 import type { Intervention } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { campusDate } from "@/lib/dates";
 
 const STATUS_LABEL = { open: "Open", in_progress: "In progress", done: "Done", cancelled: "Cancelled" } as const;
 
 function inDays(n: number) {
-  const d = new Date();
-  d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0, 10);
+  return campusDate(n);
 }
 
 export function InterventionPanel({

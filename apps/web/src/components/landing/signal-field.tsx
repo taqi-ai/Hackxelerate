@@ -124,7 +124,7 @@ export function SignalField() {
           </div>
           <div className="text-right">
             <p className="font-display text-xl font-semibold leading-none text-white">9.15</p>
-            <p className="text-[10px] text-white/50">CGPA</p>
+            <p className="text-[10px] text-white/60">CGPA</p>
           </div>
         </div>
         <div className="mt-3">
@@ -141,7 +141,7 @@ export function SignalField() {
               transition={{ duration: 1, ease: EASE }}
             />
           </svg>
-          <p className="mt-1 text-[10px] text-white/45">LMS engagement, weeks 1 to 12</p>
+          <p className="mt-1 text-[10px] text-white/60">LMS engagement, weeks 1 to 12</p>
         </div>
         <motion.div
           className="mt-3 flex items-start gap-2 rounded-lg bg-[oklch(0.28_0.06_22/0.55)] px-2.5 py-2 text-[11px] leading-snug text-[oklch(0.86_0.08_22)]"

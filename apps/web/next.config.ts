@@ -9,6 +9,17 @@ const nextConfig: NextConfig = {
     // import only what is used from these big barrel packages: smaller client bundles
     optimizePackageImports: ["recharts", "lucide-react", "@tanstack/react-table", "radix-ui"],
   },
+  // the Expo web build of the mobile app (public/mobile-sim) is a single-page app: every path serves its index
+  async rewrites() {
+    return {
+      beforeFiles: [
+        { source: "/mobile-sim", destination: "/mobile-sim/index.html" },
+        { source: "/mobile-sim/:path((?!_expo|assets|favicon.ico|index.html).*)", destination: "/mobile-sim/index.html" },
+      ],
+      afterFiles: [],
+      fallback: [],
+    };
+  },
   // long-lived caching for the brand assets (content never changes under the same name)
   async headers() {
     return [
@@ -18,7 +29,7 @@ const nextConfig: NextConfig = {
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
         ],
       },
     ];

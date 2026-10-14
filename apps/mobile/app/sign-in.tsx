@@ -9,16 +9,16 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../src/lib/theme";
-import { supabase } from "../src/lib/supabase";
+import { supabase, isSupabaseConfigured } from "../src/lib/supabase";
 import { triggerHaptic } from "../src/lib/haptics";
-
 import { playSound } from "../src/lib/sound";
+import { BrandMark } from "../src/components/BrandMark";
+import { AuroraBackground } from "../src/components/AuroraBackground";
 
 const SHARED_PASSWORD = "AscoraDemo#2026";
 
@@ -35,11 +35,18 @@ const QUICK_ROLES = [
   },
 ];
 
+const STUDENT_DEMO_PICKS = [
+  { id: "CU24AIML0001", name: "Daksh Bakshi", branch: "CSE-AIML", year: 3 },
+  { id: "CU24AIML0039", name: "Arjun Gupta", branch: "CSE-AIML", year: 3 },
+];
+
 export default function SignInScreen() {
   const router = useRouter();
   const { colors } = useTheme();
+
   const insets = useSafeAreaInsets();
 
+  const [activeTab, setActiveTab] = useState<"institutional" | "student">("institutional");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -64,11 +71,15 @@ export default function SignInScreen() {
       if (signInError) {
         triggerHaptic("error");
         playSound("error");
-        setError(
-          signInError.message === "Invalid login credentials"
-            ? "Invalid email or password. Pick a quick role below to fill."
-            : signInError.message
-        );
+        if (!isSupabaseConfigured || signInError.message?.toLowerCase().includes("invalid api key")) {
+          setError(
+            "Supabase credentials not configured in apps/mobile/.env. Add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY to log in."
+          );
+        } else if (signInError.message === "Invalid login credentials") {
+          setError("That email and password do not match an account. Check them or pick an account below.");
+        } else {
+          setError(signInError.message);
+        }
       } else {
         triggerHaptic("success");
         playSound("success");
@@ -91,197 +102,338 @@ export default function SignInScreen() {
     setError(null);
   };
 
-  return (
-    <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <ScrollView
-        contentContainerStyle={[
-          styles.scrollContent,
-          {
-            paddingTop: Math.max(insets.top, 24) + 16,
-            paddingBottom: Math.max(insets.bottom, 24) + 24,
-          },
-        ]}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Brand Header */}
-        <View style={styles.header}>
-          <Image
-            source={require("../assets/icon-512-transparent.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <Text
-            style={[
-              styles.appName,
-              { color: colors.text, fontFamily: "BricolageGrotesque_700Bold" },
-            ]}
-          >
-            Ascora
-          </Text>
-          <Text style={[styles.appTagline, { color: colors.mutedText }]}>
-            AI Student Success Companion
-          </Text>
-        </View>
+  const handleStudentPick = (studentId: string) => {
+    triggerHaptic("medium");
+    playSound("tap");
+    // Navigate straight to student detail preview
+    router.push({
+      pathname: "/student/[id]",
+      params: { id: studentId },
+    });
+  };
 
-        {/* Sign In Form Card */}
-        <View
-          style={[
-            styles.card,
+  return (
+    <AuroraBackground>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
             {
-              backgroundColor: colors.card,
-              borderColor: colors.cardBorder,
+              paddingTop: Math.max(insets.top, 24) + 16,
+              paddingBottom: Math.max(insets.bottom, 24) + 24,
             },
           ]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <Text
-            style={[
-              styles.cardTitle,
-              { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
-            ]}
-          >
-            Sign in to your account
-          </Text>
-
-          {/* Email input */}
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>Email address</Text>
-            <View
+          {/* Brand Header */}
+          <View style={styles.header}>
+            <BrandMark size={42} showSubtitle={false} />
+            <Text
               style={[
-                styles.inputWrapper,
-                {
-                  backgroundColor: colors.inputBg,
-                  borderColor: colors.cardBorder,
-                },
+                styles.appTagline,
+                { color: colors.mutedText },
               ]}
             >
-              <Feather name="mail" size={16} color={colors.mutedText} style={styles.inputIcon} />
-              <TextInput
-                style={[styles.input, { color: colors.text }]}
-                placeholder="name@college.edu"
-                placeholderTextColor={colors.mutedText}
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                autoCorrect={false}
-              />
-            </View>
+              From early warning to real intervention
+            </Text>
           </View>
 
-          {/* Password input */}
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>Password</Text>
-            <View
-              style={[
-                styles.inputWrapper,
-                {
-                  backgroundColor: colors.inputBg,
-                  borderColor: colors.cardBorder,
-                },
-              ]}
-            >
-              <Feather name="lock" size={16} color={colors.mutedText} style={styles.inputIcon} />
-              <TextInput
-                style={[styles.input, { color: colors.text }]}
-                placeholder="Password"
-                placeholderTextColor={colors.mutedText}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                autoCapitalize="none"
-              />
-            </View>
-          </View>
-
-          {error && (
-            <View
-              style={[
-                styles.errorBox,
-                { backgroundColor: colors.riskHighSoft, borderColor: colors.riskHigh },
-              ]}
-            >
-              <Feather name="alert-circle" size={15} color={colors.riskHigh} />
-              <Text style={[styles.errorText, { color: colors.riskHigh }]}>{error}</Text>
-            </View>
-          )}
-
-          {/* Sign in button */}
-          <TouchableOpacity
+          {/* Role Navigation Tab Switcher matching Website LoginForm */}
+          <View
             style={[
-              styles.signInBtn,
+              styles.tabSwitcher,
               {
-                backgroundColor: colors.brand,
-                opacity: loading ? 0.75 : 1,
+                backgroundColor: colors.surface,
+                borderColor: colors.cardBorder,
               },
             ]}
-            onPress={handleSignIn}
-            disabled={loading}
-            activeOpacity={0.8}
           >
-            {loading ? (
-              <ActivityIndicator color="#07070b" />
-            ) : (
-              <Text style={styles.signInBtnText}>Sign in</Text>
-            )}
-          </TouchableOpacity>
-        </View>
-
-        {/* Quick Sign-in Section */}
-        <View style={styles.quickSection}>
-          <Text
-            style={[
-              styles.quickSectionTitle,
-              { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
-            ]}
-          >
-            Quick sign-in
-          </Text>
-          <Text style={[styles.quickSectionSubtitle, { color: colors.mutedText }]}>
-            Evaluation roles with shared credentials
-          </Text>
-
-          <View style={styles.quickGrid}>
-            {QUICK_ROLES.map((role) => (
-              <TouchableOpacity
-                key={role.email}
+            <TouchableOpacity
+              style={[
+                styles.tabBtn,
+                activeTab === "institutional" && {
+                  backgroundColor: colors.card,
+                  borderColor: colors.cardBorder,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 4,
+                  elevation: 2,
+                },
+              ]}
+              onPress={() => {
+                playSound("toggle");
+                setActiveTab("institutional");
+              }}
+              activeOpacity={0.8}
+            >
+              <Feather
+                name="key"
+                size={14}
+                color={activeTab === "institutional" ? colors.brand : colors.mutedText}
+              />
+              <Text
                 style={[
-                  styles.quickCard,
+                  styles.tabBtnText,
                   {
-                    backgroundColor: colors.surface,
-                    borderColor: colors.cardBorder,
+                    color: activeTab === "institutional" ? colors.text : colors.mutedText,
+                    fontWeight: activeTab === "institutional" ? "700" : "500",
                   },
                 ]}
-                onPress={() => handleQuickFill(role.email)}
-                activeOpacity={0.7}
               >
-                <View style={styles.quickRow}>
+                Faculty & Admin
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.tabBtn,
+                activeTab === "student" && {
+                  backgroundColor: colors.card,
+                  borderColor: colors.cardBorder,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 4,
+                  elevation: 2,
+                },
+              ]}
+              onPress={() => {
+                playSound("toggle");
+                setActiveTab("student");
+              }}
+              activeOpacity={0.8}
+            >
+              <Feather
+                name="user"
+                size={14}
+                color={activeTab === "student" ? colors.brand : colors.mutedText}
+              />
+              <Text
+                style={[
+                  styles.tabBtnText,
+                  {
+                    color: activeTab === "student" ? colors.text : colors.mutedText,
+                    fontWeight: activeTab === "student" ? "700" : "500",
+                  },
+                ]}
+              >
+                Student Login
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Sign In Form Card */}
+          <View
+            style={[
+              styles.card,
+              {
+                backgroundColor: colors.card,
+                borderColor: colors.cardBorder,
+              },
+            ]}
+          >
+            {activeTab === "institutional" ? (
+              <>
+                <Text
+                  style={[
+                    styles.cardTitle,
+                    { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
+                  ]}
+                >
+                  Welcome back
+                </Text>
+                <Text style={[styles.cardSubtitle, { color: colors.mutedText }]}>
+                  Use your college account. Access depends on your role.
+                </Text>
+
+                {/* Email input */}
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.label, { color: colors.text }]}>Email address</Text>
+                  <View
+                    style={[
+                      styles.inputWrapper,
+                      {
+                        backgroundColor: colors.inputBg,
+                        borderColor: colors.cardBorder,
+                      },
+                    ]}
+                  >
+                    <Feather name="mail" size={16} color={colors.mutedText} style={styles.inputIcon} />
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      placeholder="name@college.edu..."
+                      placeholderTextColor={colors.mutedText}
+                      value={email}
+                      onChangeText={setEmail}
+                      autoCapitalize="none"
+                      keyboardType="email-address"
+                      autoCorrect={false}
+                    />
+                  </View>
+                </View>
+
+                {/* Password input */}
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.label, { color: colors.text }]}>Password</Text>
+                  <View
+                    style={[
+                      styles.inputWrapper,
+                      {
+                        backgroundColor: colors.inputBg,
+                        borderColor: colors.cardBorder,
+                      },
+                    ]}
+                  >
+                    <Feather name="lock" size={16} color={colors.mutedText} style={styles.inputIcon} />
+                    <TextInput
+                      style={[styles.input, { color: colors.text }]}
+                      placeholder="Password"
+                      placeholderTextColor={colors.mutedText}
+                      value={password}
+                      onChangeText={setPassword}
+                      secureTextEntry
+                      autoCapitalize="none"
+                    />
+                  </View>
+                </View>
+
+                {error && (
+                  <View
+                    style={[
+                      styles.errorBox,
+                      { backgroundColor: colors.riskHighSoft, borderColor: colors.riskHigh },
+                    ]}
+                  >
+                    <Feather name="alert-circle" size={15} color={colors.riskHigh} />
+                    <Text style={[styles.errorText, { color: colors.riskHigh }]}>{error}</Text>
+                  </View>
+                )}
+
+                {/* Sign in button */}
+                <TouchableOpacity
+                  style={[
+                    styles.signInBtn,
+                    {
+                      backgroundColor: colors.brand,
+                      opacity: loading ? 0.75 : 1,
+                    },
+                  ]}
+                  onPress={handleSignIn}
+                  disabled={loading}
+                  activeOpacity={0.85}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#07070b" />
+                  ) : (
+                    <Text style={styles.signInBtnText}>Sign in</Text>
+                  )}
+                </TouchableOpacity>
+
+                {/* Quick sign-in list */}
+                <View style={styles.quickSection}>
                   <Text
                     style={[
-                      styles.quickRoleLabel,
+                      styles.quickSectionTitle,
                       { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
                     ]}
                   >
-                    {role.label}
+                    Quick sign-in
                   </Text>
-                  <Feather name="arrow-right" size={14} color={colors.brand} />
+
+                  <View style={styles.quickGrid}>
+                    {QUICK_ROLES.map((role) => (
+                      <TouchableOpacity
+                        key={role.email}
+                        style={[
+                          styles.quickCard,
+                          {
+                            backgroundColor: colors.surface,
+                            borderColor: colors.cardBorder,
+                          },
+                        ]}
+                        onPress={() => handleQuickFill(role.email)}
+                        activeOpacity={0.7}
+                      >
+                        <View style={styles.quickRow}>
+                          <Text
+                            style={[
+                              styles.quickRoleLabel,
+                              { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
+                            ]}
+                          >
+                            {role.label}
+                          </Text>
+                          <Feather name="arrow-right" size={14} color={colors.brand} />
+                        </View>
+                        <Text style={[styles.quickEmail, { color: colors.brand }]}>{role.email}</Text>
+                        <Text style={[styles.quickHint, { color: colors.mutedText }]}>{role.hint}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
                 </View>
-                <Text style={[styles.quickEmail, { color: colors.brand }]}>{role.email}</Text>
-                <Text style={[styles.quickHint, { color: colors.mutedText }]}>{role.hint}</Text>
-              </TouchableOpacity>
-            ))}
+              </>
+            ) : (
+              /* Student Portal Quick Chooser matching Website */
+              <View style={styles.studentChooserWrap}>
+                <Text
+                  style={[
+                    styles.cardTitle,
+                    { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
+                  ]}
+                >
+                  Student 360 View
+                </Text>
+                <Text style={[styles.cardSubtitle, { color: colors.mutedText }]}>
+                  Select a student profile from the cohort to view personal grades, attendance simulators, and ML recourse.
+                </Text>
+
+                <View style={styles.studentGrid}>
+                  {STUDENT_DEMO_PICKS.map((st) => (
+                    <TouchableOpacity
+                      key={st.id}
+                      style={[
+                        styles.quickCard,
+                        {
+                          backgroundColor: colors.surface,
+                          borderColor: colors.cardBorder,
+                        },
+                      ]}
+                      onPress={() => handleStudentPick(st.id)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={styles.quickRow}>
+                        <Text
+                          style={[
+                            styles.quickRoleLabel,
+                            { color: colors.text, fontFamily: "BricolageGrotesque_600SemiBold" },
+                          ]}
+                        >
+                          {st.name}
+                        </Text>
+                        <Feather name="arrow-right" size={14} color={colors.brand} />
+                      </View>
+                      <Text style={[styles.quickEmail, { color: colors.brand }]}>{st.id}</Text>
+                      <Text style={[styles.quickHint, { color: colors.mutedText }]}>
+                        {st.branch} · Year {st.year}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
           </View>
 
           <Text style={[styles.disclaimerText, { color: colors.mutedText }]}>
-            Shared password: <Text style={{ fontFamily: "monospace", color: colors.brand }}>{SHARED_PASSWORD}</Text>
-            . Select a role above to auto-fill.
+            Shared evaluation credentials · Synthetic data only · KPMG Challenge 04
           </Text>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </AuroraBackground>
   );
 }
 
@@ -291,79 +443,101 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
+    gap: 16,
   },
   header: {
     alignItems: "center",
-    marginBottom: 24,
-  },
-  logo: {
-    width: 64,
-    height: 64,
-    marginBottom: 12,
-  },
-  appName: {
-    fontSize: 28,
-    fontWeight: "700",
-    letterSpacing: -0.5,
+    gap: 8,
+    marginBottom: 4,
   },
   appTagline: {
     fontSize: 13,
-    marginTop: 4,
+    marginTop: 2,
+    textAlign: "center",
+  },
+  tabSwitcher: {
+    flexDirection: "row",
+    padding: 4,
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: 4,
+  },
+  tabBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 9,
+    borderRadius: 10,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  tabBtnText: {
+    fontSize: 13,
   },
   card: {
+    padding: 20,
     borderRadius: 20,
     borderWidth: 1,
-    padding: 20,
     gap: 14,
-    marginBottom: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.16,
+    shadowRadius: 12,
+    elevation: 3,
   },
   cardTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 2,
+    fontSize: 20,
+    letterSpacing: -0.4,
+  },
+  cardSubtitle: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: -8,
   },
   inputGroup: {
     gap: 6,
   },
   label: {
     fontSize: 13,
-    fontWeight: "500",
+    fontWeight: "600",
   },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 14,
     borderWidth: 1,
-    height: 48,
+    borderRadius: 12,
     paddingHorizontal: 12,
+    height: 48,
   },
   inputIcon: {
     marginRight: 10,
   },
   input: {
     flex: 1,
-    height: "100%",
     fontSize: 14,
+    height: "100%",
   },
   errorBox: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
     padding: 12,
-    borderRadius: 12,
-    borderWidth: 0.5,
+    borderRadius: 10,
+    borderWidth: 1,
+    gap: 8,
   },
   errorText: {
-    fontSize: 12,
+    fontSize: 12.5,
     flex: 1,
     lineHeight: 16,
   },
   signInBtn: {
     height: 48,
-    borderRadius: 14,
-    justifyContent: "center",
+    borderRadius: 12,
     alignItems: "center",
-    marginTop: 6,
+    justifyContent: "center",
+    marginTop: 4,
   },
   signInBtnText: {
     color: "#07070b",
@@ -371,25 +545,21 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   quickSection: {
+    marginTop: 8,
     gap: 10,
   },
   quickSectionTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-  },
-  quickSectionSubtitle: {
-    fontSize: 12,
+    fontSize: 14,
+    letterSpacing: -0.2,
   },
   quickGrid: {
-    gap: 10,
-    marginTop: 4,
+    gap: 8,
   },
   quickCard: {
-    borderRadius: 14,
+    padding: 12,
+    borderRadius: 12,
     borderWidth: 1,
-    padding: 14,
-    gap: 4,
-    minHeight: 56,
+    gap: 3,
   },
   quickRow: {
     flexDirection: "row",
@@ -397,8 +567,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   quickRoleLabel: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: 13,
   },
   quickEmail: {
     fontSize: 12,
@@ -406,12 +575,17 @@ const styles = StyleSheet.create({
   },
   quickHint: {
     fontSize: 11,
-    marginTop: 2,
+  },
+  studentChooserWrap: {
+    gap: 12,
+  },
+  studentGrid: {
+    gap: 8,
+    marginTop: 4,
   },
   disclaimerText: {
-    fontSize: 11,
     textAlign: "center",
-    lineHeight: 16,
-    marginTop: 8,
+    fontSize: 11.5,
+    marginTop: 4,
   },
 });

@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { supabase, isSupabaseConfigured } from "./supabase";
 import type {
   Intervention,
   LMSActivity,
@@ -87,6 +87,14 @@ export async function fetchStudentRows(
     orderByPriority = false,
   } = options;
 
+  if (!isSupabaseConfigured) {
+    return {
+      rows: [],
+      hasMore: false,
+      totalApprox: 0,
+    };
+  }
+
   let query = supabase.from("student_scores").select(ROW_COLS, { count: "exact" });
 
   if (orderByPriority) {
@@ -139,6 +147,9 @@ export async function fetchStudentRows(
 }
 
 export async function fetchTopPriorityStudents(limit = 5): Promise<StudentRow[]> {
+  if (!isSupabaseConfigured) {
+    return [];
+  }
   const { data, error } = await supabase
     .from("student_scores")
     .select(ROW_COLS)
@@ -146,7 +157,10 @@ export async function fetchTopPriorityStudents(limit = 5): Promise<StudentRow[]>
     .limit(limit);
 
   if (error) {
-    console.error("fetchTopPriorityStudents error:", error.message);
+    // Only log if not an unconfigured key warning
+    if (!error.message?.includes("Invalid API key")) {
+      console.error("fetchTopPriorityStudents error:", error.message);
+    }
     return [];
   }
   return (data || []).map((r: any) => toRow(r, r.students));
@@ -159,6 +173,15 @@ export async function fetchDashboardStats(): Promise<{
   highPlacement: number;
   silentDecliners: number;
 }> {
+  if (!isSupabaseConfigured) {
+    return {
+      totalStudents: 0,
+      avgScore: 0,
+      highAcademic: 0,
+      highPlacement: 0,
+      silentDecliners: 0,
+    };
+  }
   // Query all accessible rows (or up to 1200) for exact metric aggregates
   const { data, error } = await supabase
     .from("student_scores")
@@ -237,6 +260,9 @@ export async function fetchStudent360(studentId: string) {
 }
 
 export async function fetchInterventions(studentId?: string): Promise<Intervention[]> {
+  if (!isSupabaseConfigured) {
+    return [];
+  }
   let query = supabase
     .from("interventions")
     .select("*")
@@ -248,7 +274,9 @@ export async function fetchInterventions(studentId?: string): Promise<Interventi
 
   const { data, error } = await query;
   if (error) {
-    console.error("fetchInterventions error:", error.message);
+    if (!error.message?.includes("Invalid API key")) {
+      console.error("fetchInterventions error:", error.message);
+    }
     return [];
   }
 

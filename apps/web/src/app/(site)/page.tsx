@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { ArrowUpRight, BookOpenCheck, Briefcase, CalendarCheck, ClipboardList, GraduationCap, MessageSquareText, Trophy } from "lucide-react";
 import { Headline } from "@/components/landing/headline";
 import { HeroStage } from "@/components/landing/hero-stage";
+import { HeroShowcase } from "@/components/landing/hero-showcase";
 import { Story } from "@/components/landing/story";
 import { Bento } from "@/components/landing/bento";
 import { Aurora, ClosingCta, Eyebrow, GhostCta, PrimaryCta, SectionHead } from "@/components/landing/site-kit";
@@ -44,8 +45,11 @@ export default async function Home() {
   const profile = await getProfile().catch(() => null);
   return (
     <>
-      {/* hero */}
-      <section className="relative isolate overflow-hidden">
+      {/* first screen: promise, both ways in, the real product */}
+      <HeroShowcase signedIn={!!profile} />
+
+      {/* the original hero, kept as the second beat: how the seven systems become one view */}
+      <section id="platform" className="relative isolate scroll-mt-0 overflow-hidden border-t border-white/10">
         <Aurora />
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
           {[
@@ -80,7 +84,7 @@ export default async function Home() {
               </div>
             </Reveal>
             <Reveal delay={0.3}>
-              <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/45">
+              <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/60">
                 <li>Explainable scores</li>
                 <li>Mentor workflow built in</li>
                 <li>Role-based access</li>
@@ -109,21 +113,20 @@ export default async function Home() {
 
       {/* measured results, not marketing numbers */}
       <section aria-label="Measured results" className="mx-auto max-w-7xl px-4 pt-20 sm:px-6">
-        <dl className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <ul className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {PROOF.map((p, i) => (
-            <Reveal key={p.label} delay={i * 0.06}>
-              <div className="h-full rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.05] to-transparent p-6">
-                <dt className="sr-only">{p.label}</dt>
-                <dd>
+            <li key={p.label}>
+              <Reveal delay={i * 0.06} className="h-full">
+                <div className="h-full rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.05] to-transparent p-6">
                   <CountUp value={p.v} decimals={p.decimals ?? 0} suffix={p.suffix ?? ""} className="font-display text-4xl font-semibold tracking-tight sm:text-5xl" />
                   <p className="mt-2 text-sm text-white/80">{p.label}</p>
-                  <p className="mt-1 text-xs text-white/40">{p.note}</p>
-                </dd>
-              </div>
-            </Reveal>
+                  <p className="mt-1 text-xs text-white/60">{p.note}</p>
+                </div>
+              </Reveal>
+            </li>
           ))}
-        </dl>
-        <p className="mt-4 text-xs text-white/35">Measured on a generated sample cohort of 1,200 students. No real student data is used.</p>
+        </ul>
+        <p className="mt-4 text-xs text-white/60">Measured on a generated sample cohort of 1,200 students. No real student data is used.</p>
       </section>
 
       {/* the method, as a pinned story */}
@@ -176,7 +179,7 @@ export default async function Home() {
               >
                 <span className="flex items-center justify-between font-display text-xl font-semibold">
                   {e.title}
-                  <ArrowUpRight className="size-5 text-white/40 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-white" aria-hidden />
+                  <ArrowUpRight className="size-5 text-white/60 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-white" aria-hidden />
                 </span>
                 <span className="mt-3 text-sm leading-relaxed text-white/55">{e.body}</span>
               </Link>

@@ -14,15 +14,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { fmtInt, INTERVENTION_LABEL } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { istParts } from "@/lib/dates";
 import type { StudentRow } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Overview" };
-
-function istNow() {
-  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", hour12: false }).formatToParts(new Date());
-  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
-  return { date: `${get("year")}-${get("month")}-${get("day")}`, hour: Number(get("hour")) };
-}
 
 function firstName(full: string) {
   const clean = full.replace(/\(.*?\)/g, "").trim();
@@ -53,7 +48,7 @@ export default async function OverviewPage() {
     );
   }
 
-  const now = istNow();
+  const now = istParts();
   const hello = now.hour < 12 ? "Good morning" : now.hour < 17 ? "Good afternoon" : "Good evening";
   const isMentor = profile?.role === "mentor";
   const n = rows.length;

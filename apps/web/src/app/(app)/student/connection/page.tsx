@@ -27,12 +27,13 @@ export default async function StudentConnectionPage() {
   const { student, academic, attendance, connection } = academicData;
   const overallAtt = attendance?.overall_pct ?? 0;
   const cgpaValue = academic?.cgpa ?? 0;
+  const isLive = connection?.provenance === "manual_import" || connection?.provenance === "culko_portal";
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Data & Portal"
-        description="University portal synchronization, data provenance breakdown, and DPDP compliance safeguards."
+        description="Data provenance, manual import and privacy safeguards. No live university portal sync."
         actions={
           <div className="flex items-center gap-2">
             <StudentSelectorDialog currentStudentId={student.id} />
@@ -46,16 +47,20 @@ export default async function StudentConnectionPage() {
         <div className="lg:col-span-7 space-y-6">
           <Panel
             title="Campus Integration Status"
-            description="Active provenance link connecting Ascora to institutional records"
+            description="Where this student's figures come from. Ascora does not log in to the university portal."
           >
             <div className="space-y-4 pt-2">
               <div className="rounded-xl border bg-background/60 p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Connected Provider
+                    Data Source
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                    <CheckCircle2 className="h-3.5 w-3.5" /> Synchronized
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                    isLive
+                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                      : "bg-muted text-muted-foreground"
+                  }`}>
+                    <CheckCircle2 className="h-3.5 w-3.5" /> {isLive ? "Imported" : "Demo data, no live sync"}
                   </span>
                 </div>
 
@@ -80,9 +85,9 @@ export default async function StudentConnectionPage() {
                     <span className="font-mono font-semibold text-foreground">{student.id}</span>
                   </div>
                   <div className="rounded-lg border bg-muted/30 p-2.5">
-                    <span className="text-[10px] text-muted-foreground uppercase font-medium block">Last Verified</span>
+                    <span className="text-[10px] text-muted-foreground uppercase font-medium block">{isLive ? "Last imported" : "Data as of"}</span>
                     <span className="font-mono font-semibold text-foreground">
-                      {new Date(connection?.last_synced_at ?? Date.now()).toLocaleDateString()}
+                      {connection?.last_synced_at ? new Date(connection.last_synced_at).toLocaleDateString() : "Frozen demo cohort"}
                     </span>
                   </div>
                 </div>

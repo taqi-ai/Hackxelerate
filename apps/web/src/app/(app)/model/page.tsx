@@ -40,7 +40,7 @@ function ModelBlock({ m }: { m: any }) {
         </Panel>
       </div>
       <Panel title="Model card" description="Intended use, limits and prohibited uses">
-        <pre className="max-h-96 overflow-auto whitespace-pre-wrap rounded-lg bg-muted/50 p-4 font-sans text-sm leading-relaxed">{m.card}</pre>
+        <pre tabIndex={0} aria-label="Scrollable score note" className="max-h-96 overflow-auto whitespace-pre-wrap rounded-lg bg-muted/50 p-4 font-sans text-sm leading-relaxed">{m.card}</pre>
       </Panel>
     </div>
   );

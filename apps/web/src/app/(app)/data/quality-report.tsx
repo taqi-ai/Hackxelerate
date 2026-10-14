@@ -139,7 +139,7 @@ export function QualityReport({ report, conflicts, review }: { report: any | nul
           <TabsTrigger value="conflicts">Conflicts ({q.conflicts})</TabsTrigger>
         </TabsList>
         <TabsContent value="review" className="mt-3">
-          <div className="max-h-96 overflow-auto rounded-xl border bg-card">
+          <div tabIndex={0} role="region" aria-label="Scrollable table" className="max-h-96 overflow-auto rounded-xl border bg-card focus-visible:outline-2 focus-visible:outline-ring">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -166,7 +166,7 @@ export function QualityReport({ report, conflicts, review }: { report: any | nul
           <p className="mt-2 text-xs text-muted-foreground">Ambiguous links are never used in scores until a person confirms them. Typically two students share a name in the same class.</p>
         </TabsContent>
         <TabsContent value="conflicts" className="mt-3">
-          <div className="max-h-96 overflow-auto rounded-xl border bg-card">
+          <div tabIndex={0} role="region" aria-label="Scrollable table" className="max-h-96 overflow-auto rounded-xl border bg-card focus-visible:outline-2 focus-visible:outline-ring">
             <Table>
               <TableHeader>
                 <TableRow>

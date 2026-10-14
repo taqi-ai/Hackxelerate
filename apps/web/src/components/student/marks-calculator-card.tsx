@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { calculateSubjectMarkTarget, GRADE_BANDS } from "@/lib/academic-calc";
 import { saveStudentPlanAction } from "@/app/(app)/actions";
 import { play } from "@/lib/sound";
+import { campusDate } from "@/lib/dates";
 
 export interface SubjectMarksData {
   subject: string;
@@ -48,7 +49,7 @@ export function MarksCalculatorCard({
     );
   }, [selectedSubjectName, currentSemesterSubjects, subjects]);
 
-  const [internalScore, setInternalScore] = useState<number>(selectedSubject.internal ?? 20);
+  const [internalScore, setInternalScore] = useState<number>(selectedSubject.internal ?? 0);
   const [targetTotal, setTargetTotal] = useState<number>(70);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -58,7 +59,7 @@ export function MarksCalculatorCard({
     setSelectedSubjectName(name);
     const sub = subjects.find((s) => s.subject === name);
     if (sub) {
-      setInternalScore(sub.internal ?? 20);
+      setInternalScore(sub.internal ?? 0);
     }
   }
 
@@ -93,7 +94,7 @@ export function MarksCalculatorCard({
           internalScore,
           internalMax: 40,
         },
-        due_date: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+        due_date: campusDate(30),
         notes: `Simulated via Marks Target Planner. Need ${result.requiredEndSemScore}/60 in End Semester examination to secure ${result.gradeBand}.`,
       });
 
@@ -157,6 +158,9 @@ export function MarksCalculatorCard({
                 onChange={(e) => setInternalScore(Math.min(40, Math.max(0, Number(e.target.value) || 0)))}
                 className="w-28 font-mono text-base font-semibold"
               />
+              {selectedSubject.internal == null && (
+                <span className="text-xs font-medium text-amber-600 dark:text-amber-400">Not in the ERP export for this subject. Enter your own marks.</span>
+              )}
               <span className="text-xs text-muted-foreground">
                 Sum of Mid Semester Tests, assignments, quizzes, and continuous evaluation.
               </span>

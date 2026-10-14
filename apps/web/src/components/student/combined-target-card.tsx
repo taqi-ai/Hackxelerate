@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { calculateAttendance, calculateSubjectMarkTarget, GRADE_BANDS } from "@/lib/academic-calc";
 import { saveStudentPlanAction } from "@/app/(app)/actions";
 import { play } from "@/lib/sound";
+import { campusDate } from "@/lib/dates";
 
 export interface CombinedCourseData {
   subject: string;
@@ -118,7 +119,7 @@ export function CombinedTargetCard({
           currentInternal: totalInternal,
           currentAttendancePct: selectedCourse.attendancePct,
         },
-        due_date: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+        due_date: campusDate(30),
         notes: `Combined goal: Secure ${marksCalc.requiredEndSemScore}/60 in End-Sem and attend ${attCalc.classesNeededForSafeZone} sessions for ${targetAttendancePct}% buffer.`,
       });
 

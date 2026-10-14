@@ -28,7 +28,7 @@ export interface SubjectItem {
   subject: string;
   code?: string;
   credits?: number;
-  internal: number;
+  internal: number | null;
   end_sem: number | null;
   total: number | null;
   sem?: number;
@@ -117,7 +117,7 @@ export function SubjectCardGrid({
       if (sortBy === "attendance-asc") return a.attendancePct - b.attendancePct;
       if (sortBy === "attendance-desc") return b.attendancePct - a.attendancePct;
       if (sortBy === "name") return a.subject.localeCompare(b.subject);
-      if (sortBy === "marks") return b.internal - a.internal;
+      if (sortBy === "marks") return (b.internal ?? -1) - (a.internal ?? -1);
       return 0;
     });
 
@@ -227,7 +227,7 @@ export function SubjectCardGrid({
                 <div className="space-y-1">
                   <div className="flex justify-between text-[11px] text-muted-foreground">
                     <span>
-                      {sub.attended} of {sub.conducted} classes attended
+                      about {sub.attended} of {sub.conducted} classes (assumes a 40-class term)
                     </span>
                     <span className="font-medium text-foreground">
                       Target 75%
@@ -247,7 +247,7 @@ export function SubjectCardGrid({
                 <div className="flex items-center justify-between text-xs pt-1 border-t border-border/50">
                   <div className="flex items-center gap-2 font-mono text-[11px]">
                     <span className="text-muted-foreground">Internal:</span>
-                    <span className="font-semibold text-foreground">{sub.internal.toFixed(1)} / 40</span>
+                    <span className="font-semibold text-foreground">{sub.internal !== null ? `${sub.internal.toFixed(1)} / 40` : "Not recorded"}</span>
                   </div>
 
                   {isLow ? (
@@ -313,7 +313,7 @@ export function SubjectCardGrid({
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-center pt-1 font-mono">
                   <div className="rounded-lg bg-background p-2 border">
-                    <span className="text-[10px] text-muted-foreground block">Attended / Conducted</span>
+                    <span className="text-[10px] text-muted-foreground block">Attended / Conducted (est.)</span>
                     <span className="font-bold text-foreground">
                       {selectedSubject.attended} / {selectedSubject.conducted}
                     </span>
@@ -342,29 +342,14 @@ export function SubjectCardGrid({
                     <span>Assessment Evaluation</span>
                   </span>
                   <span className="font-mono text-xs font-bold text-foreground">
-                    {selectedSubject.internal.toFixed(1)} / 40
+                    {selectedSubject.internal !== null ? `${selectedSubject.internal.toFixed(1)} / 40` : "Not recorded"}
                   </span>
                 </div>
-                <div className="grid grid-cols-3 gap-2 text-center pt-1 font-mono text-[10px]">
-                  <div className="rounded-lg bg-background p-2 border">
-                    <span className="text-muted-foreground block">MST Average</span>
-                    <span className="font-bold text-foreground">
-                      {(selectedSubject.internal * 0.5).toFixed(1)} / 20
-                    </span>
-                  </div>
-                  <div className="rounded-lg bg-background p-2 border">
-                    <span className="text-muted-foreground block">Assignments</span>
-                    <span className="font-bold text-foreground">
-                      {(selectedSubject.internal * 0.3).toFixed(1)} / 12
-                    </span>
-                  </div>
-                  <div className="rounded-lg bg-background p-2 border">
-                    <span className="text-muted-foreground block">Quizzes & Att.</span>
-                    <span className="font-bold text-foreground">
-                      {(selectedSubject.internal * 0.2).toFixed(1)} / 8
-                    </span>
-                  </div>
-                </div>
+                <p className="text-[11px] leading-relaxed text-muted-foreground">
+                  {selectedSubject.internal !== null
+                    ? "The ERP export holds one internal figure per subject, so no MST, assignment or quiz breakdown is shown."
+                    : "The ERP export has no internal marks for this subject yet. Enter your own in the target calculator."}
+                </p>
               </div>
 
               {/* Action Buttons */}

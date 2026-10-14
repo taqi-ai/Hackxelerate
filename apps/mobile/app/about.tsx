@@ -5,12 +5,13 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../src/lib/theme";
+import { BrandMark } from "../src/components/BrandMark";
+import { AnimatedAscoraArt } from "../src/components/AnimatedAscoraArt";
 
 const TEAM = [
   { name: "Taqi", role: "Team Lead" },
@@ -56,21 +57,12 @@ export default function AboutScreen() {
           { paddingBottom: Math.max(insets.bottom, 16) + 32 },
         ]}
       >
-        {/* Brand Hero */}
+        {/* Brand Hero with Animated Shield Art */}
         <View style={styles.brandHero}>
-          <Image
-            source={require("../assets/icon-512-transparent.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <Text
-            style={[
-              styles.appName,
-              { color: colors.text, fontFamily: "BricolageGrotesque_700Bold" },
-            ]}
-          >
-            Ascora
-          </Text>
+          <BrandMark size={48} showSubtitle={false} />
+          <View style={styles.artBox}>
+            <AnimatedAscoraArt kind="shield" width={180} height={90} />
+          </View>
           <Text style={[styles.challengeBadge, { color: colors.brand }]}>
             HacXLerate 2026 · Challenge 04
           </Text>
@@ -94,6 +86,7 @@ export default function AboutScreen() {
           <Text style={[styles.bodyText, { color: colors.text }]}>
             Ascora was built for KPMG in India&apos;s Smart Campus Analytics challenge at HacXLerate 2026 by byteXL.
           </Text>
+
           <Text style={[styles.bodyText, { color: colors.mutedText, marginTop: 6 }]}>
             It empowers university leadership, heads of department, and faculty mentors with continuous student-success intelligence, explainable SHAP risk drivers, counterfactual recourse, and closed-loop intervention tracking.
           </Text>
@@ -188,35 +181,29 @@ const styles = StyleSheet.create({
   brandHero: {
     alignItems: "center",
     paddingVertical: 12,
+    gap: 10,
   },
-  logo: {
-    width: 64,
-    height: 64,
-    marginBottom: 8,
-  },
-  appName: {
-    fontSize: 26,
-    fontWeight: "700",
-    letterSpacing: -0.5,
+  artBox: {
+    marginTop: -8,
+    marginBottom: -10,
   },
   challengeBadge: {
     fontSize: 12,
-    fontWeight: "600",
-    marginTop: 4,
+    fontWeight: "700",
+    letterSpacing: 0.5,
   },
   card: {
-    borderRadius: 20,
+    padding: 16,
+    borderRadius: 16,
     borderWidth: 1,
-    padding: 18,
     gap: 8,
   },
   cardTitle: {
     fontSize: 16,
-    fontWeight: "700",
   },
   bodyText: {
-    fontSize: 13,
-    lineHeight: 19,
+    fontSize: 13.5,
+    lineHeight: 20,
   },
   collegeMeta: {
     fontSize: 12,
@@ -224,38 +211,37 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   teamList: {
-    marginTop: 6,
+    marginTop: 4,
   },
   teamRow: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 10,
-    gap: 10,
+    gap: 12,
   },
   memberDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   memberName: {
     fontSize: 14,
     fontWeight: "600",
   },
   memberRole: {
-    fontSize: 11,
-    marginTop: 1,
+    fontSize: 12,
   },
   disclaimerCard: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    padding: 16,
-    borderRadius: 16,
+    padding: 14,
+    borderRadius: 12,
     borderWidth: 1,
+    gap: 10,
   },
   disclaimerText: {
     fontSize: 12,
-    lineHeight: 16,
     flex: 1,
+    lineHeight: 16,
   },
 });

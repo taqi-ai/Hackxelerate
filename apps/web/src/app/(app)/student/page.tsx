@@ -48,7 +48,7 @@ export default async function StudentOverviewPage() {
   const allSubjects = (academic?.subjects ?? []) as Array<{
     sem: number;
     subject: string;
-    internal: number;
+    internal: number | null;
     end_sem: number | null;
     total: number | null;
   }>;
@@ -135,12 +135,14 @@ export default async function StudentOverviewPage() {
               {connection?.provenance === "synthetic_demo"
                 ? "Frozen Demo Cohort"
                 : connection?.provenance === "manual_import"
-                ? "Self Verified Record"
-                : "Portal Synced"}
+                ? "Manual Import"
+                : "Portal Record"}
             </span>
-            <span className="text-[10px] text-muted-foreground font-mono">
-              ({new Date(connection?.last_synced_at ?? Date.now()).toLocaleDateString()})
-            </span>
+            {connection?.last_synced_at && (
+              <span className="text-[10px] text-muted-foreground font-mono">
+                ({new Date(connection.last_synced_at).toLocaleDateString()})
+              </span>
+            )}
           </Link>
         </div>
       </div>

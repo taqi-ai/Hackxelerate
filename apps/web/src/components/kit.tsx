@@ -29,7 +29,7 @@ export function RiskBadge({ level, prob, label }: { level: string; prob?: number
       title={prob !== undefined && prob !== null ? `Estimated probability ${(prob * 100).toFixed(0)}%` : undefined}
     >
       {text}
-      {prob !== undefined && prob !== null && level !== "N/A" && <span className="tabular opacity-75">{(prob * 100).toFixed(0)}%</span>}
+      {prob !== undefined && prob !== null && level !== "N/A" && <span className="tabular opacity-90">{(prob * 100).toFixed(0)}%</span>}
     </span>
   );
 }

@@ -14,6 +14,9 @@ export default async function SegmentsPage() {
   const [segments, rows] = await Promise.all([getSegments(), getStudentRows()]);
   const members = new Map<number, typeof rows>();
   rows.forEach((r) => members.set(r.segment_id, [...(members.get(r.segment_id) ?? []), r]));
+  // two different things share the name "silent decliner": the individual alert rule and the behaviour cluster
+  const ruleFlagged = rows.filter((r) => r.alerts.some((a) => a.type === "silent_decliner"));
+  const clusterOfRule = ruleFlagged.filter((r) => r.persona === "Silent decliners").length;
 
   return (
     <>
@@ -21,6 +24,12 @@ export default async function SegmentsPage() {
         title="Segments"
         description="Students grouped by how they behave across all sources, not by a single number. Each group needs a different kind of help."
       />
+      {ruleFlagged.length > 0 && (
+        <p className="mb-4 rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+          Segments are behaviour clusters. They are separate from the individual alerts on the overview: {fmtInt(ruleFlagged.length)} students trip the
+          silent-decliner alert rule, and {fmtInt(clusterOfRule)} of them sit in the &quot;Silent decliners&quot; segment below, which is wider because it groups similar trends.
+        </p>
+      )}
       <div className="grid gap-4 lg:grid-cols-2">
         {segments.map((s) => {
           const m = (members.get(s.id) ?? []).sort((a, b) => b.priority - a.priority);

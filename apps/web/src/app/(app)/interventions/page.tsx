@@ -5,6 +5,7 @@ import { EmptyState, PageHeader, Panel, Stat } from "@/components/kit";
 import { HBar } from "@/components/charts";
 import { InterventionRow } from "../students/[id]/intervention-panel";
 import { INTERVENTION_LABEL } from "@/lib/format";
+import { campusDate } from "@/lib/dates";
 
 export const metadata: Metadata = { title: "Interventions" };
 
@@ -14,7 +15,7 @@ export default async function InterventionsPage() {
   const withNames = items.map((i) => ({ ...i, student_name: byId.get(i.student_id)?.name }));
   const open = withNames.filter((i) => i.status === "open" || i.status === "in_progress");
   const done = withNames.filter((i) => i.status === "done");
-  const overdue = open.filter((i) => i.due_date && i.due_date < new Date().toISOString().slice(0, 10));
+  const overdue = open.filter((i) => i.due_date && i.due_date < campusDate());
   const ww = art.what_works;
 
   // students who finished an intervention: has their risk moved since it was logged?

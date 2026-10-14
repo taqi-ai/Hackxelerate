@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { calculateAttendance } from "@/lib/academic-calc";
 import { saveStudentPlanAction } from "@/app/(app)/actions";
 import { play } from "@/lib/sound";
+import { campusDate } from "@/lib/dates";
 
 interface SubjectAttendance {
   subject: string;
@@ -71,7 +72,7 @@ export function AttendanceSliderCard({
           attended: calc.attended,
           conducted: calc.conducted,
         },
-        due_date: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
+        due_date: campusDate(14),
         notes: `Simulated via What-If Calculator. Projected attendance: ${calc.projectedPct}%.`,
       });
 
