@@ -83,7 +83,7 @@ export default async function ProductPage() {
         lead="Ascora keeps each page focused on one decision, and hides detail until you ask for it."
       >
         <div className="mt-9">
-          <PrimaryCta href={profile ? "/overview" : "/login"}>{profile ? "Open dashboard" : "Open live demo"}</PrimaryCta>
+          <PrimaryCta href={profile ? "/overview" : "/login"}>{profile ? "Open dashboard" : "Open Ascora"}</PrimaryCta>
         </div>
       </PageHero>
 

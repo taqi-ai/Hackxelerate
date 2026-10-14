@@ -115,7 +115,7 @@ export default async function StudentSchedulePage() {
             <TabsContent value="timetable" className="space-y-4">
               <Panel
                 title="Weekly Class Schedule (sample layout)"
-                description={`Built from your Semester ${currentSem} courses. The demo sources hold no timetable, so slots, rooms and faculty are illustrative until a college timetable is connected.`}
+                description={`Built from your Semester ${currentSem} courses. The connected sources hold no timetable, so slots, rooms and faculty are illustrative until a college timetable is connected.`}
               >
                 <div className="pt-2">
                   <WeeklyTimetable
@@ -129,7 +129,7 @@ export default async function StudentSchedulePage() {
             <TabsContent value="exams" className="space-y-4">
               <Panel
                 title="Exam and Deadline Calendar (sample dates)"
-                description={`Example milestones for your Semester ${currentSem} courses. No exam calendar is in the demo sources, so dates and venues are placeholders.`}
+                description={`Example milestones for your Semester ${currentSem} courses. No exam calendar is in the connected sources, so dates and venues are placeholders.`}
               >
                 <div className="space-y-3 pt-2">
                   {upcomingMilestones.map((m) => (

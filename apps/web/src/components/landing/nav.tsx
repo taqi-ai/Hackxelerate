@@ -16,7 +16,7 @@ export function SiteNav({ signedIn }: { signedIn: boolean }) {
   const [solid, setSolid] = useState(false);
   const [open, setOpen] = useState(false);
   useMotionValueEvent(scrollY, "change", (v) => setSolid(v > 24));
-  const cta = signedIn ? { href: "/overview", label: "Open dashboard" } : { href: "/login", label: "Open live demo" };
+  const cta = signedIn ? { href: "/overview", label: "Open dashboard" } : { href: "/login", label: "Open Ascora" };
   return (
     <header
       className={cn(

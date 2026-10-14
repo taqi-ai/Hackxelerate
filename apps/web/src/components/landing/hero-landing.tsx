@@ -58,7 +58,7 @@ export function HeroLanding({ signedIn }: { signedIn: boolean }) {
                 href={signedIn ? "/overview" : "/login"}
                 className="group inline-flex h-12 items-center gap-2 rounded-full bg-[#f4f4f7] pl-6 pr-5 text-[15px] font-medium text-[#0a0a10] transition-[transform,background-color] duration-200 hover:bg-white active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[oklch(0.75_0.12_272)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07070b]"
               >
-                {signedIn ? "Open dashboard" : "Open live demo"}
+                {signedIn ? "Open dashboard" : "Open Ascora"}
                 <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden />
               </Link>
               <Link

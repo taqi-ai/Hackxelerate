@@ -109,7 +109,7 @@ export function StudentSelectorDialog({
       </DialogTrigger>
       <DialogContent className="max-h-[88vh] max-w-2xl overflow-hidden p-0 sm:rounded-2xl">
         <DialogHeader className="border-b px-6 py-4">
-          <DialogTitle className="font-display text-xl font-semibold">Select Demonstration Student</DialogTitle>
+          <DialogTitle className="font-display text-xl font-semibold">Choose a student</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
             Choose from the 1,200 synthetic student cohort. Each profile includes verified attendance, assessment marks, SGPA/CGPA, and model risk flags.
           </DialogDescription>
