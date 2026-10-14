@@ -160,3 +160,20 @@ Fairness: gender, residence, first-generation, lateral entry and schooling mediu
 ---
 
 Team roles above are as provided by the team lead. Adjust the speaking split if needed, but keep every number exactly as written.
+
+---
+
+## 12. Hard questions: answer in under 20 seconds
+
+- **"Your data and labels are synthetic. Aren't the accuracy numbers circular?"** Yes, they only prove the pipeline works end to end. The product is the pipeline: messy files in, matched students, an explainable score, and actions out. A college plugs in its own past outcomes, the models retrain in one run, and the thresholds are re-checked on the Model page. We report the simple baseline next to LightGBM so nobody is misled.
+- **"Why trust the matching?"** Uncertain links are never guessed. They go to a human review queue with a confidence, and every value shows its source file and row.
+- **"Why these risk cut-offs?"** High is where flags are usually right, so mentor time goes to real cases. Medium is wider for light follow-up. Both live in one config file (the Model page shows the numbers).
+- **"What about bias?"** Sensitive attributes are never inputs. We audit flag rates per group, and 4 of 10 checks are openly marked for review rather than hidden.
+
+## 13. Demo-day checklist (do it 1 hour before)
+
+1. Open https://ascora-five.vercel.app in a fresh incognito window and sign in as admin, then as mentor. Click every sidebar tab once (this also warms the server cache).
+2. Open one student, plan an intervention, mark it Done.
+3. Open /mobile and launch the app.
+4. Keep `npm run dev:offline` ready on a laptop in case the venue Wi-Fi fails.
+5. Keep the demo to 4 moments: overview, one student's reasons, plan an intervention, segments.
