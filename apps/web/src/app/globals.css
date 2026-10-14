@@ -316,9 +316,11 @@
   0%, 82% { opacity: 1; transform: none; }
   100% { opacity: 0; transform: translateY(-24px) scale(0.98); }
 }
-.intro-overlay { animation: intro-lift 900ms cubic-bezier(0.76, 0, 0.24, 1) 2300ms forwards; }
-.intro-overlay .intro-logo { animation: intro-logo 2600ms ease both; }
-html.intro .hero-line > span, html.intro .hero-fade, html.intro .hero-plane { animation-delay: calc(var(--d, 0ms) + 2550ms); }
+/* the intro waits for an Enter tap (browsers only allow sound after a user gesture), then plays and lifts */
+.intro-overlay.play { animation: intro-lift 900ms cubic-bezier(0.76, 0, 0.24, 1) 2300ms forwards; }
+.intro-overlay.play .intro-logo { animation: intro-logo 2600ms ease both; }
+.intro-overlay.play .intro-gate { opacity: 0; pointer-events: none; transition: opacity 300ms ease; }
+html.intro:not(.intro-done) .hero-line > span, html.intro:not(.intro-done) .hero-fade, html.intro:not(.intro-done) .hero-plane { animation-play-state: paused; }
 html.no-intro .intro-overlay { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .intro-overlay { display: none; }
