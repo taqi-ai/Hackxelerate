@@ -1,4 +1,5 @@
 import "server-only";
+import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { ExternalConnection, Intervention, StudentPlan } from "@/lib/types";
@@ -114,7 +115,7 @@ function samplePlan(): Intervention[] {
     const due = new Date(today.getFullYear(), today.getMonth(), today.getDate() + (k % 8) * 2 - 1);
     const stamp = new Date().toISOString();
     return {
-      id: `sample-${k}`,
+      id: randomUUID(),
       student_id: r.student_id,
       type: k % 4 === 3 ? "peer_tutoring" : "mentor_meeting",
       driver: r.alerts?.[0]?.type ?? "priority",

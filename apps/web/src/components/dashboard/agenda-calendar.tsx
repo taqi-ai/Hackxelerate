@@ -59,11 +59,13 @@ export function AgendaCalendar({ events, today }: { events: AgendaEvent[]; today
 
   // the picked day first, then the rest of the visible window, then what is overdue
   const windowKeys = days.map(ymd);
-  const list = [
+  const all = [
     ...(byDay.get(picked) ?? []),
     ...events.filter((e) => e.date !== picked && windowKeys.includes(e.date)),
     ...events.filter((e) => e.overdue && !windowKeys.includes(e.date)),
-  ].slice(0, 4);
+  ];
+  const list = all.slice(0, 4);
+  const more = all.length - list.length;
   const pd = parse(picked);
   const month = `${MO_LONG[pd.getMonth()]} ${pd.getFullYear()}`;
 
@@ -165,6 +167,11 @@ export function AgendaCalendar({ events, today }: { events: AgendaEvent[]; today
         )}
       </div>
 
+      {more > 0 && (
+        <Link href="/interventions" className="mt-2 block rounded-lg px-1 py-1 text-center text-xs text-muted-foreground hover:text-foreground">
+          {more} more in the intervention tracker
+        </Link>
+      )}
       <Link
         href="/this-week"
         className="press mt-3 flex items-center justify-center gap-1.5 rounded-xl bg-brand/85 py-2.5 text-sm font-medium text-primary-foreground hover:bg-brand"

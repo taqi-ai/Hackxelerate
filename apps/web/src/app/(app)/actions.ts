@@ -76,11 +76,13 @@ export async function updateInterventionStatus(input: z.infer<typeof StatusSchem
     it.updated_at = new Date().toISOString();
   } else {
     const supabase = await createClient();
-    const { error } = await supabase
+    const { error, count } = await supabase
       .from("interventions")
-      .update({ status, ...(notes !== undefined ? { notes } : {}), updated_at: new Date().toISOString() })
+      .update({ status, ...(notes !== undefined ? { notes } : {}), updated_at: new Date().toISOString() }, { count: "exact" })
       .eq("id", id);
     if (error) return { ok: false, error: error.message };
+    // RLS hides rows this user may not change: zero rows is a refusal, not a success
+    if (!count) return { ok: false, error: "You can only update interventions for your own students." };
   }
   revalidatePath("/interventions");
   revalidatePath("/overview");
