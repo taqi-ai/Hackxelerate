@@ -92,18 +92,6 @@ Fairness: gender, residence, first-generation, lateral entry and schooling mediu
 - DPDP-aligned design (purpose limitation, minimisation, masking, audit). It is not a legal certification; say "aligned with", not "compliant".
 - Student preview mode (pick a student on the login page) uses read-only synthetic files and stores that visitor's saved plans in their own browser cookie. It never opens the database to anonymous visitors.
 
-## 8. Demo flow (5 minutes)
-
-1. Landing page: intro, hero, "Open live demo".
-2. Sign in as HOD (`admin@ascora.test`, password in `docs/DEMO_SCRIPT.md`). Overview: 1,200 students, risk counts, heatmap, agenda.
-3. Students table: filter High academic risk, open one student. Show reasons, both risks, sources tab (lineage).
-4. Plan an intervention from the suggested driver. Show it in Interventions.
-5. Segments: explain silent decliners (63 flagged by the rule, 54 of them in the 160-student cluster).
-6. Data integration: the 12-step pipeline and match quality.
-7. Score and models page: formula, AUC with baseline, fairness.
-8. Student view: log out, pick a demo student, show attendance recovery and marks target calculators.
-9. Mobile: /mobile, launch the app in the phone frame.
-
 ## 9. Numbers cheat sheet
 
 7 sources · 62,927 rows · 1,200 students · 21 mentors · matching precision 1.00 / recall 0.95 · 60 conflicts resolved by rule · score weights 30/20/15/15/10/10 · rank stability ≥ 0.997 · academic AUC 0.881 · placement AUC 0.802 · precision@50 0.78 / 0.62 · 6 segments · fairness 6/10 pass, 4 flagged for review · mentor sees 64 students.
@@ -159,7 +147,6 @@ Fairness: gender, residence, first-generation, lateral entry and schooling mediu
 
 ---
 
-Team roles above are as provided by the team lead. Adjust the speaking split if needed, but keep every number exactly as written.
 
 ---
 
