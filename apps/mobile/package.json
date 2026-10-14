@@ -47,7 +47,7 @@
     "start:tunnel": "expo start --tunnel",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
-    "export:web": "expo export -p web",
+    "export:web": "node scripts/export-web.mjs",
     "android": "expo start --android",
     "ios": "expo start --ios"
   },
