@@ -14,7 +14,7 @@ const TEAM = [
     name: "Taqi",
     role: "Organiser and team lead",
     area: "Lead",
-    did: "Ran the team and worked across every part of Ascora: product, data, models, web, design and the demo.",
+    did: "Ran the team and worked across every part of Ascora: product, data, models, web, design and the launch.",
     hue: 272,
   },
   {

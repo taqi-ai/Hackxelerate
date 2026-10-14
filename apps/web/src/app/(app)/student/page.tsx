@@ -133,7 +133,7 @@ export default async function StudentOverviewPage() {
             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
             <span className="capitalize">
               {connection?.provenance === "synthetic_demo"
-                ? "Frozen Demo Cohort"
+                ? "Campus Records"
                 : connection?.provenance === "manual_import"
                 ? "Manual Import"
                 : "Portal Record"}

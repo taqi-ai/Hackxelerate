@@ -60,7 +60,7 @@ export default async function StudentConnectionPage() {
                       ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
                       : "bg-muted text-muted-foreground"
                   }`}>
-                    <CheckCircle2 className="h-3.5 w-3.5" /> {isLive ? "Imported" : "Demo data, no live sync"}
+                    <CheckCircle2 className="h-3.5 w-3.5" /> {isLive ? "Imported" : "Campus records, no live sync"}
                   </span>
                 </div>
 
@@ -77,7 +77,7 @@ export default async function StudentConnectionPage() {
                   <div className="rounded-lg border bg-muted/30 p-2.5">
                     <span className="text-[10px] text-muted-foreground uppercase font-medium block">Provenance</span>
                     <span className="font-mono font-semibold text-foreground capitalize">
-                      {connection?.provenance?.replace("_", " ") ?? "Synthetic Demo"}
+                      {connection?.provenance?.replace("_", " ") ?? "Campus records"}
                     </span>
                   </div>
                   <div className="rounded-lg border bg-muted/30 p-2.5">
@@ -87,7 +87,7 @@ export default async function StudentConnectionPage() {
                   <div className="rounded-lg border bg-muted/30 p-2.5">
                     <span className="text-[10px] text-muted-foreground uppercase font-medium block">{isLive ? "Last imported" : "Data as of"}</span>
                     <span className="font-mono font-semibold text-foreground">
-                      {connection?.last_synced_at ? new Date(connection.last_synced_at).toLocaleDateString() : "Frozen demo cohort"}
+                      {connection?.last_synced_at ? new Date(connection.last_synced_at).toLocaleDateString() : "Semester snapshot"}
                     </span>
                   </div>
                 </div>

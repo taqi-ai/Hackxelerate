@@ -63,7 +63,7 @@ export default function MobilePage() {
               <div className="mt-10 space-y-3 rounded-2xl border border-white/10 p-5 text-sm text-white/65">
                 <p className="font-medium text-white">How to sign in</p>
                 <p>
-                  On the sign-in screen pick <strong className="font-medium text-white">Head of department</strong> or <strong className="font-medium text-white">Mentor</strong> for a ready demo account, or choose a student to preview their view. All data is a synthetic cohort of 1,200 students.
+                  On the sign-in screen pick <strong className="font-medium text-white">Head of department</strong> or <strong className="font-medium text-white">Mentor</strong> for a ready account, or choose a student to preview their view. All data is a synthetic cohort of 1,200 students.
                 </p>
                 <p>
                   On a real phone you can run it with Expo Go: <code className="rounded bg-white/10 px-1.5 py-0.5 text-xs">npm run start</code> inside <code className="rounded bg-white/10 px-1.5 py-0.5 text-xs">apps/mobile</code>.

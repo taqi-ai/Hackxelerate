@@ -81,7 +81,7 @@ export default async function Home() {
             </Reveal>
             <Reveal delay={0.22}>
               <div className="mt-9 flex flex-wrap items-center gap-3">
-                <PrimaryCta href={profile ? "/overview" : "/login"}>{profile ? "Open dashboard" : "Open live demo"}</PrimaryCta>
+                <PrimaryCta href={profile ? "/overview" : "/login"}>{profile ? "Open dashboard" : "Open Ascora"}</PrimaryCta>
                 <GhostCta href="/how-it-works">See how it works</GhostCta>
               </div>
             </Reveal>

@@ -73,7 +73,7 @@ export function LoginForm({ next }: { next?: string }) {
         router.refresh();
       } else {
         play("error");
-        setError(res.error || "Failed to start demo student session.");
+        setError(res.error || "Could not open the student view. Try again.");
       }
     });
   }
@@ -184,14 +184,14 @@ export function LoginForm({ next }: { next?: string }) {
           <div className="rounded-2xl border bg-card/60 p-4 space-y-3">
             <div className="flex items-center justify-between">
               <span className="inline-flex items-center rounded-full border bg-brand/10 px-2 py-0.5 text-[10px] font-semibold text-brand">
-                Option A · Evaluation Mode
+                Student view
               </span>
               <span className="text-[11px] text-muted-foreground">1,200 Cohort</span>
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-foreground">Demo Student</h3>
+              <h3 className="text-sm font-semibold text-foreground">Students</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Explore personalized academic, attendance, marks, and What-If planning for students in the frozen evaluation cohort.
+                Explore personalized academic, attendance, marks, and What-If planning for students in the 1,200-student cohort.
               </p>
             </div>
 
