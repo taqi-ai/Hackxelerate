@@ -107,7 +107,7 @@ export default async function ProductPage() {
             </Reveal>
             <Reveal delay={0.1} className={cn(i % 2 === 1 && "lg:order-1")}>
               <div className="relative">
-                <div aria-hidden className="absolute -inset-6 -z-10 rounded-[2rem] bg-[radial-gradient(closest-side,oklch(0.62_0.16_272/0.25),transparent)] blur-2xl" />
+                <div aria-hidden className="absolute inset-0 -z-10 sm:-inset-6 rounded-[2rem] bg-[radial-gradient(closest-side,oklch(0.62_0.16_272/0.25),transparent)] blur-2xl" />
                 <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0d0d14] shadow-[0_40px_100px_-30px_oklch(0.8_0.07_272/0.35)]">
                   <div className="flex h-8 items-center gap-1.5 border-b border-white/10 px-3.5" aria-hidden>
                     <span className="size-2 rounded-full bg-white/15" />

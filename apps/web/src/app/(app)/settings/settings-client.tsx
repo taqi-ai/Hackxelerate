@@ -59,7 +59,7 @@ function Section({ id, title, description, children }: { id: string; title: stri
 
 function Row({ label, hint, children }: { label: React.ReactNode; hint?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-3 border-t py-4 first:border-t-0 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex min-w-0 flex-col gap-3 border-t py-4 first:border-t-0 first:pt-0 last:pb-0 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between [&>*]:min-w-0 [&>*:last-child]:max-w-full [&>*:last-child]:overflow-x-auto">
       <div className="min-w-0">
         <p className="text-sm font-medium">{label}</p>
         {hint && <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>}
@@ -132,8 +132,8 @@ export function SettingsClient({ name, email, role, mentorId, visibleStudents, o
     .join("");
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[200px_1fr]">
-      <nav aria-label="Settings sections" className="lg:sticky lg:top-20 lg:self-start">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[200px_minmax(0,1fr)]">
+      <nav aria-label="Settings sections" className="min-w-0 lg:sticky lg:top-20 lg:self-start">
         <ul className="flex gap-1 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible">
           {SECTIONS.map((s) => (
             <li key={s.id}>
@@ -240,7 +240,7 @@ export function SettingsClient({ name, email, role, mentorId, visibleStudents, o
             />
           </Row>
           <Row label="Weekly mentoring hours" hint="The planner on This week starts from this budget.">
-            <div className="flex w-64 items-center gap-3">
+            <div className="flex w-full max-w-64 items-center gap-3">
               <Slider min={1} max={10} step={0.5} value={[prefs.hours]} onValueChange={([v]) => setPrefs((p) => ({ ...p, hours: v }))} onValueCommit={([v]) => update("hours", v)} aria-label="Weekly mentoring hours" />
               <span className="w-12 text-right text-sm tabular">{prefs.hours}h</span>
             </div>
