@@ -15,11 +15,11 @@
 | :--- | :---: | :---: | :--- |
 | Data Integration & Analysis | 30 | 26 to 28 | Verified on synthetic data: 7 sources, fuzzy matching reproduced (precision 1.00, recall 0.953 vs planted ground truth by `scripts/run_integration_check.py`), cleaning fixes counted, conflicts logged. Not verified on any real institutional export. |
 | Student Success Score & Risk | 25 | 21 to 23 | Verified: deterministic weighted score, LightGBM models reproduced from saved artifacts (academic ROC-AUC 0.881, placement 0.802, both on a 25% hold-out, labels simulated by the generator). The logistic baseline is statistically level with LightGBM (0.875 / 0.806), so the gain from the complex model is not demonstrated. |
-| Dashboard & Visualization | 25 | 21 to 23 | Implemented; typecheck, lint, 20 web tests pass. Interaction paths covered by unit tests only, no browser E2E suite. Accessibility and CLS claims were not measured (removed). |
+| Dashboard & Visualization | 25 | 21 to 23 | Implemented; typecheck, lint, 20 web tests pass. A scripted crawl of every route and a 60-student sweep of the student and mentor pages found and fixed a crash affecting about 1 in 4 demo students. Automated axe-core WCAG 2.2 A/AA checks are clean on 15 pages in light and dark. No manual screen-reader pass, no field Web Vitals. |
 | Problem Understanding | 10 | 8 to 9 | Intervention workflow with baselines and "What Works" analysis exists in code. Outcome effects are computed on synthetic history. |
 | Presentation & Demo | 10 | 8 to 9 | Demo script, live deploy (Vercel + Azure ML) checked reachable 2026-10-14. |
 | **Base total** | **100** | **84 to 94** | Range, not a measured score. |
-| Bonus (student portal, mobile companion) | n/a | not scored | Web student portal verified by tests. Mobile app is owned by Ujjwal and unverified here (see `docs/OVERNIGHT_PROGRESS.md`). |
+| Bonus (student portal, mobile companion) | n/a | not scored | Student portal swept across 60 students, no errors. Mobile app: type check, lint and bundle build clean; runs in the browser at `/mobile` (live). No APK, no device test. See `docs/OVERNIGHT_PROGRESS.md`. |
 
 ### Corrections made to earlier claims
 - "CU Lucknow verified connection": **false as worded.** The product links to the official portal and offers a manual import with provenance. It does not authenticate to or read from the university portal, and never bypasses its CAPTCHA. The UI no longer shows "Synchronized" or a fabricated "last verified" time.

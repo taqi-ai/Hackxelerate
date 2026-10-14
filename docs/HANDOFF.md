@@ -18,3 +18,4 @@ One line per finished or in-progress task. Newest at the bottom. Format: `date |
 2026-10-14 | gemini | Exact website-to-mobile UI/UX synchronization: PageArt across all tabs, BrandMark tiles, exact OKLCH tokens, lint & typecheck clean | gemini/mobile-and-offline-fixes | done
 
 
+2026-10-14 | claude | Audit + release: new hero, /mobile web simulator, student crash fix, honest mobile Ask, a11y, Tokyo region; PRs #5 #9 live | main | done, see OVERNIGHT_PROGRESS.md
