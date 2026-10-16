@@ -59,7 +59,8 @@ function CommandDialog({
         )}
         showCloseButton={showCloseButton}
       >
-        {children}
+        {/* cmdk keeps its state on the Command root: inputs and items crash without it */}
+        <Command>{children}</Command>
       </DialogContent>
     </Dialog>
   )
