@@ -135,6 +135,15 @@ export interface Insight {
   rank: number;
 }
 
+export interface InterventionFollowup {
+  date: string;
+  success_score?: number | null;
+  academic_risk_prob?: number | null;
+  attendance_pct?: number | null;
+  notes?: string | null;
+  reviewer_name?: string | null;
+}
+
 export interface Intervention {
   id: string;
   student_id: string;
@@ -145,8 +154,26 @@ export interface Intervention {
   status: "open" | "in_progress" | "done" | "cancelled";
   notes: string | null;
   baseline: { success_score: number; academic_risk_prob: number; placement_risk_prob: number | null } | null;
+  followup?: InterventionFollowup | null;
+  outcome?: "improved" | "stable" | "escalated" | "unresolved" | "inconclusive" | null;
+  review_date?: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export type JourneyCategory = "academic" | "attendance_lms" | "support_intervention" | "milestone_skill" | "alert";
+
+export interface JourneyEvent {
+  id: string;
+  date: string;
+  category: JourneyCategory;
+  title: string;
+  description: string;
+  metric?: string | null;
+  status?: string | null;
+  source?: string | null;
+  isModelDerived?: boolean;
+  details?: Record<string, unknown>;
 }
 
 export interface StudentPlan {

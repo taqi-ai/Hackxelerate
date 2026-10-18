@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowDownUp, Columns3, Download, FilterX, Search, UsersRound } from "lucide-react";
+import { ArrowDownUp, Columns3, Download, FileText, FilterX, Search, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -28,6 +28,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { EmptyState, RiskBadge, ScoreValue } from "@/components/kit";
 import { INTENT_LABEL, maskEmail } from "@/lib/format";
+import { matchesStudentQuery } from "@/lib/search-utils";
 import type { StudentRow } from "@/lib/types";
 
 const ALERT_LABEL: Record<string, string> = {
@@ -99,12 +100,12 @@ export function StudentsTable({
   const mentorIds = useMemo(() => [...new Set(rows.map((r) => r.mentor_id).filter(Boolean))].sort() as string[], [rows]);
 
   const filtered = useMemo(() => {
-    const q = f.q.trim().toLowerCase();
+    const q = f.q.trim();
     const min = f.minScore === "" ? -1 : Number(f.minScore);
     const max = f.maxScore === "" ? 101 : Number(f.maxScore);
     return rows.filter(
       (r) =>
-        (!q || r.name.toLowerCase().includes(q) || r.id.toLowerCase().includes(q)) &&
+        (!q || matchesStudentQuery(r.name, r.id, q)) &&
         (f.branch === ALL || r.branch === f.branch) &&
         (f.year === ALL || String(r.year) === f.year) &&
         (f.section === ALL || r.section === f.section) &&
@@ -184,6 +185,22 @@ export function StudentsTable({
           ),
       },
       { id: "priority", accessorKey: "priority", header: "Priority", cell: ({ getValue }) => <span className="tabular text-sm">{(getValue() as number).toFixed(2)}</span> },
+      {
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }) => (
+          <div className="flex items-center gap-1.5 whitespace-nowrap">
+            <Link
+              href={`/students/${row.original.id}/report`}
+              className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-xs font-medium text-foreground/90 transition-colors hover:border-brand/40 hover:bg-brand/10 hover:text-brand"
+              title="Generate Student 360 Report"
+            >
+              <FileText className="size-3 text-brand" />
+              <span>Report</span>
+            </Link>
+          </div>
+        ),
+      },
     ],
     [mentorName],
   );
