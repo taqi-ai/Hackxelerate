@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { ArrowLeft, Lock, Target, TriangleAlert } from "lucide-react";
+import { ArrowLeft, FileText, Lock, Target, TriangleAlert } from "lucide-react";
 import { getInterventions, getStudent360 } from "@/lib/data";
 import { Panel, RiskBadge } from "@/components/kit";
 import { ComponentRadar } from "@/components/charts";
@@ -32,9 +32,18 @@ export default async function Student360({ params }: { params: Promise<{ id: str
 
   return (
     <div className="space-y-4">
-      <Link href="/students" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="size-4" /> Students
-      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link href="/students" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="size-4" /> Students
+        </Link>
+        <Link
+          href={`/students/${st.id}/report`}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-brand/40 bg-brand/10 px-3.5 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand/20 shadow-xs"
+        >
+          <FileText className="size-4" />
+          <span>Generate Student 360 Report</span>
+        </Link>
+      </div>
 
       {/* header */}
       <section className="edge relative grid gap-4 overflow-hidden rounded-2xl border bg-card/80 p-5 backdrop-blur-sm lg:grid-cols-[1fr_auto]">
@@ -96,7 +105,7 @@ export default async function Student360({ params }: { params: Promise<{ id: str
         <TabsList className="h-10 max-w-full justify-start overflow-x-auto rounded-full p-1">
           <TabsTrigger value="why" className="rounded-full px-4">Why flagged</TabsTrigger>
           <TabsTrigger value="improve" className="rounded-full px-4">What helps</TabsTrigger>
-          <TabsTrigger value="history" className="rounded-full px-4">This semester</TabsTrigger>
+          <TabsTrigger value="history" className="rounded-full px-4">Student Journey</TabsTrigger>
           <TabsTrigger value="sources" className="rounded-full px-4">Sources</TabsTrigger>
         </TabsList>
         <TabsContent value="why" className="grid gap-4">
@@ -143,8 +152,19 @@ export default async function Student360({ params }: { params: Promise<{ id: str
           )}
         </TabsContent>
         <TabsContent value="history">
-          <Panel title="This semester, week by week" description="LMS activity and submissions by week, attendance by month, SGPA by semester">
-            <StudentTimeline lms={d.lms} attendance={d.attendance} academic={d.academic} />
+          <Panel
+            title="Student Journey Timeline"
+            description="Chronological record of verified milestones, semester examinations, attendance shifts, LMS activity, and mentor support actions"
+          >
+            <StudentTimeline
+              student={st}
+              lms={d.lms}
+              attendance={d.attendance}
+              academic={d.academic}
+              engagement={d.engagement}
+              feedback={d.feedback}
+              interventions={interventions}
+            />
           </Panel>
         </TabsContent>
         <TabsContent value="sources">

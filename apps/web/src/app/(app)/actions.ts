@@ -89,6 +89,63 @@ export async function updateInterventionStatus(input: z.infer<typeof StatusSchem
   return { ok: true };
 }
 
+const FollowupSchema = z.object({
+  id: z.string().uuid(),
+  followup_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Pick a valid follow-up date"),
+  observed_risk_prob: z.number().min(0).max(1).optional().nullable(),
+  observed_score: z.number().min(0).max(100).optional().nullable(),
+  observed_attendance: z.number().min(0).max(100).optional().nullable(),
+  notes: z.string().max(1000).optional().nullable(),
+  outcome: z.enum(["improved", "stable", "escalated", "unresolved", "inconclusive"]).optional().nullable(),
+  review_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  status: z.enum(["open", "in_progress", "done", "cancelled"]).optional(),
+});
+
+export async function recordInterventionFollowup(input: z.infer<typeof FollowupSchema>): Promise<ActionResult> {
+  const parsed = FollowupSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid follow-up data" };
+  const v = parsed.data;
+
+  const followupPayload = {
+    date: v.followup_date,
+    academic_risk_prob: v.observed_risk_prob ?? null,
+    success_score: v.observed_score ?? null,
+    attendance_pct: v.observed_attendance ?? null,
+    notes: v.notes ?? null,
+  };
+
+  if (OFFLINE) {
+    const it = offlineInterventions.find((i) => i.id === v.id);
+    if (!it) return { ok: false, error: "Intervention not found" };
+    it.followup = followupPayload;
+    if (v.outcome !== undefined) it.outcome = v.outcome;
+    if (v.review_date !== undefined) it.review_date = v.review_date;
+    if (v.status) it.status = v.status;
+    it.updated_at = new Date().toISOString();
+  } else {
+    const supabase = await createClient();
+    const updateObj: Record<string, any> = {
+      followup: followupPayload,
+      updated_at: new Date().toISOString(),
+    };
+    if (v.outcome !== undefined) updateObj.outcome = v.outcome;
+    if (v.review_date !== undefined) updateObj.review_date = v.review_date;
+    if (v.status) updateObj.status = v.status;
+
+    const { error, count } = await supabase
+      .from("interventions")
+      .update(updateObj, { count: "exact" })
+      .eq("id", v.id);
+    if (error) return { ok: false, error: error.message };
+    if (!count) return { ok: false, error: "You can only update interventions for your authorized students." };
+  }
+
+  revalidatePath("/interventions");
+  revalidatePath("/overview");
+  revalidatePath("/students");
+  return { ok: true };
+}
+
 export async function selectDemoStudentAction(studentId: string): Promise<ActionResult> {
   if (!/^CU\d{2}[A-Z]{2,4}\d{4}$/.test(studentId)) {
     return { ok: false, error: "Invalid student identifier format" };

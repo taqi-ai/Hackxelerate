@@ -113,19 +113,42 @@ function samplePlan(): Intervention[] {
   const today = new Date();
   return picks.map((r, k) => {
     const due = new Date(today.getFullYear(), today.getMonth(), today.getDate() + (k % 8) * 2 - 1);
-    const stamp = new Date().toISOString();
+    const created = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 21 + (k % 7));
+    const stamp = created.toISOString();
+    const isDone = k % 3 === 0;
+    const isInProgress = !isDone && k % 2 === 0;
+    const status = isDone ? "done" : isInProgress ? "in_progress" : "open";
+    const improvedProb = Math.max(0.04, Math.round((r.academic_risk_prob - 0.18) * 1000) / 1000);
+    const improvedScore = Math.min(96, Math.round(r.success_score + 9.5));
+
     return {
       id: randomUUID(),
       student_id: r.student_id,
-      type: k % 4 === 3 ? "peer_tutoring" : "mentor_meeting",
-      driver: r.alerts?.[0]?.type ?? "priority",
-      owner_name: mentorName.get(mentorOf.get(r.student_id) ?? "") ?? null,
+      type: k % 4 === 3 ? "peer_tutoring" : k % 4 === 2 ? "skill_workshop" : "mentor_meeting",
+      driver: r.alerts?.[0]?.type ?? "academic_risk",
+      owner_name: mentorName.get(mentorOf.get(r.student_id) ?? "") ?? "Prof. Eiravati Manne",
       due_date: `${due.getFullYear()}-${String(due.getMonth() + 1).padStart(2, "0")}-${String(due.getDate()).padStart(2, "0")}`,
-      status: k % 5 === 4 ? "in_progress" : "open",
-      notes: "Sample plan created with the generated cohort",
+      status,
+      notes: isDone
+        ? "Completed structured support sessions. Student demonstrated measurable engagement recovery."
+        : "Initial discussion held; weekly milestone targets active.",
       baseline: { success_score: r.success_score, academic_risk_prob: r.academic_risk_prob, placement_risk_prob: r.placement_risk_prob },
+      followup: isDone
+        ? {
+            date: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 3).toISOString().slice(0, 10),
+            academic_risk_prob: improvedProb,
+            success_score: improvedScore,
+            attendance_pct: 82.5,
+            notes: "Observed risk decrease following tutoring support and attendance recovery.",
+            reviewer_name: mentorName.get(mentorOf.get(r.student_id) ?? "") ?? "Prof. Eiravati Manne",
+          }
+        : null,
+      outcome: isDone ? "improved" : null,
+      review_date: isDone
+        ? new Date(today.getFullYear(), today.getMonth(), today.getDate() + 14).toISOString().slice(0, 10)
+        : null,
       created_at: stamp,
-      updated_at: stamp,
+      updated_at: new Date().toISOString(),
     };
   });
 }
