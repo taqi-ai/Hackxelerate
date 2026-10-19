@@ -203,3 +203,33 @@ Q&A routing: data, pipeline, backend, mobile, security → **Ujjwal**. Score, mo
 Cheapest and most reliable: record the screen yourself (OBS Studio, or the built-in Windows recorder with Win+Alt+R) while one person follows section 15 and narrates live. Then trim it in any free editor. This costs nothing and no AI credits.
 
 Open Montage (installed skills `playwright-recording`, `hyperframes`, `ffmpeg`) can also do it free, because it runs locally: Playwright records a scripted browser walkthrough, HyperFrames adds title cards, and ffmpeg joins them. The catches: narration would need a paid text-to-speech API or your own recorded voice, and the scripted recording needs the signed-in demo login typed into the script by you. It takes more setup than a manual recording. Use it only for a short polished intro clip, not the whole demo.
+
+---
+
+## 17. Engineering hardening (October 2026): what changed and how to talk about it
+
+Use this when a judge asks "is it secure / production-ready?". Honest status: **internal test ready, synthetic data only**. Evidence lives in `docs/engineering/`.
+
+| Area | What we did | One-line proof |
+|---|---|---|
+| Access control | Row-level security tested automatically for anonymous, profile-less, mentor, student and admin users, with negative and positive checks | `supabase/tests/rls_isolation.sql` runs in CI on every database change and was run on production (rolled back) |
+| Bugs the tests found | Students could create and edit staff interventions; any signed-in account could read campus analytics; migrations did not apply to an empty database | fixed in migrations 0008, 0009 and 0002 |
+| Multi-institution | Institutions table; every record and rule scoped to the caller's institution; a second institution is proven isolated both ways | migration 0010, section 6 of the RLS test |
+| Public demo logins | Shared demo accounts can explore but cannot run or publish the pipeline | ML `require_admin_write`, tested |
+| Uploads and exports | 25 MB limit, content checks, zip-bomb guard, path-traversal fix; CSV cells cannot run as formulas | `tests/test_auth.py`, `tests/test_runs.py`, `csv.test.ts` |
+| AI boundary | Roll numbers, emails and phones are stripped from every LLM prompt; `ASCORA_LLM=off` turns the LLM off entirely; scoring never uses the LLM | `tests/test_llm_boundary.py` |
+| Interventions | One open intervention per type per student; a database-enforced status flow (open, in progress, done, cancelled, reopen) | migration 0011, `intervention_rules.sql` |
+| Reliability | Pipeline run status survives restarts; one run at a time; health probes for web and ML; request IDs in logs | `/api/health`, `/health/ready` |
+| Dependencies | Vulnerable Python packages upgraded (models give identical predictions); CI blocks known vulnerabilities | CI `deps-audit` |
+| Data sources | Admin screen shows each source's real status; only file import is built; CUIMS shows "Awaiting institution authorisation" | `GET /connectors`, Data integration page |
+| Browser tests | 10 end-to-end journeys run in CI on every web or ML change | CI `e2e` |
+
+**Who answers:**
+- **Ujjwal (backend):** access control, multi-institution, uploads, health checks, connectors.
+- **Ashmit (models and product):** AI boundary, model card (`docs/engineering/ML_MODEL_CARD.md`), why the baseline is reported.
+- **Harsh (dashboard and trust):** intervention rules, browser tests, what a judge sees on screen.
+
+**Say it straight:**
+- "We test our own security rules automatically, and those tests found real bugs that we fixed."
+- "It is not certified or pen-tested yet. Before real student data we need a security review, a legal and DPO review, backups verified, and the institution's authorisation for its data sources."
+
