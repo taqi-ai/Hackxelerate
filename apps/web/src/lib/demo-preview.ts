@@ -16,6 +16,10 @@ import type { ExternalConnection, StudentPlan } from "@/lib/types";
  */
 
 export const DEMO_STUDENT_COOKIE = "ascora_demo_student";
+
+/** The public student preview serves the synthetic evaluation cohort. It is off unless a deployment opts in, so an
+ *  institution's production deployment can never fall back to fixture students. */
+export const PREVIEW_ENABLED = process.env.ASCORA_PUBLIC_PREVIEW === "1";
 export const DEMO_PLANS_COOKIE = "ascora_demo_plans";
 export const DEMO_IMPORT_COOKIE = "ascora_demo_import";
 export const DEMO_ID = /^CU\d{2}[A-Z]{2,4}\d{4}$/;
