@@ -26,6 +26,6 @@ Legend: REAL+TESTED · REAL/UNDER-TESTED · PARTIAL · DEMO/FIXTURE · UI-ONLY �
 | Notifications (email / SMS) | MISSING | none exist; nothing claims delivery |
 | Exports (students table CSV) | PARTIAL | client-side CSV of visible rows; no formula-injection guard yet |
 | Data freshness on dashboards | PARTIAL | run date only; no per-source freshness |
-| Background jobs | PARTIAL | in-process threads; job state not durable |
+| Background jobs | PARTIAL | in-process thread, one run at a time; status persisted to disk and restored on restart (`tests/test_runs.py`) |
 | Health checks | PARTIAL | ML `/health`; no web readiness probe |
 | Android app | REAL | signed APK 1.0.0 (`com.ascora.mobile`); not on Play Store; no OTA |

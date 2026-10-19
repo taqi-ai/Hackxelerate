@@ -31,11 +31,12 @@ app.add_middleware(CORSMiddleware, allow_origins=ALLOWED_ORIGINS, allow_origin_r
 @app.on_event("startup")
 def _startup():
     service.load_state()
+    service.load_runs()
 
 
 class RunRequest(BaseModel):
     source: str = Field("demo", pattern="^(demo|upload)$")
-    upload_id: str | None = None
+    upload_id: str | None = Field(None, pattern="^[0-9a-f]{10}$")   # exactly what /pipeline/upload issues
     publish: bool = True
 
 
@@ -123,13 +124,16 @@ def run(req: RunRequest):
         folder = UPLOADS / req.upload_id
     else:
         folder = DEMO_DIR
-    st = service.start_run(folder, req.publish)
+    try:
+        st = service.start_run(folder, req.publish)
+    except service.RunConflict as busy:
+        raise HTTPException(409, f"Run {busy} is still in progress. Wait for it to finish.")
     return {"run_id": st.run_id, "status": st.status}
 
 
 @app.get("/pipeline/runs/{run_id}", dependencies=[Depends(require_admin)])
 def run_status(run_id: str):
-    st = service.RUNS.get(run_id)
+    st = service.get_run(run_id)
     if not st:
         raise HTTPException(404, "unknown run")
     return {"run_id": st.run_id, "status": st.status, "steps": st.steps, "summary": st.summary, "error": st.error}
