@@ -7,6 +7,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { OFFLINE, offlineConnections, offlineInterventions, offlinePlans, one, visibleIds } from "@/lib/offline";
 import { getProfile, isPreview } from "@/lib/data";
+import { ACTIVE_STATUSES, canTransition } from "@/lib/intervention-rules";
 import { DEMO_PLAN_LIMIT, PREVIEW_ENABLED, readDemoPlans, writeDemoImport, writeDemoPlans } from "@/lib/demo-preview";
 
 const TYPES = ["mentor_meeting", "peer_tutoring", "mock_interview", "counselling_referral", "parent_call", "skill_workshop"] as const;
@@ -22,6 +23,14 @@ const CreateSchema = z.object({
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
+/** Database refusals in words a mentor understands (rules live in migration 0011). */
+function interventionError(error: { code?: string; message: string }): string {
+  if (error.code === "23505") return "This student already has an open intervention of this type. Update that one instead.";
+  if (error.code === "22023") return error.message;
+  if (error.message.includes("row-level security")) return "You can only create interventions for your students.";
+  return error.message;
+}
+
 export async function createIntervention(input: z.infer<typeof CreateSchema>): Promise<ActionResult> {
   const parsed = CreateSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
@@ -29,6 +38,9 @@ export async function createIntervention(input: z.infer<typeof CreateSchema>): P
 
   if (OFFLINE) {
     if (!visibleIds().has(v.student_id)) return { ok: false, error: "You can only create interventions for your students." };
+    if (offlineInterventions.some((i) => i.student_id === v.student_id && i.type === v.type && ACTIVE_STATUSES.includes(i.status))) {
+      return { ok: false, error: interventionError({ code: "23505", message: "" }) };
+    }
     const s = one("student_scores", v.student_id);
     const now = new Date().toISOString();
     offlineInterventions.unshift({
@@ -53,7 +65,7 @@ export async function createIntervention(input: z.infer<typeof CreateSchema>): P
       .eq("student_id", v.student_id)
       .maybeSingle();
     const { error } = await supabase.from("interventions").insert({ ...v, created_by: user.id, baseline: s ?? null });
-    if (error) return { ok: false, error: error.message.includes("row-level security") ? "You can only create interventions for your students." : error.message };
+    if (error) return { ok: false, error: interventionError(error) };
     await supabase.from("audit_log").insert({ action: "create_intervention", student_id: v.student_id });
   }
   revalidatePath(`/students/${v.student_id}`);
@@ -71,6 +83,7 @@ export async function updateInterventionStatus(input: z.infer<typeof StatusSchem
   if (OFFLINE) {
     const it = offlineInterventions.find((i) => i.id === id);
     if (!it) return { ok: false, error: "Not found" };
+    if (!canTransition(it.status, status)) return { ok: false, error: `Intervention status cannot change from ${it.status} to ${status}` };
     it.status = status;
     if (notes !== undefined) it.notes = notes;
     it.updated_at = new Date().toISOString();
@@ -80,7 +93,7 @@ export async function updateInterventionStatus(input: z.infer<typeof StatusSchem
       .from("interventions")
       .update({ status, ...(notes !== undefined ? { notes } : {}), updated_at: new Date().toISOString() }, { count: "exact" })
       .eq("id", id);
-    if (error) return { ok: false, error: error.message };
+    if (error) return { ok: false, error: interventionError(error) };
     // RLS hides rows this user may not change: zero rows is a refusal, not a success
     if (!count) return { ok: false, error: "You can only update interventions for your own students." };
   }
@@ -120,7 +133,10 @@ export async function recordInterventionFollowup(input: z.infer<typeof FollowupS
     it.followup = followupPayload;
     if (v.outcome !== undefined) it.outcome = v.outcome;
     if (v.review_date !== undefined) it.review_date = v.review_date;
-    if (v.status) it.status = v.status;
+    if (v.status) {
+      if (!canTransition(it.status, v.status)) return { ok: false, error: `Intervention status cannot change from ${it.status} to ${v.status}` };
+      it.status = v.status;
+    }
     it.updated_at = new Date().toISOString();
   } else {
     const supabase = await createClient();
@@ -136,7 +152,7 @@ export async function recordInterventionFollowup(input: z.infer<typeof FollowupS
       .from("interventions")
       .update(updateObj, { count: "exact" })
       .eq("id", v.id);
-    if (error) return { ok: false, error: error.message };
+    if (error) return { ok: false, error: interventionError(error) };
     if (!count) return { ok: false, error: "You can only update interventions for your authorized students." };
   }
 
