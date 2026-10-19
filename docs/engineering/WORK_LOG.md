@@ -14,3 +14,4 @@
 - Durable run state + single-run lock + upload_id validation (path traversal). `pytest -q` 41 passed.
 - 0009 campus analytics staff-only. CI `db-rls` green from empty (0001-0009); production suite passed in a rolled-back transaction.
 - Next: tenancy expand migration (institutions + institution_id + membership-scoped helpers), web/ML unchanged until enforcement step.
+- Tenancy expand 0010: CI from empty (0001-0010) green incl. 11 cross-institution checks; applied to production; regression (admin/mentor visibility unchanged) + tenant checks passed in a rolled-back transaction.

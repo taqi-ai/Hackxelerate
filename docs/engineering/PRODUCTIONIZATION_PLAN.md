@@ -11,7 +11,8 @@ Ordered backlog. Status per item: done / next / blocked / human. Evidence in WOR
 - [human] Enable leaked-password protection and admin MFA in Supabase; rotate token secrets.
 
 ## P1: core foundations
-- Tenancy: `institutions`, `institution_memberships`, `institution_id` on every table (expand, backfill, then constrain), RLS by membership, negative tests.
+- [done: expand] Tenancy 0010: `institutions`, `institution_id` on profiles, mentors, students, feedback and every campus-wide table (default = evaluation campus); every policy and helper scoped to the caller's institution; cross-institution tests in CI and production.
+- [next: contract] Institution-scoped keys (students.id and analytics_artifacts.key are still globally unique, so two colleges cannot share a roll number); an institution parameter on `ascora_ingest` and `ascora_reset` (both still act on the default institution / all rows); per-institution ML artefacts; institution admin onboarding UI.
 - Provisioning: invite-only accounts, first-admin bootstrap, deprovisioning.
 - [done] Durable run state: JSON per run under `artifacts/runs/` (survives restarts; interrupted runs marked failed), one run at a time (409), `upload_id` format-validated (path traversal). A database-backed table is still needed for multi-instance hosting.
 - Connector interface (discover / test / fetch / normalize, cursors, sync reports), with the file import as connector #1.

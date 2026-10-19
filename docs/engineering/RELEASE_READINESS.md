@@ -4,7 +4,7 @@
 
 Not a pilot candidate yet. Gates that block any real student data:
 
-1. Multi-institution tenancy (`institution_id`, RLS by membership, negative tests): MISSING.
+1. Multi-institution tenancy: PARTIAL. Data isolation enforced and tested (0010); keys, publish RPC and ML artefacts are not yet per institution, so a second institution cannot be onboarded yet.
 2. Account provisioning and deprovisioning, admin MFA: MISSING.
 3. Automated RLS / cross-role negative test suite: DONE for the current single-tenant model (CI `db-rls`). Must be extended with cross-institution cases when tenancy lands.
 4. Durable job state for pipeline runs: DONE for single-instance hosting (file-backed); database-backed table needed before scaling out.
