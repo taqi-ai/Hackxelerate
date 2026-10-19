@@ -19,3 +19,13 @@ def test_identifiers_are_redacted_before_any_llm_call(monkeypatch, tmp_path):
 def test_redaction_keeps_ordinary_numbers():
     assert llm.redact("ECE year 2 students with attendance under 70% and 3 backlogs") == \
         "ECE year 2 students with attendance under 70% and 3 backlogs"
+
+
+def test_kill_switch_stops_all_external_calls(monkeypatch, tmp_path):
+    monkeypatch.setenv("ASCORA_LLM", "off")
+    monkeypatch.setattr(llm, "_cache", {})
+    monkeypatch.setattr(llm, "CACHE_FILE", tmp_path / "c.json")
+    called = []
+    monkeypatch.setattr(llm, "_azure", lambda *a, **k: called.append(1) or "x")
+    assert llm.provider() == "none"
+    assert llm.generate("anything") is None and not called
