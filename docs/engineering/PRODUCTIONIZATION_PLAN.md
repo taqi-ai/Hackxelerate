@@ -16,7 +16,8 @@ Ordered backlog. Status per item: done / next / blocked / human. Evidence in WOR
 - Provisioning: invite-only accounts, first-admin bootstrap, deprovisioning.
 - [done] Intervention integrity (0011): one active intervention per type per student (unique index) and a database-enforced state machine; UI offers only allowed moves; offline mode mirrors the rules (`lib/intervention-rules.ts`).
 - [done] Durable run state: JSON per run under `artifacts/runs/` (survives restarts; interrupted runs marked failed), one run at a time (409), `upload_id` format-validated (path traversal). A database-backed table is still needed for multi-instance hosting.
-- Connector interface (discover / test / fetch / normalize, cursors, sync reports), with the file import as connector #1.
+- [done: status layer] Connector catalog and real status (`GET /connectors`, Data integration panel); file import is connector #1 with run-history status; others honestly "Not configured" / CUIMS "Awaiting institution authorisation". See CONNECTOR_ARCHITECTURE.md.
+- [next] First API connector only after an institution authorises one (interface in CONNECTOR_ARCHITECTURE.md).
 - Per-source data freshness on dashboards.
 
 ## P2: operations
@@ -27,7 +28,7 @@ Ordered backlog. Status per item: done / next / blocked / human. Evidence in WOR
 
 ## Docs
 - [done] `ML_MODEL_CARD.md` (measured metrics, leakage audit, gates), `PRODUCTION_RUNBOOK.md` (deploy, rollback, secrets, flags, incidents).
-- [next] `CONNECTOR_ARCHITECTURE.md` and `DATA_DICTIONARY_AND_LINEAGE.md`.
+- [done] `CONNECTOR_ARCHITECTURE.md`. [next] `DATA_DICTIONARY_AND_LINEAGE.md`.
 
 ## P3: polish
 - Mobile OTA (expo-updates) with a release channel; Play Store listing.

@@ -14,7 +14,8 @@ Legend: REAL+TESTED · REAL/UNDER-TESTED · PARTIAL · DEMO/FIXTURE · UI-ONLY �
 | Public student preview | DEMO/FIXTURE (explicit) | synthetic files in `apps/web/demo-data/preview`; off unless `ASCORA_PUBLIC_PREVIEW=1` |
 | File import pipeline (CSV/XLSX/JSON, 12 steps) | REAL/UNDER-TESTED | `services/ml/app/pipeline.py`; run state is in memory (lost on restart) |
 | Entity resolution + review queue | REAL+TESTED (synthetic) | `clean/resolve.py`, `tests/test_resolve.py`; P 1.00 / R 0.95 vs planted truth |
-| Live ERP / LMS / CUIMS connectors | MISSING / BLOCKED | no connector framework; CUIMS needs institutional authorisation |
+| Connector status | REAL+TESTED | `services/ml/app/connectors.py`, `tests/test_connectors.py`, Data integration panel (checked end to end locally) |
+| Live ERP / LMS / CUIMS connectors | MISSING / BLOCKED | none built; CUIMS needs institutional authorisation; shown honestly as not configured |
 | Success Score | REAL+TESTED | `scoring/`, `docs/score-note.md` |
 | Academic / placement risk models | REAL, synthetic labels only | real hold-out evaluation; NOT VALIDATED on institutional outcomes |
 | SHAP reasons, what-helps | REAL | computed from the actual model |
