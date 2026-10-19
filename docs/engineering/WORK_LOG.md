@@ -23,3 +23,8 @@
 - ASCORA_LLM=off kill switch (49 pytest). ML_MODEL_CARD.md and PRODUCTION_RUNBOOK.md written from verified facts; backups and PITR marked not verified.
 - Intervention integrity 0011 + `supabase/tests/intervention_rules.sql` (CI) + web mapping and allowed-move dropdown. 48 vitest.
 - Connector status layer: ML `/connectors` (admin) + Data integration panel; verified end to end locally (web token to ML). 52 pytest, 48 vitest. Offline quality timestamp no longer fakes "now".
+
+## Checkpoint 2026-10-20
+- Merged and live: #33 (LLM redaction, health), #34 (deps + request log + CI deps-audit), #35 (LLM kill switch, model card, runbook), #36 (intervention integrity 0011), #37 (connector status), #38 (Playwright e2e in CI). All CI jobs green.
+- Production DB has migrations 0001-0011; all SQL suites passed on production in rolled-back transactions.
+- Next session, in order: (1) DATA_DICTIONARY_AND_LINEAGE.md; (2) tenancy contract step (institution-scoped keys + institution-aware ingest/reset RPCs) after the user decides; (3) Next 16 upgrade to clear the accepted advisory; (4) account provisioning and admin MFA; (5) restore drill.
