@@ -8,6 +8,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import re
 
 import httpx
 
@@ -68,7 +69,20 @@ def _gemini(prompt: str, timeout_s: float) -> str | None:
     return ((client.models.generate_content(model=GEMINI_MODEL, contents=prompt).text) or "").strip()
 
 
+_ROLL = re.compile(r"\bCU\d{2}[A-Z]{2,4}\d{4}\b", re.IGNORECASE)
+_EMAIL = re.compile(r"\b[\w.+-]+@[\w-]+(?:\.[\w-]+)+\b")
+_PHONE = re.compile(r"(?<!\d)(?:\+?91[\s-]?)?[6-9]\d{4}[\s-]?\d{5}(?!\d)")
+
+
+def redact(text: str) -> str:
+    """Strip student identifiers before text leaves for an external model: roll numbers, emails, phone numbers.
+    Free-text names cannot be detected reliably by pattern; the prompts built here never include them, but a
+    staff member could still type one into Ask, which is documented in docs/engineering/THREAT_MODEL.md (T8)."""
+    return _PHONE.sub("[phone]", _EMAIL.sub("[email]", _ROLL.sub("[student-id]", text)))
+
+
 def generate(prompt: str, json_mode: bool = False, timeout_s: float = 12.0) -> str | None:
+    prompt = redact(prompt)   # single choke point: every external LLM call goes through here
     key = cache_key(prompt, json_mode)
     if key in _cache:
         return _cache[key]
