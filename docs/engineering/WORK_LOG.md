@@ -21,3 +21,4 @@
 - Structured request logging (ML). Dependency upgrades: pip-audit clean, 48 pytest, identical model predictions. shadcn moved to dev. CI `deps-audit` added.
 - ML deploy after the dependency upgrade: Azure reported "failed to start within 10 min" (one-time dependency reinstall on B1), yet the new version started and is ready. Set WEBSITES_CONTAINER_START_TIME_LIMIT=1800; a settings restart came back ready in seconds (deps cached).
 - ASCORA_LLM=off kill switch (49 pytest). ML_MODEL_CARD.md and PRODUCTION_RUNBOOK.md written from verified facts; backups and PITR marked not verified.
+- Intervention integrity 0011 + `supabase/tests/intervention_rules.sql` (CI) + web mapping and allowed-move dropdown. 48 vitest.

@@ -17,6 +17,7 @@ import { INTERVENTION_LABEL } from "@/lib/format";
 import type { Intervention } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { campusDate } from "@/lib/dates";
+import { canTransition } from "@/lib/intervention-rules";
 
 const STATUS_LABEL = { open: "Open", in_progress: "In progress", done: "Done", cancelled: "Cancelled" } as const;
 const OUTCOME_LABEL = {
@@ -283,7 +284,7 @@ export function InterventionRow({
           </SelectTrigger>
           <SelectContent>
             {Object.entries(STATUS_LABEL).map(([v, l]) => (
-              <SelectItem key={v} value={v} className="text-xs">
+              <SelectItem key={v} value={v} className="text-xs" disabled={!canTransition(i.status, v as keyof typeof STATUS_LABEL)}>
                 {l}
               </SelectItem>
             ))}
