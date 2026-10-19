@@ -5,7 +5,7 @@ Ordered backlog. Status per item: done / next / blocked / human. Evidence in WOR
 ## P0: security and data integrity
 - [done] Demo accounts cannot change published data (ML `require_admin_write`).
 - [done] Fixture preview off by default (`ASCORA_PUBLIC_PREVIEW`).
-- [next] Automated RLS negative tests (mentor A vs mentor B, anonymous, student) against a local Supabase (`supabase start`), run in CI.
+- [done] RLS isolation suite (`supabase/tests/rls_isolation.sql`) in CI job `db-rls`: migrations from empty + anon / no-profile / mentor / student / admin checks. Found and fixed: students could create and edit staff interventions (0008). Found and fixed: migrations did not apply to an empty database (0002).
 - [done] Upload limits: 25 MB per file, content signature checks, xlsx inflate cap (zip-bomb guard), rejected uploads deleted. Parse timeout still open.
 - [done] CSV export formula-injection guard (`lib/csv.ts`), unit-tested and checked in a browser.
 - [human] Enable leaked-password protection and admin MFA in Supabase; rotate token secrets.

@@ -23,6 +23,7 @@ jobs:
     outputs:
       web: ${{ steps.f.outputs.web }}
       ml: ${{ steps.f.outputs.ml }}
+      db: ${{ steps.f.outputs.db }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -31,6 +32,9 @@ jobs:
           filters: |
             web:
               - 'apps/web/**'
+              - '.github/workflows/ci.yml'
+            db:
+              - 'supabase/**'
               - '.github/workflows/ci.yml'
             ml:
               - 'services/ml/**'
@@ -96,6 +100,20 @@ jobs:
         run: |
           "$GITHUB_WORKSPACE/.venv/bin/python" -m pytest -q -x
 
+  # Migrations must apply to an empty database, and row-level security must hold for every role
+  # (supabase/tests/rls_isolation.sql: anon, no-profile user, mentor, student, admin; always rolled back).
+  db-rls:
+    needs: changes
+    if: needs.changes.outputs.db == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with: { version: 2.121.0 }
+      - run: supabase db start
+      - run: psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f supabase/tests/rls_seed.sql -f supabase/tests/rls_isolation.sql
+
   secrets-scan:
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -108,7 +126,7 @@ jobs:
   # One stable name to require in branch protection. Skipped jobs count as success.
   ci-ok:
     if: always()
-    needs: [web-check, web-build, ml-tests, secrets-scan]
+    needs: [web-check, web-build, ml-tests, db-rls, secrets-scan]
     runs-on: ubuntu-latest
     steps:
       - run: |

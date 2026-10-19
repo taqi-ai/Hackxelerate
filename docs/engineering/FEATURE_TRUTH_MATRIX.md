@@ -6,7 +6,7 @@ Legend: REAL+TESTED · REAL/UNDER-TESTED · PARTIAL · DEMO/FIXTURE · UI-ONLY �
 |---|---|---|
 | Staff login / logout (Supabase Auth, admin + mentor) | REAL/UNDER-TESTED | `login-form.tsx`, `middleware.ts`. No automated E2E (no test credentials in CI). |
 | Role resolution from `profiles` (role never from client) | REAL+TESTED (ML side) | `api/ml-token/route.ts`, `services/ml/tests/test_auth.py` |
-| Mentor sees only own students (RLS) | REAL/UNDER-TESTED | migrations 0001/0004/0006; verified once by SQL role impersonation; no automated RLS suite yet |
+| Role isolation (RLS) | REAL+TESTED | `supabase/tests/rls_isolation.sql`, CI `db-rls`; re-run on production in a rolled-back transaction |
 | Multi-institution tenancy | MISSING | single implicit institution; no `institution_id` (P1) |
 | User provisioning / invitations / deprovisioning | MISSING | accounts created manually in Supabase |
 | Admin MFA | MISSING | supported by Supabase, not enforced |
