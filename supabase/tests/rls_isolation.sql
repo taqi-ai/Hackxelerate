@@ -146,5 +146,44 @@ do $$ begin
 end $$;
 reset role;
 
+-- 6. Institutions are isolated from each other ---------------------------------------------------------------------
+insert into public.institutions (id, slug, name) values ('00000000-0000-4000-8000-0000000000b2', 'rls-test-b', 'RLS test institution B');
+insert into auth.users (id, email, aud, role)
+values ('33333333-3333-4333-8333-333333333333', 'rls-b-admin@example.invalid', 'authenticated', 'authenticated');
+insert into public.profiles (id, full_name, role, institution_id)
+values ('33333333-3333-4333-8333-333333333333', 'Institution B admin', 'admin', '00000000-0000-4000-8000-0000000000b2');
+insert into public.students (id, name, branch, year, section, institution_id)
+values ('CU99RLS0001', 'Institution B student', 'CSE', 1, 'A', '00000000-0000-4000-8000-0000000000b2');
+insert into public.analytics_artifacts (key, payload, institution_id) values ('rls-test-b', '{}', '00000000-0000-4000-8000-0000000000b2');
+
+-- our admin sees nothing of institution B
+select set_config('request.jwt.claims', json_build_object('sub', (select admin_uid from t_ids), 'role', 'authenticated')::text, true);
+set local role authenticated;
+do $$ begin
+  assert (select count(*) from public.students where id = 'CU99RLS0001') = 0, 'LEAK tenant: admin A sees institution B student';
+  assert (select count(*) from public.analytics_artifacts where key = 'rls-test-b') = 0, 'LEAK tenant: admin A sees B analytics';
+  assert (select count(*) from public.profiles where id = '33333333-3333-4333-8333-333333333333') = 0, 'LEAK tenant: admin A sees B profile';
+  assert (select count(*) from public.institutions) = 1, 'LEAK tenant: admin A lists other institutions';
+end $$;
+reset role;
+
+-- institution B's admin sees only institution B and cannot act on ours
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated"}', true);
+set local role authenticated;
+do $$ begin
+  assert (select count(*) from public.students) = 1, 'LEAK tenant: admin B sees institution A students';
+  assert (select count(*) from public.analytics_artifacts where key = 'rls-test') = 0, 'LEAK tenant: admin B sees A analytics';
+  assert (select count(*) from public.academic x join t_own o on o.id = x.student_id) = 0, 'LEAK tenant: admin B sees A academic';
+  assert (select count(*) from public.interventions) = 0, 'LEAK tenant: admin B sees A interventions';
+  assert (select count(*) from public.profiles) = 1, 'LEAK tenant: admin B sees A profiles';
+  assert (select count(*) from public.audit_log) = 0, 'LEAK tenant: admin B reads A audit log';
+  begin
+    insert into public.interventions (student_id, type) values ((select id from t_own), 'mentor_meeting');
+    raise exception 'LEAK tenant: admin B created an intervention for an institution A student';
+  exception when insufficient_privilege then null;
+  end;
+end $$;
+reset role;
+
 do $$ begin raise notice 'RLS isolation: all checks passed'; end $$;
 rollback;
