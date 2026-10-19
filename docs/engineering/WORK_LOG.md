@@ -18,3 +18,4 @@
 
 ## 2026-10-20
 - LLM boundary: `redact()` at the `generate()` choke point. Health probes for ML and web. `pytest -q` 46 passed (twice, cache isolated); `npm test` 46 passed; build OK.
+- Structured request logging (ML). Dependency upgrades: pip-audit clean, 48 pytest, identical model predictions. shadcn moved to dev. CI `deps-audit` added.

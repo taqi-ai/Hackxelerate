@@ -114,6 +114,22 @@ jobs:
       - run: supabase db start
       - run: psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f supabase/tests/rls_seed.sql -f supabase/tests/rls_isolation.sql
 
+  # Known-vulnerability gate on what ships. Web: production dependencies, blocks on critical (the two Next.js
+  # advisories fixed only in Next 16 are an accepted, tracked risk: docs/engineering/SECURITY_REMEDIATION.md).
+  # ML: every pinned requirement, blocks on any known vulnerability.
+  deps-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - working-directory: apps/web
+        run: npm audit --omit=dev --audit-level=critical
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pip-audit==2.10.1 && pip-audit -r services/ml/requirements.txt --disable-pip --no-deps
+
   secrets-scan:
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -126,7 +142,7 @@ jobs:
   # One stable name to require in branch protection. Skipped jobs count as success.
   ci-ok:
     if: always()
-    needs: [web-check, web-build, ml-tests, db-rls, secrets-scan]
+    needs: [web-check, web-build, ml-tests, db-rls, deps-audit, secrets-scan]
     runs-on: ubuntu-latest
     steps:
       - run: |
