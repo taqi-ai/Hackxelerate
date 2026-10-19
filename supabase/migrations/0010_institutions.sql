@@ -18,11 +18,7 @@ insert into public.institutions (id, slug, name)
 values ('00000000-0000-4000-8000-0000000000a1', 'ascora-evaluation', 'Ascora evaluation campus (synthetic data)')
 on conflict (id) do nothing;
 
--- caller's institution (null for anonymous / profile-less callers, which then match nothing)
-create or replace function private.my_institution() returns uuid
-language sql stable security definer set search_path = public as $$
-  select institution_id from public.profiles where id = auth.uid();
-$$;
+
 
 do $$
 declare t text;
@@ -35,6 +31,11 @@ begin
   end loop;
 end $$;
 
+-- caller's institution (null for anonymous / profile-less callers, which then match nothing)
+create or replace function private.my_institution() returns uuid
+language sql stable security definer set search_path = public as $$
+  select institution_id from public.profiles where id = auth.uid();
+$$;
 revoke all on function private.my_institution() from public, anon;
 grant execute on function private.my_institution() to authenticated;
 
