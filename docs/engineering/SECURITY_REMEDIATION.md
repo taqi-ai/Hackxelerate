@@ -2,6 +2,8 @@
 
 | Date | Finding | Severity | Fix | Evidence |
 |---|---|---|---|---|
+| 2026-10-19 | Signed-in students could read, create and update staff intervention records about themselves | P0 | migration 0008: `private.is_staff()` on intervention policies (applied to production) | `supabase/tests/rls_isolation.sql` (CI `db-rls`, and production in a rolled-back transaction) |
+| 2026-10-19 | Migrations failed on an empty database (0002 renamed a function 0001 no longer creates) | P1 | 0002 made conditional | CI `db-rls` applies 0001-0008 from empty |
 | 2026-10-19 | Shared demo admin (public repo) could run and publish the pipeline and upload files to the ML service | P0 | `require_admin_write` in `services/ml/app/auth.py`; web marks demo tokens (`apps/web/src/lib/demo-accounts.ts`) | `pytest tests/test_auth.py::test_shared_demo_accounts_cannot_change_published_data`; `vitest src/lib/demo-accounts.test.ts` |
 | 2026-10-19 | Fixture student preview always on in production | P0 | `ASCORA_PUBLIC_PREVIEW` flag (default off) in data layer, actions, search API and middleware | local production build: off gives `/student` 307 to login and search `[]`; on gives 200 |
 | 2026-10-19 | Uploads: no size limit, no content check, zip-bomb risk | P0 | size cap, signature checks, inflate cap, cleanup (`services/ml/app/main.py`) | `pytest tests/test_auth.py::test_upload_rejects_disguised_oversized_and_bomb_files` |

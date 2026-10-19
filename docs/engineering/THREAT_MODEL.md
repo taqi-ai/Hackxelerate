@@ -6,7 +6,7 @@ Assets: student records (synthetic today), staff accounts, scores and prediction
 |---|---|---|---|
 | T1 | Public repo exposes the shared demo logins (`@ascora.test`), so anyone can act as admin | **Fixed:** demo tokens carry `demo=true`; the ML service refuses pipeline runs and uploads (`require_admin_write`, tested) | demo users can still create and edit interventions on synthetic data (accepted for the evaluation instance) |
 | T2 | Production silently serving fixture students | **Fixed:** preview gated by `ASCORA_PUBLIC_PREVIEW`, default off; middleware ignores the preview cookie when off | the evaluation instance has it on deliberately |
-| T3 | Cross-mentor data access | RLS on every table, helpers in a private schema | add automated RLS tests (P0 next) |
+| T3 | Cross-role data access | RLS on every table; interventions staff-only (0008); CI suite `db-rls` with negative and positive controls | students can read their own scores including risk levels: product decision pending (right of access vs harm) |
 | T4 | Cross-institution leakage | not applicable yet (single tenant) | tenancy required before a second institution (P1) |
 | T5 | Anonymous SECURITY DEFINER RPCs `ascora_ingest` / `ascora_reset` | shared-secret gated, only a SHA-256 stored | rotate before real data; consider a dedicated database role |
 | T6 | Malicious uploads (macros, zip bombs, huge files) | **Fixed:** 25 MB/file, max 12 files, signature checks, xlsx inflate cap, rejected uploads deleted | parse timeout and per-tenant quota still open |
