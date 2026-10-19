@@ -8,11 +8,12 @@ import time
 import uuid
 from pathlib import Path
 
+from fastapi.responses import JSONResponse
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from . import service
+from . import config, service
 from .auth import current_user, require_admin, require_admin_write
 from .config import ALLOWED_ORIGINS, DEMO_DIR, ML_ROOT
 from .insights.llm import model_name, provider
@@ -53,6 +54,25 @@ class AskRequest(BaseModel):
 def health():
     return {"status": "ok", "model_state": bool(service.STATE) or service.STATE_FILE.exists(),
             "llm": provider() if provider() != "none" else "disabled (deterministic fallbacks)", "llm_model": model_name(), "time": time.time()}
+
+
+@app.get("/health/live")
+def health_live():
+    """Process is up. Never touches dependencies, so a slow database cannot restart a healthy process."""
+    return {"status": "ok"}
+
+
+@app.get("/health/ready")
+def health_ready():
+    """Ready to serve real traffic: configuration present and model state loaded. Reports booleans only, never values."""
+    checks = {
+        "auth_secret": bool(config.TOKEN_SECRET),
+        "publish_token": bool(config.INGEST_TOKEN),
+        "database_url": bool(config.SUPABASE_URL),
+        "model_state": bool(service.STATE) or service.STATE_FILE.exists(),
+    }
+    ok = all(checks.values())
+    return JSONResponse({"status": "ready" if ok else "not_ready", "checks": checks}, status_code=200 if ok else 503)
 
 
 MAX_FILE_BYTES = 25 * 1024 * 1024        # per uploaded file

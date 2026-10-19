@@ -5,6 +5,7 @@ const PUBLIC_PREFIXES = [
   "/login",
   "/auth",
   "/api/ml-token",
+  "/api/health",
   // public student-preview picker: returns only the synthetic preview index, and nothing when the preview is off
   "/api/students/search",
   "/product",

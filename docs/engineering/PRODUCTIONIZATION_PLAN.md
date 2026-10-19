@@ -19,7 +19,8 @@ Ordered backlog. Status per item: done / next / blocked / human. Evidence in WOR
 - Per-source data freshness on dashboards.
 
 ## P2: operations
-- Web readiness endpoint; structured logs with request IDs; backup and restore drill; a staging environment.
+- [done] Health probes: ML `/health/live`, `/health/ready` (503 with boolean checks); web `/api/health` (`?probe=live`), booleans only.
+- [next] Structured logs with request IDs; backup and restore drill; a staging environment.
 
 ## P3: polish
 - Mobile OTA (expo-updates) with a release channel; Play Store listing.
