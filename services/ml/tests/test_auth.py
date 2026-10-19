@@ -55,3 +55,38 @@ def test_endpoints_enforce_signed_in_user_and_admin_role(monkeypatch):
     assert client.post("/ask", headers=mentor, json={"question": "high risk students"}).status_code == 200
     assert client.get("/pipeline/runs/does-not-exist", headers=admin).status_code == 404
     assert client.get("/whatif/CU25CSE0001/inputs", headers={"Authorization": "Bearer garbage"}).status_code == 401
+
+
+def test_shared_demo_accounts_cannot_change_published_data(monkeypatch):
+    """The demo logins are public. A demo admin may read and simulate, but may not run, publish or upload."""
+    monkeypatch.setattr(config, "TOKEN_SECRET", SECRET)
+    client = TestClient(app)
+    demo = {"Authorization": "Bearer " + auth.sign({"sub": "d1", "role": "admin", "demo": True, "exp": time.time() + 600}, SECRET)}
+    r = client.post("/pipeline/run", headers=demo, json={"source": "demo", "publish": False})
+    assert r.status_code == 403 and "demo" in r.json()["detail"].lower()
+    assert client.post("/pipeline/upload", headers=demo, files={"files": ("a.csv", b"x,y\n1,2\n", "text/csv")}).status_code == 403
+    assert client.get("/pipeline/runs/does-not-exist", headers=demo).status_code == 404   # reading run status is fine
+    assert client.post("/ask", headers=demo, json={"question": "high risk students"}).status_code == 200
+
+
+def test_upload_rejects_disguised_oversized_and_bomb_files(monkeypatch, tmp_path):
+    import io, zipfile
+    from app import main
+    monkeypatch.setattr(config, "TOKEN_SECRET", SECRET)
+    monkeypatch.setattr(main, "UPLOADS", tmp_path)
+    monkeypatch.setattr(main, "MAX_FILE_BYTES", 2048)
+    client = TestClient(app)
+    admin = {"Authorization": f"Bearer {token('admin')}"}
+    def post(name, data, ctype="application/octet-stream"):
+        return client.post("/pipeline/upload", headers=admin, files={"files": (name, data, ctype)})
+    assert post("ok.csv", b"roll_no,name\nCU25CSE0001,Asha\n", "text/csv").status_code == 200
+    assert post("fake.xlsx", b"MZ\x90\x00 not a spreadsheet").status_code == 400          # wrong signature
+    assert post("bin.csv", b"\x00\x01\x02\xff\xfe binary").status_code == 400             # not text
+    assert post("big.csv", b"a,b\n" + b"1,2\n" * 2000, "text/csv").status_code == 413     # over the size limit
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("xl/worksheets/sheet1.xml", b"0" * 50_000_000)                         # ~50 MB inflated
+    monkeypatch.setattr(main, "MAX_FILE_BYTES", 10_000_000)
+    monkeypatch.setattr(main, "MAX_XLSX_INFLATED", 10_000_000)
+    assert post("bomb.xlsx", buf.getvalue()).status_code == 400
+    assert not any(p.is_file() for p in tmp_path.rglob("*") if p.name in ("fake.xlsx", "bin.csv", "big.csv", "bomb.xlsx"))

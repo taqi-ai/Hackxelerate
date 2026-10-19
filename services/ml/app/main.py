@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 import shutil
+import zipfile
 import time
 import uuid
 from pathlib import Path
@@ -12,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from . import service
-from .auth import current_user, require_admin
+from .auth import current_user, require_admin, require_admin_write
 from .config import ALLOWED_ORIGINS, DEMO_DIR, ML_ROOT
 from .insights.llm import model_name, provider
 from .insights.ask import ask as ask_query
@@ -53,7 +54,36 @@ def health():
             "llm": provider() if provider() != "none" else "disabled (deterministic fallbacks)", "llm_model": model_name(), "time": time.time()}
 
 
-@app.post("/pipeline/upload", dependencies=[Depends(require_admin)])
+MAX_FILE_BYTES = 25 * 1024 * 1024        # per uploaded file
+MAX_XLSX_INFLATED = 200 * 1024 * 1024    # guards against compressed "zip bomb" spreadsheets
+
+
+def _check_upload(path: Path) -> None:
+    """Reject files whose content does not match their extension, before any parser touches them."""
+    head = path.open("rb").read(4096)
+    suffix = path.suffix.lower()
+    if suffix == ".xlsx":
+        if not head.startswith(b"PK\x03\x04") or not zipfile.is_zipfile(path):
+            raise HTTPException(400, f"{path.name}: not a valid Excel (.xlsx) file")
+        with zipfile.ZipFile(path) as z:
+            if sum(i.file_size for i in z.infolist()) > MAX_XLSX_INFLATED:
+                raise HTTPException(400, f"{path.name}: the spreadsheet expands to an unsafe size")
+    else:
+        try:
+            head.decode("utf-8-sig")
+        except UnicodeDecodeError:
+            # a multi-byte character may be cut at the 4 KB boundary; retry without the last 3 bytes
+            try:
+                head[:-3].decode("utf-8-sig")
+            except UnicodeDecodeError:
+                raise HTTPException(400, f"{path.name}: must be UTF-8 text")
+        if b"\x00" in head:
+            raise HTTPException(400, f"{path.name}: must be UTF-8 text")
+        if suffix == ".json" and head.lstrip()[:1] not in (b"{", b"["):
+            raise HTTPException(400, f"{path.name}: not a JSON document")
+
+
+@app.post("/pipeline/upload", dependencies=[Depends(require_admin_write)])
 async def upload(files: list[UploadFile] = File(...)):
     if not files or len(files) > 12:
         raise HTTPException(400, "Upload between 1 and 12 files")
@@ -61,20 +91,31 @@ async def upload(files: list[UploadFile] = File(...)):
     folder = UPLOADS / uid
     folder.mkdir(parents=True, exist_ok=True)
     saved = []
-    for f in files:
-        name = Path(f.filename or "file").name
-        if Path(name).suffix.lower() not in (".csv", ".xlsx", ".json"):
-            raise HTTPException(400, f"{name}: only CSV, XLSX and JSON are accepted")
-        with (folder / name).open("wb") as out:
-            shutil.copyfileobj(f.file, out, length=1 << 20)
-        saved.append(name)
+    try:
+        for f in files:
+            name = Path(f.filename or "file").name
+            if Path(name).suffix.lower() not in (".csv", ".xlsx", ".json"):
+                raise HTTPException(400, f"{name}: only CSV, XLSX and JSON are accepted")
+            target = folder / name
+            written = 0
+            with target.open("wb") as out:
+                while chunk := f.file.read(1 << 20):
+                    written += len(chunk)
+                    if written > MAX_FILE_BYTES:
+                        raise HTTPException(413, f"{name}: larger than {MAX_FILE_BYTES // (1024 * 1024)} MB")
+                    out.write(chunk)
+            _check_upload(target)
+            saved.append(name)
+    except HTTPException:
+        shutil.rmtree(folder, ignore_errors=True)   # never keep a rejected upload around
+        raise
     # the mentors list is reference data the college already has
     if (DEMO_DIR / "mentors.csv").exists() and not (folder / "mentors.csv").exists():
         shutil.copy(DEMO_DIR / "mentors.csv", folder / "mentors.csv")
     return {"upload_id": uid, "files": saved}
 
 
-@app.post("/pipeline/run", dependencies=[Depends(require_admin)])
+@app.post("/pipeline/run", dependencies=[Depends(require_admin_write)])
 def run(req: RunRequest):
     if req.source == "upload":
         if not req.upload_id or not (UPLOADS / req.upload_id).is_dir():

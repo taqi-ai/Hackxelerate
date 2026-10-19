@@ -1,0 +1,12 @@
+# Security remediation log
+
+| Date | Finding | Severity | Fix | Evidence |
+|---|---|---|---|---|
+| 2026-10-19 | Shared demo admin (public repo) could run and publish the pipeline and upload files to the ML service | P0 | `require_admin_write` in `services/ml/app/auth.py`; web marks demo tokens (`apps/web/src/lib/demo-accounts.ts`) | `pytest tests/test_auth.py::test_shared_demo_accounts_cannot_change_published_data`; `vitest src/lib/demo-accounts.test.ts` |
+| 2026-10-19 | Fixture student preview always on in production | P0 | `ASCORA_PUBLIC_PREVIEW` flag (default off) in data layer, actions, search API and middleware | local production build: off gives `/student` 307 to login and search `[]`; on gives 200 |
+| 2026-10-19 | Uploads: no size limit, no content check, zip-bomb risk | P0 | size cap, signature checks, inflate cap, cleanup (`services/ml/app/main.py`) | `pytest tests/test_auth.py::test_upload_rejects_disguised_oversized_and_bomb_files` |
+| 2026-10-19 | CSV export formula injection | P1 | `apps/web/src/lib/csv.ts` | `vitest src/lib/csv.test.ts`; browser export of 1,200 rows |
+| 2026-10-19 | Login-page student picker broken (API redirected to login) | P2 bug | `/api/students/search` public with bounded inputs | curl against a local production build |
+| 2026-10-14 | Student portal 500s and fake plan saves | P1 | preview files, honest errors | `docs/OVERNIGHT_PROGRESS.md` |
+
+Open items that need a human: enable Supabase leaked-password protection and admin MFA; rotate `ASCORA_TOKEN_SECRET` and the ingest token before any real data; an independent penetration test; legal / DPO review (DPDP Act 2023 and its rules).

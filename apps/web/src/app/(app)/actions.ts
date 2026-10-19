@@ -7,7 +7,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { OFFLINE, offlineConnections, offlineInterventions, offlinePlans, one, visibleIds } from "@/lib/offline";
 import { getProfile, isPreview } from "@/lib/data";
-import { DEMO_PLAN_LIMIT, readDemoPlans, writeDemoImport, writeDemoPlans } from "@/lib/demo-preview";
+import { DEMO_PLAN_LIMIT, PREVIEW_ENABLED, readDemoPlans, writeDemoImport, writeDemoPlans } from "@/lib/demo-preview";
 
 const TYPES = ["mentor_meeting", "peer_tutoring", "mock_interview", "counselling_referral", "parent_call", "skill_workshop"] as const;
 
@@ -147,6 +147,7 @@ export async function recordInterventionFollowup(input: z.infer<typeof FollowupS
 }
 
 export async function selectDemoStudentAction(studentId: string): Promise<ActionResult> {
+  if (!OFFLINE && !PREVIEW_ENABLED) return { ok: false, error: "Student preview is not enabled on this deployment." };
   if (!/^CU\d{2}[A-Z]{2,4}\d{4}$/.test(studentId)) {
     return { ok: false, error: "Invalid student identifier format" };
   }

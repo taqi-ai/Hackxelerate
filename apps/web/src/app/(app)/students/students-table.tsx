@@ -30,6 +30,7 @@ import { EmptyState, RiskBadge, ScoreValue } from "@/components/kit";
 import { INTENT_LABEL, maskEmail } from "@/lib/format";
 import { matchesStudentQuery } from "@/lib/search-utils";
 import type { StudentRow } from "@/lib/types";
+import { csvRow } from "@/lib/csv";
 
 const ALERT_LABEL: Record<string, string> = {
   silent_decliner: "Silent decliner",
@@ -223,9 +224,7 @@ export function StudentsTable({
   function exportCsv() {
     const header = ["roll_no", "name", "branch", "year", "section", "mentor", "success_score", "academic_risk", "academic_prob", "placement_risk", "placement_prob", "intent", "segment", "alerts"];
     const lines = table.getSortedRowModel().rows.map(({ original: r }) =>
-      [r.id, r.name, r.branch, r.year, r.section, mentorName.get(r.mentor_id ?? "") ?? "", r.success_score, r.academic_risk_level, r.academic_risk_prob, r.placement_risk_level, r.placement_risk_prob ?? "", r.intent, r.persona, r.alerts.map((a) => a.type).join("|")]
-        .map((v) => `"${String(v).replaceAll('"', '""')}"`)
-        .join(","),
+      csvRow([r.id, r.name, r.branch, r.year, r.section, mentorName.get(r.mentor_id ?? "") ?? "", r.success_score, r.academic_risk_level, r.academic_risk_prob, r.placement_risk_level, r.placement_risk_prob ?? "", r.intent, r.persona, r.alerts.map((a) => a.type).join("|")]),
     );
     const blob = new Blob([[header.join(","), ...lines].join("\n")], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");

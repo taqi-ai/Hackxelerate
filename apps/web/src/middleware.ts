@@ -5,6 +5,8 @@ const PUBLIC_PREFIXES = [
   "/login",
   "/auth",
   "/api/ml-token",
+  // public student-preview picker: returns only the synthetic preview index, and nothing when the preview is off
+  "/api/students/search",
   "/product",
   "/how-it-works",
   "/trust",
@@ -27,7 +29,9 @@ const INSTITUTIONAL_PREFIXES = [
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
-  const demoStudentCookie = request.cookies.get("ascora_demo_student")?.value;
+  // the student preview cookie only counts where the preview is switched on (see lib/demo-preview.ts)
+  const previewOn = process.env.ASCORA_PUBLIC_PREVIEW === "1" || (process.env.ASCORA_OFFLINE === "1" && !process.env.VERCEL);
+  const demoStudentCookie = previewOn ? request.cookies.get("ascora_demo_student")?.value : undefined;
 
   // Offline mode: no Supabase, no auth (local machine only; see lib/offline.ts)
   if (process.env.ASCORA_OFFLINE === "1" && !process.env.VERCEL) {

@@ -57,3 +57,11 @@ def require_admin(user: dict = Depends(current_user)) -> dict:
     if user.get("role") != "admin":
         raise HTTPException(403, "Admin only")
     return user
+
+
+def require_admin_write(user: dict = Depends(require_admin)) -> dict:
+    """Admin actions that change published data (pipeline runs, uploads). The shared demo logins are public,
+    so their tokens carry demo=true and may read and simulate but never overwrite the dataset."""
+    if user.get("demo"):
+        raise HTTPException(403, "Demo accounts can explore but not change published data. Use an institution admin account.")
+    return user

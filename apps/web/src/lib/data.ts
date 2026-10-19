@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { unstable_cache } from "next/cache";
 import { createClient as createPlainClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { previewConnection, previewStudent, readDemoImport, readDemoPlans, searchPreview } from "@/lib/demo-preview";
+import { PREVIEW_ENABLED, previewConnection, previewStudent, readDemoImport, readDemoPlans, searchPreview } from "@/lib/demo-preview";
 import {
   artifact,
   offlineConnections,
@@ -47,7 +47,7 @@ export const getProfile = cache(async (): Promise<(Profile & { email: string }) 
   const cookieStore = await cookies();
   const demoStudentId = cookieStore.get("ascora_demo_student")?.value;
 
-  if (demoStudentId) {
+  if (demoStudentId && (OFFLINE || PREVIEW_ENABLED)) {
     if (OFFLINE) {
       const st = snapshot().students.find((s) => s.id === demoStudentId);
       if (st) {
@@ -93,7 +93,7 @@ export const getProfile = cache(async (): Promise<(Profile & { email: string }) 
 
 /** a visitor previewing a demo student (no database identity) */
 export function isPreview(profile: { id: string; role: string } | null | undefined) {
-  return !OFFLINE && profile?.role === "student" && profile.id.startsWith("student-");
+  return !OFFLINE && PREVIEW_ENABLED && profile?.role === "student" && profile.id.startsWith("student-");
 }
 
 const ROW_COLS =
@@ -376,6 +376,7 @@ export async function searchDemoStudents(query = "", branch?: string, year?: num
     }));
   }
   // the picker is public: it searches the synthetic cohort's read-only index, never the database
+  if (!PREVIEW_ENABLED) return [];
   return searchPreview(query, branch, year, limit);
 }
 
