@@ -247,6 +247,7 @@ def start_run(folder: Path, publish: bool) -> RunState:
         finally:
             if st.status == "running":   # never report success that was not recorded
                 st.status, st.error = "error", "The run ended without reporting a result."
+            st.summary = {**(st.summary or {}), "finished_at": time.time()}
             save_run(st)
     threading.Thread(target=worker, daemon=True).start()
     return st

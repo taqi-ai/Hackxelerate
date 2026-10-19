@@ -209,7 +209,8 @@ export const getMentors = cache(async (): Promise<{ id: string; name: string; de
 export const getQualityReport = cache(async () => {
   if (OFFLINE) {
     const q = snapshot().data_quality_log[0];
-    return q ? { run_id: q.run_id, created_at: new Date().toISOString(), report: q.report } : null;
+    // the snapshot's own timestamp, never "now": a fixed snapshot must not look freshly published
+    return q ? { run_id: q.run_id, created_at: (q.created_at as string | undefined) ?? null, report: q.report } : null;
   }
   const supabase = await createClient();
   const { data } = await supabase
@@ -218,7 +219,7 @@ export const getQualityReport = cache(async () => {
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
-  return data as { run_id: string; created_at: string; report: any } | null;
+  return data as { run_id: string; created_at: string | null; report: any } | null;
 });
 
 export async function getConflicts(limit = 200) {

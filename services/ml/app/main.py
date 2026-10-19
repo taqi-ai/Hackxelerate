@@ -15,7 +15,7 @@ from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from . import config, service
+from . import config, connectors, service
 from .auth import current_user, require_admin, require_admin_write
 from .config import ALLOWED_ORIGINS, DEMO_DIR, ML_ROOT
 from .insights.llm import model_name, provider
@@ -174,6 +174,12 @@ def run(req: RunRequest):
     except service.RunConflict as busy:
         raise HTTPException(409, f"Run {busy} is still in progress. Wait for it to finish.")
     return {"run_id": st.run_id, "status": st.status}
+
+
+@app.get("/connectors", dependencies=[Depends(require_admin)])
+def list_connectors():
+    """Data sources and their real status (only the file import is built; nothing else claims a connection)."""
+    return {"connectors": connectors.list_connectors()}
 
 
 @app.get("/pipeline/runs/{run_id}", dependencies=[Depends(require_admin)])

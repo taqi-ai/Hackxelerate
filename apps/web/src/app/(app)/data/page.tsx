@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { getConflicts, getProfile, getQualityReport, getReviewQueue } from "@/lib/data";
 import { PageHeader } from "@/components/kit";
+import { ConnectorsPanel } from "./connectors-panel";
 import { PipelineRunner } from "./pipeline-runner";
 import { QualityReport } from "./quality-report";
 
@@ -17,6 +18,7 @@ export default async function DataPage() {
         title="Data integration"
         description="Seven messy campus systems become one student view. Every step is logged, every link has a confidence, and every value remembers the file and row it came from."
       />
+      <ConnectorsPanel lastPublished={quality?.created_at ?? null} />
       <PipelineRunner />
       <QualityReport report={quality?.report ?? null} conflicts={conflicts as any[]} review={review as any} />
     </>

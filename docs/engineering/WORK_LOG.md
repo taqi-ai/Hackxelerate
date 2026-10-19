@@ -22,3 +22,4 @@
 - ML deploy after the dependency upgrade: Azure reported "failed to start within 10 min" (one-time dependency reinstall on B1), yet the new version started and is ready. Set WEBSITES_CONTAINER_START_TIME_LIMIT=1800; a settings restart came back ready in seconds (deps cached).
 - ASCORA_LLM=off kill switch (49 pytest). ML_MODEL_CARD.md and PRODUCTION_RUNBOOK.md written from verified facts; backups and PITR marked not verified.
 - Intervention integrity 0011 + `supabase/tests/intervention_rules.sql` (CI) + web mapping and allowed-move dropdown. 48 vitest.
+- Connector status layer: ML `/connectors` (admin) + Data integration panel; verified end to end locally (web token to ML). 52 pytest, 48 vitest. Offline quality timestamp no longer fakes "now".
