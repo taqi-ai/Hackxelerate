@@ -37,6 +37,50 @@ class RunState:
 
 RUNS: dict[str, RunState] = {}
 _lock = threading.Lock()
+RUNS_DIR = ARTIFACTS / "runs"   # run status survives restarts (App Service keeps this folder)
+KEEP_RUNS = 50
+
+
+class RunConflict(Exception):
+    """A run is already in progress; two runs must never publish over each other."""
+
+
+def save_run(st: RunState) -> None:
+    try:
+        RUNS_DIR.mkdir(parents=True, exist_ok=True)
+        tmp = RUNS_DIR / f".{st.run_id}.tmp"
+        tmp.write_text(json.dumps({"run_id": st.run_id, "status": st.status, "steps": st.steps,
+                                   "summary": st.summary, "error": st.error}, default=str))
+        tmp.replace(RUNS_DIR / f"{st.run_id}.json")
+        for old in sorted(RUNS_DIR.glob("*.json"))[:-KEEP_RUNS]:
+            old.unlink(missing_ok=True)
+    except OSError as e:
+        log.warning("could not persist run %s: %s", st.run_id, e)
+
+
+def load_runs() -> None:
+    """On startup: restore recent runs. One that was still running died with the old process, so say so."""
+    if not RUNS_DIR.is_dir():
+        return
+    for f in sorted(RUNS_DIR.glob("*.json")):
+        try:
+            d = json.loads(f.read_text())
+        except (OSError, ValueError):
+            continue
+        st = RunState(run_id=d["run_id"], status=d.get("status", "error"), steps=d.get("steps", []),
+                      summary=d.get("summary", {}), error=d.get("error"))
+        if st.status == "running":
+            st.status, st.error = "error", "Interrupted by a service restart. Start the run again."
+            save_run(st)
+        RUNS[st.run_id] = st
+
+
+def get_run(run_id: str) -> RunState | None:
+    st = RUNS.get(run_id)
+    if st is None and RUNS_DIR.is_dir() and (RUNS_DIR / f"{run_id}.json").is_file():
+        load_runs()
+        st = RUNS.get(run_id)
+    return st
 STATE: dict = {}
 
 
@@ -188,7 +232,11 @@ def start_run(folder: Path, publish: bool) -> RunState:
     rid = time.strftime("%Y%m%d-%H%M%S-") + uuid.uuid4().hex[:6]
     st = RunState(run_id=rid)
     with _lock:
+        busy = next((r for r in RUNS.values() if r.status == "running"), None)
+        if busy:
+            raise RunConflict(busy.run_id)
         RUNS[rid] = st
+    save_run(st)
 
     def worker():
         try:
@@ -196,6 +244,10 @@ def start_run(folder: Path, publish: bool) -> RunState:
         except Exception as e:  # surfaced to the UI, logged with traceback
             log.exception("pipeline run failed")
             st.status, st.error = "error", str(e)
+        finally:
+            if st.status == "running":   # never report success that was not recorded
+                st.status, st.error = "error", "The run ended without reporting a result."
+            save_run(st)
     threading.Thread(target=worker, daemon=True).start()
     return st
 

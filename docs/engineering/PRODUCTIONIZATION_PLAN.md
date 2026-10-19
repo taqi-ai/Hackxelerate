@@ -13,7 +13,7 @@ Ordered backlog. Status per item: done / next / blocked / human. Evidence in WOR
 ## P1: core foundations
 - Tenancy: `institutions`, `institution_memberships`, `institution_id` on every table (expand, backfill, then constrain), RLS by membership, negative tests.
 - Provisioning: invite-only accounts, first-admin bootstrap, deprovisioning.
-- Durable `pipeline_runs` table (status, counts, errors) replacing in-memory run state.
+- [done] Durable run state: JSON per run under `artifacts/runs/` (survives restarts; interrupted runs marked failed), one run at a time (409), `upload_id` format-validated (path traversal). A database-backed table is still needed for multi-instance hosting.
 - Connector interface (discover / test / fetch / normalize, cursors, sync reports), with the file import as connector #1.
 - Per-source data freshness on dashboards.
 
