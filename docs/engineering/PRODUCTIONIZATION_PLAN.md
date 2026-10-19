@@ -20,7 +20,9 @@ Ordered backlog. Status per item: done / next / blocked / human. Evidence in WOR
 
 ## P2: operations
 - [done] Health probes: ML `/health/live`, `/health/ready` (503 with boolean checks); web `/api/health` (`?probe=live`), booleans only.
-- [next] Structured logs with request IDs; backup and restore drill; a staging environment.
+- [done] Structured request log (ML): one JSON line per request with `X-Request-ID`, no bodies, queries, tokens or roll numbers.
+- [done] CI dependency gate `deps-audit` (pip-audit strict, npm audit critical).
+- [next] Next 16 upgrade (clears the accepted Next/PostCSS advisories); backup and restore drill; a staging environment.
 
 ## P3: polish
 - Mobile OTA (expo-updates) with a release channel; Play Store listing.

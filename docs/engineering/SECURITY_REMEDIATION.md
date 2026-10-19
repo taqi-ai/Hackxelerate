@@ -2,6 +2,9 @@
 
 | Date | Finding | Severity | Fix | Evidence |
 |---|---|---|---|---|
+| 2026-10-20 | Vulnerable Python dependencies: Starlette 0.41.3 (many advisories), python-multipart 0.0.20 (upload parser), pyarrow, lightgbm, python-dotenv, pytest | P1 | fastapi 0.148.0 (Starlette 1.9.0), python-multipart 0.0.31, pyarrow 23.0.1, lightgbm 4.6.0, python-dotenv 1.2.2, pytest 9.0.3 | `pip-audit` clean; 48 pytest; saved models give identical predictions under lightgbm 4.6 |
+| 2026-10-20 | `shadcn` CLI shipped as a production dependency (pulled 6 high advisories into the runtime tree) | P2 | moved to devDependencies | `npm audit --omit=dev`: 9 to 2 |
+| 2026-10-20 | **Accepted risk (review by 2026-11-30):** `next` 15.x (moderate) and its bundled `postcss` (high, source-map path traversal at build time). Fixed only in Next 16, a breaking upgrade | P2 | tracked: Next 16 upgrade with full regression pass | CI blocks on critical; this item is visible in every audit run |
 | 2026-10-20 | Staff-typed Ask questions sent to the external LLM verbatim (could contain roll numbers, emails, phones) | P1 | `redact()` in `services/ml/app/insights/llm.py`, applied to every prompt | `pytest tests/test_llm_boundary.py` |
 | 2026-10-19 | Any signed-in account (students, profile-less users) could read campus analytics, insights, segments, quality log and cached LLM text | P1 | migration 0009: staff-only policies (applied to production) | CI `db-rls` from empty; production suite in a rolled-back transaction |
 | 2026-10-19 | `upload_id` joined into a server path without validation (path traversal into any directory) | P0 | pattern `^[0-9a-f]{10}$` on `RunRequest.upload_id` | `pytest tests/test_runs.py::test_upload_id_cannot_point_outside_the_uploads_folder` |

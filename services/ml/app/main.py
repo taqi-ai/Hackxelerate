@@ -1,7 +1,9 @@
 """Ascora ML & data service (FastAPI)."""
 from __future__ import annotations
 
+import json
 import logging
+import re
 import shutil
 import zipfile
 import time
@@ -27,6 +29,29 @@ app = FastAPI(title="Ascora ML service", version="1.0.0",
               description="Integration pipeline, Success Score, risk models, what-if simulation and Ask Ascora.")
 app.add_middleware(CORSMiddleware, allow_origins=ALLOWED_ORIGINS, allow_origin_regex=r"https://ascora.*\.vercel\.app",
                    allow_methods=["GET", "POST"], allow_headers=["Authorization", "Content-Type"])
+
+_reqlog = logging.getLogger("ascora.request")
+_SAFE_ID = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
+_ROLL_IN_PATH = re.compile(r"CU\d{2}[A-Z]{2,4}\d{4}", re.IGNORECASE)
+
+
+@app.middleware("http")
+async def request_log(request, call_next):
+    """One structured line per request, correlated by X-Request-ID (kept if the caller sent a safe one).
+    Never logs bodies, query strings, tokens or student roll numbers."""
+    incoming = request.headers.get("x-request-id", "")
+    rid = incoming if _SAFE_ID.match(incoming) else uuid.uuid4().hex[:16]
+    t0 = time.perf_counter()
+    status = 500
+    try:
+        response = await call_next(request)
+        status = response.status_code
+        response.headers["X-Request-ID"] = rid
+        return response
+    finally:
+        _reqlog.info(json.dumps({"request_id": rid, "method": request.method,
+                                 "path": _ROLL_IN_PATH.sub("[student-id]", request.url.path),
+                                 "status": status, "ms": round((time.perf_counter() - t0) * 1000, 1)}))
 
 
 @app.on_event("startup")
