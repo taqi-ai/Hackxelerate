@@ -24,5 +24,9 @@ Ordered backlog. Status per item: done / next / blocked / human. Evidence in WOR
 - [done] CI dependency gate `deps-audit` (pip-audit strict, npm audit critical).
 - [next] Next 16 upgrade (clears the accepted Next/PostCSS advisories); backup and restore drill; a staging environment.
 
+## Docs
+- [done] `ML_MODEL_CARD.md` (measured metrics, leakage audit, gates), `PRODUCTION_RUNBOOK.md` (deploy, rollback, secrets, flags, incidents).
+- [next] `CONNECTOR_ARCHITECTURE.md` and `DATA_DICTIONARY_AND_LINEAGE.md`.
+
 ## P3: polish
 - Mobile OTA (expo-updates) with a release channel; Play Store listing.

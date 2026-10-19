@@ -8,6 +8,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 import re
 
 import httpx
@@ -21,6 +22,9 @@ API_VERSION = "2024-10-21"
 
 
 def provider() -> str:
+    # institution-level kill switch: with ASCORA_LLM=off nothing is ever sent to an external model
+    if os.getenv("ASCORA_LLM", "on").strip().lower() == "off":
+        return "none"
     if AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_KEY:
         return "azure-openai"
     if GEMINI_API_KEY:
