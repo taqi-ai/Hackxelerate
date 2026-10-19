@@ -19,6 +19,8 @@ select s.id from public.students s, t_ids where s.mentor_id is distinct from t_i
 create temp table t_own as    -- a student who does
 select s.id from public.students s, t_ids where s.mentor_id = t_ids.mentor_code limit 1;
 grant select on t_ids, t_other, t_own to anon, authenticated;
+-- a campus-wide analytics row, so the staff-only checks are not vacuous
+insert into public.analytics_artifacts (key, payload) values ('rls-test', '{}');
 -- a staff intervention about the student used in section 4, so the student read check is not vacuous
 insert into public.interventions (student_id, type, created_by) select id, 'mentor_meeting', (select mentor_uid from t_ids) from t_own;
 
@@ -46,6 +48,7 @@ select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000
 do $$ begin
   assert (select count(*) from public.students) = 0, 'LEAK no-profile user: students';
   assert (select count(*) from public.interventions) = 0, 'LEAK no-profile user: interventions';
+  assert (select count(*) from public.analytics_artifacts) = 0, 'LEAK no-profile user: campus analytics';
 end $$;
 reset role;
 
@@ -62,6 +65,7 @@ begin
   assert (select count(*) from public.academic x join t_other o on o.id = x.student_id) = 0, 'LEAK mentor: other student academic';
   assert (select count(*) from public.feedback x join t_other o on o.id = x.student_id) = 0, 'LEAK mentor: other student feedback';
   assert (select count(*) from public.audit_log) = 0, 'LEAK mentor: audit log is admin-only';
+  assert (select count(*) from public.analytics_artifacts where key = 'rls-test') = 1, 'mentor cannot read campus analytics';
   assert (select count(*) from public.profiles) = 1, 'LEAK mentor: can read other profiles';
 
   begin
@@ -92,6 +96,11 @@ begin
   assert (select count(*) from public.students) = 1, 'LEAK student: sees other students';
   assert (select count(*) from public.academic x join t_other o on o.id = x.student_id) = 0, 'LEAK student: other student academic';
   assert (select count(*) from public.interventions) = 0, 'LEAK student: reads staff intervention records';
+  assert (select count(*) from public.analytics_artifacts) = 0, 'LEAK student: campus analytics';
+  assert (select count(*) from public.insights) = 0, 'LEAK student: insights';
+  assert (select count(*) from public.segments) = 0, 'LEAK student: segments';
+  assert (select count(*) from public.llm_cache) = 0, 'LEAK student: llm cache';
+  assert (select count(*) from public.data_quality_log) = 0, 'LEAK student: quality log';
 
   begin
     insert into public.interventions (student_id, type) values ((select id from t_own), 'mentor_meeting');
