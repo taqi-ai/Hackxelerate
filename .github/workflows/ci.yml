@@ -100,6 +100,42 @@ jobs:
         run: |
           "$GITHUB_WORKSPACE/.venv/bin/python" -m pytest -q -x
 
+  # Critical user journeys in a real browser against the real app in offline mode (frozen synthetic cohort,
+  # no secrets). The snapshot is generated from data/demo with --no-publish, so nothing touches a database.
+  e2e:
+    needs: changes
+    if: needs.changes.outputs.web == 'true' || needs.changes.outputs.ml == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: services/ml/requirements.txt
+          python-version: "3.12"
+      - run: uv pip install -r services/ml/requirements.txt
+      - name: Build the offline snapshot (no publish)
+        run: '"$GITHUB_WORKSPACE/.venv/bin/python" services/ml/scripts/publish_demo.py --no-publish'
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: apps/web/package-lock.json }
+      - working-directory: apps/web
+        run: npm ci --no-audit --no-fund --prefer-offline
+      - working-directory: apps/web
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
+          NEXT_PUBLIC_ML_API_URL: http://localhost:8000
+      - working-directory: apps/web
+        run: npx playwright install --with-deps chromium
+      - working-directory: apps/web
+        run: npx playwright test
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with: { name: playwright-report, path: apps/web/playwright-report, retention-days: 7 }
+
   # Migrations must apply to an empty database, and row-level security must hold for every role
   # (supabase/tests/rls_isolation.sql: anon, no-profile user, mentor, student, admin; always rolled back).
   db-rls:
@@ -142,7 +178,7 @@ jobs:
   # One stable name to require in branch protection. Skipped jobs count as success.
   ci-ok:
     if: always()
-    needs: [web-check, web-build, ml-tests, db-rls, deps-audit, secrets-scan]
+    needs: [web-check, web-build, ml-tests, db-rls, deps-audit, e2e, secrets-scan]
     runs-on: ubuntu-latest
     steps:
       - run: |
