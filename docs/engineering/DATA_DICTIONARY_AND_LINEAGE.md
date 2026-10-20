@@ -50,5 +50,7 @@ such as `erp_academics.csv row 15728`, and monthly attendance names the sheet an
 `source_links` decision with its method and confidence, and every conflict with the rule that resolved it.
 
 ## Known limits
-- Roll numbers are unique across the whole platform today (tenancy contract step pending).
+- Roll numbers are issued by each institution, so they are only unique within one. Until the composite-key migration,
+  a roll number already held by another institution is refused at publish (error, never merged). `students.apaar_id`
+  (optional national 12-digit APAAR ID, unique) is the cross-institution identity.
 - Lineage records file and row, not a content hash of the source file; reproducing an old run needs the original files.
