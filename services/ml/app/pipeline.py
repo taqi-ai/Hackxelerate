@@ -20,6 +20,7 @@ from .clean.normalize import (BRANCH_CODE, CODE_BRANCH, clip_range, normalize_br
                               normalize_name, normalize_roll, parse_date, to_0_100)
 from .clean.resolve import (Roster, batch_to_year, evaluate_links, link_by_email, link_by_name, link_by_roll)
 from .ingest.readers import SOURCE_LABELS, SourceFrame, read_folder
+from .freshness import source_freshness
 
 SEM_START = date(2026, 7, 20)
 CORE_SUBJECTS = {"Data Structures", "Database Management Systems", "Operating Systems", "Computer Networks",
@@ -238,6 +239,16 @@ def run_integration(folder: Path, log: StepLog, truth_dir: Path | None = None) -
     tags = [tag_feedback(c, r) for c, r in zip(fb["comment"], fb["rating"])]
     fb["theme"] = [t[0] for t in tags]
     fb["sentiment"] = [t[1] for t in tags]
+    report["freshness"] = source_freshness(
+        attendance_sheets=att["src_sheet"].dropna().tolist(),
+        lms_dates=lms["date"].tolist(),
+        club_dates=clubs["date_parsed"].tolist(),
+        feedback_dates=fb["date"].map(parse_date).tolist() if "date" in fb else [],
+        skills_exported_at=frames["skills_assessment"].meta.get("exported_at"),
+        erp_max_semester=erp["semester"].max(),
+        has_placement="placement_cell" in frames,
+        run_date=date.today(),
+    )
     log.done("standardize", fixes=fixes, missing_internal_marks=missing_internal,
              roll_formats_normalised=4, languages=fb["language"].value_counts().to_dict())
 

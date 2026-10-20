@@ -12,7 +12,8 @@ import { HelpCard } from "@/components/dashboard/help-card";
 import { WeeklyEngagement } from "@/components/dashboard/weekly-engagement";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { fmtInt, INTERVENTION_LABEL } from "@/lib/format";
+import { fmtInt, INTERVENTION_LABEL, SOURCE_LABEL } from "@/lib/format";
+import { stalest } from "@/lib/freshness";
 import { cn } from "@/lib/utils";
 import { istParts } from "@/lib/dates";
 import type { StudentRow } from "@/lib/types";
@@ -92,9 +93,17 @@ export default async function OverviewPage() {
     .sort((a, b) => a.date.localeCompare(b.date));
   const overdue = events.filter((e) => e.overdue).length;
 
+  // how current the data is, from dates inside the source files (the stalest dated source, or the first one past its limit)
+  const old = stalest(quality?.report?.freshness);
+  const freshNote = !old
+    ? ""
+    : old[1].stale
+      ? ` ${SOURCE_LABEL[old[0]] ?? old[0]} data is ${old[1].age_days} days old, past its ${old[1].stale_after_days}-day limit: refresh that source.`
+      : ` Oldest dated source: ${SOURCE_LABEL[old[0]] ?? old[0]}, ${old[1].age_days} days old.`;
+
   const summary = isMentor
-    ? `${highA} of your ${n} mentees are at high academic risk and ${decliners} are quietly slipping. Start with the five below.`
-    : `${fmtInt(highA)} of ${fmtInt(n)} students are at high academic risk, and ${decliners} silent decliners are hiding behind average scores. Data from ${sources} campus systems.`;
+    ? `${highA} of your ${n} mentees are at high academic risk and ${decliners} are quietly slipping. Start with the five below.${freshNote}`
+    : `${fmtInt(highA)} of ${fmtInt(n)} students are at high academic risk, and ${decliners} silent decliners are hiding behind average scores. Data from ${sources} campus systems.${freshNote}`;
 
   return (
     <>

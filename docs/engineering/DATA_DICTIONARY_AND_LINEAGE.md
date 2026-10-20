@@ -49,6 +49,12 @@ such as `erp_academics.csv row 15728`, and monthly attendance names the sheet an
 `attendance_register.xlsx, sheet 'Oct 2026', row 4`). The student profile's Sources tab shows these, plus every
 `source_links` decision with its method and confidence, and every conflict with the rule that resolved it.
 
+## Freshness
+`data_quality_log.report.freshness` holds, per source, the latest date found inside the data (`as_of`), how it was
+found (`basis`), its age at run time and whether it passed that source's limit (attendance 35 days, LMS 14, feedback 60,
+clubs 120, skills 200). Attendance month sheets carry no day-level dates, so only the first day of the latest month
+counts. The ERP marks export and the placement tracker have no dates and are reported as such, never given one.
+
 ## Known limits
 - Roll numbers are issued by each institution, so they are only unique within one. Until the composite-key migration,
   a roll number already held by another institution is refused at publish (error, never merged). `students.apaar_id`

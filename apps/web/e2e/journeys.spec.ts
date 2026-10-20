@@ -31,6 +31,8 @@ test("overview shows the whole cohort", async ({ page }) => {
   const errors = trackErrors(page);
   await page.goto("/overview");
   await expect(page.getByText("1,200").first()).toBeVisible();
+  // freshness comes from dates inside the files; as the frozen files age, the wording switches to the stale warning
+  await expect(page.getByText(/Oldest dated source|days old, past its/).first()).toBeVisible();
   expect(errors).toEqual([]);
 });
 

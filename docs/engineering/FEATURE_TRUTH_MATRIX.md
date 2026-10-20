@@ -4,6 +4,7 @@ Legend: REAL+TESTED · REAL/UNDER-TESTED · PARTIAL · DEMO/FIXTURE · UI-ONLY �
 
 | Area | Status | Evidence / notes |
 |---|---|---|
+| Per-source data freshness | REAL+TESTED | from dates inside each file (`services/ml/app/freshness.py`); sources without dates say so; staleness limits per source; Data integration table and overview line. Production shows "Not reported" until the next publish |
 | Account provisioning (invite, claim, deactivate) | REAL/UNDER-TESTED | database rules tested in CI (`supabase/tests/provisioning.sql`); web flow not yet run against the live project |
 | Staff login / logout (Supabase Auth, admin + mentor) | REAL/UNDER-TESTED | `login-form.tsx`, `middleware.ts`. No automated E2E (no test credentials in CI). |
 | Role resolution from `profiles` (role never from client) | REAL+TESTED (ML side) | `api/ml-token/route.ts`, `services/ml/tests/test_auth.py` |
