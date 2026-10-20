@@ -48,6 +48,7 @@
   --color-risk-low-soft: var(--risk-low-soft);
   --color-brand: var(--brand);
   --color-brand-soft: var(--brand-soft);
+  --color-brand-foreground: var(--brand-foreground);
   --color-surface: var(--surface);
   --color-glow: var(--glow);
   --radius-sm: calc(var(--radius) * 0.6);
@@ -71,6 +72,7 @@
   --primary: oklch(0.46 0.13 272);
   --primary-foreground: oklch(0.985 0.005 270);
   --brand: oklch(0.48 0.13 272);
+  --brand-foreground: oklch(0.985 0.005 270);
   --brand-soft: oklch(0.95 0.025 272);
   --secondary: oklch(0.962 0.006 270);
   --secondary-foreground: oklch(0.22 0.02 275);
@@ -118,6 +120,7 @@
   --primary: oklch(0.8 0.07 272);
   --primary-foreground: oklch(0.16 0.02 275);
   --brand: oklch(0.8 0.07 272);
+  --brand-foreground: oklch(0.16 0.02 275);
   --brand-soft: oklch(0.26 0.035 272);
   --secondary: oklch(0.23 0.01 275);
   --secondary-foreground: oklch(0.955 0.006 270);
