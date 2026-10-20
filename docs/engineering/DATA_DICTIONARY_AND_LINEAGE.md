@@ -56,7 +56,7 @@ clubs 120, skills 200). Attendance month sheets carry no day-level dates, so onl
 counts. The ERP marks export and the placement tracker have no dates and are reported as such, never given one.
 
 ## Known limits
-- Roll numbers are issued by each institution, so they are only unique within one. Until the composite-key migration,
-  a roll number already held by another institution is refused at publish (error, never merged). `students.apaar_id`
-  (optional national 12-digit APAAR ID, unique) is the cross-institution identity.
+- Roll numbers are issued by each institution, so keys are `(institution_id, roll number)` (0014); two institutions
+  can use the same roll number for different students. `students.apaar_id` (optional national 12-digit APAAR ID,
+  unique across the platform) is the cross-institution identity.
 - Lineage records file and row, not a content hash of the source file; reproducing an old run needs the original files.

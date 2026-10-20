@@ -57,6 +57,20 @@ def test_endpoints_enforce_signed_in_user_and_admin_role(monkeypatch):
     assert client.get("/whatif/CU25CSE0001/inputs", headers={"Authorization": "Bearer garbage"}).status_code == 401
 
 
+def test_a_token_from_another_institution_is_refused(monkeypatch):
+    monkeypatch.setattr(config, "TOKEN_SECRET", SECRET)
+    monkeypatch.setattr(config, "INSTITUTION_ID", "inst-a")
+    client = TestClient(app)
+
+    def call(claims):
+        t = auth.sign({"sub": "u1", "role": "admin", "exp": time.time() + 600, **claims}, SECRET)
+        return client.get("/pipeline/runs/does-not-exist", headers={"Authorization": f"Bearer {t}"}).status_code
+
+    assert call({"inst": "inst-b"}) == 403          # another institution's user, even with a valid signature
+    assert call({"inst": "inst-a"}) == 404          # own institution: reaches the handler
+    assert call({}) == 404                          # older tokens without the claim mean this service's institution
+
+
 def test_shared_demo_accounts_cannot_change_published_data(monkeypatch):
     """The demo logins are public. A demo admin may read and simulate, but may not run, publish or upload."""
     monkeypatch.setattr(config, "TOKEN_SECRET", SECRET)

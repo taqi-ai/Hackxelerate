@@ -214,7 +214,7 @@ Use this when a judge asks "is it secure / production-ready?". Honest status: **
 |---|---|---|
 | Access control | Row-level security tested automatically for anonymous, profile-less, mentor, student and admin users, with negative and positive checks | `supabase/tests/rls_isolation.sql` runs in CI on every database change and was run on production (rolled back) |
 | Bugs the tests found | Students could create and edit staff interventions; any signed-in account could read campus analytics; migrations did not apply to an empty database | fixed in migrations 0008, 0009 and 0002 |
-| Multi-institution | Institutions table; every record and rule scoped to the caller's institution; a second institution is proven isolated both ways. Publishing is per institution: each campus has its own upload key and cannot write into another's data | migrations 0010 and 0012, `ingest_tenancy.sql` |
+| Multi-institution | Institutions table; every record and rule scoped to the caller's institution; a second institution is proven isolated both ways. Publishing is per institution: each campus has its own upload key and cannot write into another's data. Roll numbers only need to be unique inside a campus | migrations 0010, 0012, 0014, `ingest_tenancy.sql` |
 | Bug our tests caught | Re-publishing data would have wiped user accounts and score history (a database cascade). Found before it ever ran in production, fixed, and tested | migration 0012 |
 | Public demo logins | Shared demo accounts can explore but cannot run or publish the pipeline, or invite and deactivate people | ML `require_admin_write`; `profiles.shared_demo` in 0013, tested |
 | Accounts | Admins invite mentors, students and admins of their own institution; access starts only after the person confirms their email and ends the moment an admin deactivates them; every step is audited | migration 0013, `provisioning.sql`, Accounts page |
@@ -235,7 +235,7 @@ Use this when a judge asks "is it secure / production-ready?". Honest status: **
 - **Ashmit (models and product):** AI boundary, model card (`docs/engineering/ML_MODEL_CARD.md`), why the baseline is reported.
 - **Harsh (dashboard and trust):** intervention rules, browser tests, privacy in the browser, what a judge sees on screen.
 
-**If asked "are roll numbers unique?":** "Only within one institution: each university issues its own. The national ID is APAAR, which is generated from institution plus roll number. So Ascora keys students per institution, refuses a clash rather than merging two students, and has an optional APAAR field for identity across institutions." (Ujjwal)
+**If asked "are roll numbers unique?":** "Only within one institution: each university issues its own. The national ID is APAAR, which is generated from institution plus roll number. So Ascora keys every student by institution plus roll number: two campuses can both have a CU25CSE0001 and neither can see the other's. An optional APAAR field gives identity across institutions." (Ujjwal)
 
 **Say it straight:**
 - "We test our own security rules automatically, and those tests found real bugs that we fixed."

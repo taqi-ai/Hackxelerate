@@ -1,7 +1,8 @@
 """Short-lived signed tokens: the web app (after checking the Supabase session and role) mints one, the browser
 sends it to this service. Fails closed: with no secret configured, every protected call is refused.
 
-Token = base64url(json claims) + "." + base64url(HMAC-SHA256(secret, claims)). Claims: sub, role, exp (unix s)."""
+Token = base64url(json claims) + "." + base64url(HMAC-SHA256(secret, claims)). Claims: sub, role, exp (unix s), inst
+(the caller's institution; this service serves exactly one, config.INSTITUTION_ID)."""
 from __future__ import annotations
 
 import base64
@@ -50,7 +51,11 @@ def verify(token: str, secret: str | None = None, now: float | None = None) -> d
 def current_user(authorization: str | None = Header(default=None)) -> dict:
     if not authorization or not authorization.lower().startswith("bearer "):
         raise HTTPException(401, "Sign in required")
-    return verify(authorization.split(" ", 1)[1].strip())
+    claims = verify(authorization.split(" ", 1)[1].strip())
+    # tokens minted before the institution claim existed carry none and mean this service's own institution
+    if claims.get("inst") not in (None, config.INSTITUTION_ID):
+        raise HTTPException(403, "This analytics service belongs to another institution")
+    return claims
 
 
 def require_admin(user: dict = Depends(current_user)) -> dict:

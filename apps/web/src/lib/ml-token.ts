@@ -4,7 +4,7 @@ import { createHmac } from "node:crypto";
 /** Mints the short-lived token the browser sends to the ML service. Same scheme as services/ml/app/auth.py. */
 const b64 = (b: Buffer | string) => Buffer.from(b).toString("base64url");
 
-export function mintMlToken(claims: { sub: string; role: "admin" | "mentor"; demo?: boolean }, ttlSeconds = 600) {
+export function mintMlToken(claims: { sub: string; role: "admin" | "mentor"; inst?: string; demo?: boolean }, ttlSeconds = 600) {
   const secret = process.env.ASCORA_TOKEN_SECRET;
   if (!secret) throw new Error("ASCORA_TOKEN_SECRET is not set");
   const exp = Math.floor(Date.now() / 1000) + ttlSeconds;
