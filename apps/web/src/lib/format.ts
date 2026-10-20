@@ -51,13 +51,13 @@ export function suggestIntervention(feature?: string): string {
   return "mentor_meeting";
 }
 
-export function maskEmail(e: string | null) {
+export function maskEmail(e: string | null | undefined) {
   if (!e) return "-";
   const [user, domain] = e.split("@");
   return `${user.slice(0, 2)}${"•".repeat(Math.max(2, user.length - 2))}@${domain}`;
 }
 
-export function maskPhone(p: string | null) {
+export function maskPhone(p: string | null | undefined) {
   if (!p) return "-";
   return `${p.slice(0, 2)}••••••${p.slice(-2)}`;
 }

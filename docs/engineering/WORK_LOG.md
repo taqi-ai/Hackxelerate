@@ -28,3 +28,6 @@
 - Merged and live: #33 (LLM redaction, health), #34 (deps + request log + CI deps-audit), #35 (LLM kill switch, model card, runbook), #36 (intervention integrity 0011), #37 (connector status), #38 (Playwright e2e in CI). All CI jobs green.
 - Production DB has migrations 0001-0011; all SQL suites passed on production in rolled-back transactions.
 - Next session, in order: (1) DATA_DICTIONARY_AND_LINEAGE.md; (2) tenancy contract step (institution-scoped keys + institution-aware ingest/reset RPCs) after the user decides; (3) Next 16 upgrade to clear the accepted advisory; (4) account provisioning and admin MFA; (5) restore drill.
+
+## 2026-10-20 (after checkpoint)
+- DATA_DICTIONARY_AND_LINEAGE.md written from the live schema. Checking its claim that mentors never see sensitive attributes found a P1 leak: the profile and report pages passed the full student row (raw contacts, fairness attributes) to client components, and LMS lineage / link keys carried raw emails, also in the public preview files. Fixed in `lib/minimise.ts`, preview files rebuilt masked. A new Playwright test reads the raw values from the snapshot and asserts they are absent from the HTML of the profile, report and students pages; it failed before the lineage fix and passes now. 51 vitest, 11 e2e, tsc, lint, build.

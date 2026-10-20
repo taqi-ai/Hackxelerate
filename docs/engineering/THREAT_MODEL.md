@@ -11,6 +11,6 @@ Assets: student records (synthetic today), staff accounts, scores and prediction
 | T5 | Anonymous SECURITY DEFINER RPCs `ascora_ingest` / `ascora_reset` | shared-secret gated, only a SHA-256 stored | rotate before real data; consider a dedicated database role |
 | T6 | Malicious uploads (macros, zip bombs, huge files) | **Fixed:** 25 MB/file, max 12 files, signature checks, xlsx inflate cap, rejected uploads deleted | parse timeout and per-tenant quota still open |
 | T7 | CSV formula injection in exports | **Fixed:** `lib/csv.ts` escapes text starting with `= + - @`, tab, CR | |
-| T8 | Prompt injection via free-text feedback into the LLM | the LLM only words precomputed facts; never SQL or actions; **every prompt passes `redact()`** (roll numbers, emails, phones) at the single `generate()` choke point | names typed into Ask cannot be detected by pattern; an institution can disable the LLM entirely (`LLM_PROVIDER=none`) |
+| T8 | Prompt injection via free-text feedback into the LLM | the LLM only words precomputed facts; never SQL or actions; **every prompt passes `redact()`** (roll numbers, emails, phones) at the single `generate()` choke point | names typed into Ask cannot be detected by pattern; an institution can disable the LLM entirely (`ASCORA_LLM=off` on the ML service) |
 | T9 | Leaked or weak passwords | Supabase Auth | enable leaked-password protection and admin MFA (dashboard, human action) |
 | T10 | Loss of the APK signing key | stored outside the repo | back it up offline (human action) |

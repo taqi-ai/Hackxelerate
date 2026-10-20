@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
 /** Critical journeys on the real app (offline mode, frozen synthetic cohort, signed in as the offline admin). */
@@ -39,6 +41,20 @@ test("students table search narrows the list and opens a profile", async ({ page
   await page.goto(`/students/${STUDENT}`);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Arjun Gupta");
   await expect(page.getByText(/Success Score/i).first()).toBeVisible();
+});
+
+test("raw contacts and fairness-only attributes never reach the browser payload", async ({ request }) => {
+  // the server-rendered HTML carries the full props of every client component, so check it, not just what is drawn
+  const snap = JSON.parse(readFileSync(path.join(process.cwd(), "demo-data", "snapshot.json"), "utf-8"));
+  const raw = snap.students.find((s: { id: string }) => s.id === STUDENT);
+  for (const url of [`/students/${STUDENT}`, `/students/${STUDENT}/report`, "/students"]) {
+    const res = await request.get(url);
+    expect(res.status(), url).toBe(200);
+    const body = await res.text();
+    expect(body, url).not.toContain(raw.email);
+    expect(body, url).not.toContain(raw.phone);
+    for (const key of ["first_generation", "lateral_entry", "schooling_medium", "hosteller"]) expect(body, `${url} ${key}`).not.toContain(key);
+  }
 });
 
 test("an intervention can be planned once; a duplicate is refused with a clear message", async ({ page }) => {
