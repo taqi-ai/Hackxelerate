@@ -47,3 +47,35 @@ def test_upload_id_cannot_point_outside_the_uploads_folder(monkeypatch, tmp_path
     for bad in ("../../etc", "..", "abc/def", "ABCDEF1234", "0123456789/../x"):
         r = client.post("/pipeline/run", headers=admin(), json={"source": "upload", "upload_id": bad, "publish": False})
         assert r.status_code == 422, bad
+
+
+def test_a_run_over_the_time_limit_is_stopped_and_frees_the_slot(monkeypatch, tmp_path):
+    monkeypatch.setattr(service, "RUNS_DIR", tmp_path)
+    old = service.RunState(run_id="r-slow", started=time.time() - service.RUN_TIMEOUT_S - 5)
+    monkeypatch.setattr(service, "RUNS", {"r-slow": old})
+    assert service.get_run("r-slow").status == "error" and "Nothing was published" in old.error
+    assert json.loads((tmp_path / "r-slow.json").read_text())["status"] == "error"
+    busy = service.RunState(run_id="r-pub", started=time.time() - service.RUN_TIMEOUT_S - 5, publishing=True)
+    assert service.expire(busy) is False and busy.status == "running"   # never stopped half-way through writing rows
+
+
+def test_a_stopped_run_never_publishes_or_replaces_the_model(monkeypatch, tmp_path):
+    monkeypatch.setattr(service, "RUNS_DIR", tmp_path)
+    run = service.RunState(run_id="r-x")
+    calls = []
+
+    def slow_integration(folder, sl, truth_dir):
+        run.status, run.error = "error", "stopped"   # the time limit fires while files are being parsed
+        return object()
+
+    monkeypatch.setattr(service, "_load_cache", lambda fp: None)
+    monkeypatch.setattr(service, "run_integration", slow_integration)
+    monkeypatch.setattr(service, "run_intelligence", lambda *a: calls.append("intelligence"))
+    monkeypatch.setattr(service, "save_state", lambda *a: calls.append("save_state"))
+    monkeypatch.setattr(service, "Publisher", lambda: calls.append("publish"))
+    try:
+        service.run_all(service.DEMO_DIR, publish=True, run=run)
+        raise AssertionError("a stopped run must not finish")
+    except service.RunStopped:
+        pass
+    assert calls == [] and run.status == "error"
