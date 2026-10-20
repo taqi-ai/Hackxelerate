@@ -5,7 +5,9 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 import threading
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -33,16 +35,43 @@ class RunState:
     steps: list = field(default_factory=list)
     summary: dict = field(default_factory=dict)
     error: str | None = None
+    started: float = field(default_factory=time.time)
+    publishing: bool = False           # past the last checkpoint (writing rows / finishing): never declared stopped
 
 
 RUNS: dict[str, RunState] = {}
-_lock = threading.Lock()
+_lock = threading.RLock()
 RUNS_DIR = ARTIFACTS / "runs"   # run status survives restarts (App Service keeps this folder)
 KEEP_RUNS = 50
+# A run that parses, models and publishes for longer than this is stopped: a hostile or broken file must not hold the
+# single run slot (and the UI spinner) forever. The demo cohort takes well under two minutes on the B1 plan.
+RUN_TIMEOUT_S = int(os.getenv("ASCORA_RUN_TIMEOUT_S", "900"))
+_worker: threading.Thread | None = None
 
 
 class RunConflict(Exception):
     """A run is already in progress; two runs must never publish over each other."""
+
+
+class RunStopped(Exception):
+    """The run passed its time limit and was marked stopped; its worker must not change shared state."""
+
+
+def expire(st: RunState, now: float | None = None) -> bool:
+    """Mark a run that is over its time limit as stopped. Never while it is writing rows (the HTTP client has its own
+    timeouts there), so a stopped run is always one that published nothing."""
+    with _lock:
+        if st.status != "running" or st.publishing or (now or time.time()) - st.started <= RUN_TIMEOUT_S:
+            return False
+        st.status, st.error = "error", f"Stopped after {RUN_TIMEOUT_S // 60} minutes without finishing. Nothing was published; check the files and run again."
+        save_run(st)
+    log.warning("run %s stopped by the time limit", st.run_id)
+    return True
+
+
+def _checkpoint(run: RunState | None) -> None:
+    if run and run.status != "running":
+        raise RunStopped(run.run_id)
 
 
 def save_run(st: RunState) -> None:
@@ -80,6 +109,8 @@ def get_run(run_id: str) -> RunState | None:
     if st is None and RUNS_DIR.is_dir() and (RUNS_DIR / f"{run_id}.json").is_file():
         load_runs()
         st = RUNS.get(run_id)
+    if st:
+        expire(st)
     return st
 STATE: dict = {}
 
@@ -181,7 +212,9 @@ def run_all(folder: Path = DEMO_DIR, publish: bool = True, run: RunState | None 
     else:
         truth_dir = folder if (folder / "_truth.parquet").exists() else DEMO_DIR
         res = run_integration(folder, sl, truth_dir=truth_dir)
+        _checkpoint(run)
         intel = run_intelligence(res, sl, truth_dir)
+        _checkpoint(run)   # a stopped run must not replace the live model state
         res.report["steps"] = sl.as_list()
         payload = build_payload(res, intel)
         save_state(intel)
@@ -193,6 +226,10 @@ def run_all(folder: Path = DEMO_DIR, publish: bool = True, run: RunState | None 
     if snapshot_path:
         write_snapshot(payload, snapshot_path)
     counts = {}
+    with _lock:   # decide atomically: either the time limit stopped the run, or it finishes (and publishes) in full
+        _checkpoint(run)
+        if run:
+            run.publishing = True   # past the last checkpoint: from here the run finishes, it is never stopped half-way
     if publish:
         sl.start("publish")
         counts = Publisher().publish(payload)
@@ -227,20 +264,26 @@ def _save_cache(fp: str, payload, steps, summary_base, state):
 
 
 def start_run(folder: Path, publish: bool) -> RunState:
-    import time
+    global _worker
     import uuid
     rid = time.strftime("%Y%m%d-%H%M%S-") + uuid.uuid4().hex[:6]
     st = RunState(run_id=rid)
     with _lock:
+        for r in RUNS.values():
+            expire(r)
         busy = next((r for r in RUNS.values() if r.status == "running"), None)
         if busy:
             raise RunConflict(busy.run_id)
+        if _worker is not None and _worker.is_alive():   # a stopped run's thread is still unwinding
+            raise RunConflict("(previous run still stopping)")
         RUNS[rid] = st
     save_run(st)
 
     def worker():
         try:
             run_all(folder, publish=publish, run=st)
+        except RunStopped:
+            log.info("run %s exited after being stopped", st.run_id)
         except Exception as e:  # surfaced to the UI, logged with traceback
             log.exception("pipeline run failed")
             st.status, st.error = "error", str(e)
@@ -249,7 +292,12 @@ def start_run(folder: Path, publish: bool) -> RunState:
                 st.status, st.error = "error", "The run ended without reporting a result."
             st.summary = {**(st.summary or {}), "finished_at": time.time()}
             save_run(st)
-    threading.Thread(target=worker, daemon=True).start()
+    _worker = threading.Thread(target=worker, daemon=True)
+    _worker.start()
+    # flip the status even if nobody polls; expire() re-checks the limit and the publishing flag
+    timer = threading.Timer(RUN_TIMEOUT_S + 1, lambda: expire(st))
+    timer.daemon = True
+    timer.start()
     return st
 
 
