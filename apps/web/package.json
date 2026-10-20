@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "dev:offline": "cross-env ASCORA_OFFLINE=1 next dev",
+    "start:offline": "cross-env ASCORA_OFFLINE=1 next start",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "e2e": "playwright test"
