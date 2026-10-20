@@ -4,7 +4,7 @@
 
 Not a pilot candidate yet. Gates that block any real student data:
 
-1. Multi-institution tenancy: PARTIAL. Data isolation enforced and tested (0010); keys, publish RPC and ML artefacts are not yet per institution, so a second institution cannot be onboarded yet.
+1. Multi-institution tenancy: PARTIAL. Data isolation enforced and tested (0010). Publishing is per institution (0012: one ingest token per institution, rows stamped server-side, cross-institution writes and key clashes refused, reset scoped). Still open: composite (institution_id, roll number) keys, so two institutions cannot yet use the same roll number, and per-institution ML artefacts.
 2. Account provisioning and deprovisioning, admin MFA: MISSING.
 3. Automated RLS / cross-role negative test suite: DONE (CI `db-rls`): anonymous, profile-less, mentor, student and admin cases plus 11 cross-institution checks (0010), and intervention state-machine rules (0011).
 4. Durable job state for pipeline runs: DONE for single-instance hosting (file-backed); database-backed table needed before scaling out.
