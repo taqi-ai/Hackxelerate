@@ -12,8 +12,13 @@ axe-core (rules `wcag2a`, `wcag2aa`, `wcag21aa`, `wcag22aa`) on a production bui
 | `/overview`, `/this-week`, `/students`, `/students/<id>`, `/students/<id>/report`, `/segments` | no violations |
 | `/interventions`, `/ask`, `/model`, `/fairness`, `/data`, `/accounts`, `/settings` | no violations |
 
-Not covered by this run: the student portal pages (they need the preview cookie), signed-in views against the live
-database, keyboard-only and screen-reader walkthroughs, and zoom to 400%.
+| `/student`, `/student/academics`, `/student/calculator`, `/student/schedule`, `/student/connection` (preview cookie) | no violations after the fixes below |
+
+Found and fixed in the student portal: two dropdowns with no accessible name (attendance planner subject, subject sort),
+and `text-brand-foreground` used on 11 controls without the token existing, so text inherited its colour (1.64:1 on the
+brand colour in dark mode). `--brand-foreground` is now defined for both themes.
+
+Not covered: signed-in views against the live database, keyboard-only and screen-reader walkthroughs, and zoom to 400%.
 
 A first attempt measured Next.js error pages (the server was started outside `apps/web`, so the snapshot was not found,
 and every page returned 500). Those results were discarded; the table above is from the corrected run, where every page

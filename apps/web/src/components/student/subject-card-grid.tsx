@@ -157,6 +157,7 @@ export function SubjectCardGrid({
             <Filter className="h-3 w-3" /> Sort:
           </span>
           <select
+            aria-label="Sort subjects"
             value={sortBy}
             onChange={(e) => {
               play("tap");

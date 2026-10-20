@@ -103,6 +103,7 @@ export function AttendanceSliderCard({
         {/* Subject Selector */}
         <div className="w-full sm:w-64">
           <select
+            aria-label="Subject to plan attendance for"
             value={selectedSubject}
             onChange={(e) => {
               play("tap");
