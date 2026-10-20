@@ -3,6 +3,7 @@ import { EmptyState, Panel, Stat } from "@/components/kit";
 import { HBar } from "@/components/charts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SOURCE_LABEL } from "@/lib/format";
+import { freshnessLabel } from "@/lib/freshness";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +32,7 @@ export function QualityReport({ report, conflicts, review }: { report: any | nul
         <Stat label="Conflicts resolved" value={q.conflicts} tone="medium" hint="With a documented rule each" />
       </section>
 
-      <Panel title="Sources" description="What each system contained and how it was understood">
+      <Panel title="Sources" description="What each system contained, how it was understood, and how current it is (from dates inside the file, not the upload time; hover a date for how it was found)">
         <div className="overflow-x-auto rounded-lg border">
           <Table>
             <TableHeader>
@@ -43,6 +44,7 @@ export function QualityReport({ report, conflicts, review }: { report: any | nul
                 <TableHead className="text-right">Auto-linked</TableHead>
                 <TableHead className="text-right">Review</TableHead>
                 <TableHead className="text-right">Student coverage</TableHead>
+                <TableHead>Data as of</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -61,6 +63,17 @@ export function QualityReport({ report, conflicts, review }: { report: any | nul
                     <TableCell className="tabular text-right">{m ? pctf(m.match_rate) : "-"}</TableCell>
                     <TableCell className="tabular text-right">{m?.review ?? 0}</TableCell>
                     <TableCell className="tabular text-right">{pctf(cov, 0)}</TableCell>
+                    <TableCell className="text-xs">
+                      {(() => {
+                        const f = freshnessLabel(report.freshness?.[k]);
+                        return (
+                          <span title={f.title} className={cn("whitespace-nowrap", f.tone === "stale" ? "font-medium text-destructive" : f.tone === "none" && "text-muted-foreground")}>
+                            {f.text}
+                            {f.tone === "stale" && " · stale"}
+                          </span>
+                        );
+                      })()}
+                    </TableCell>
                   </TableRow>
                 );
               })}

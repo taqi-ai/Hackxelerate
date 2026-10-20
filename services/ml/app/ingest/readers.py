@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import pandas as pd
@@ -38,6 +38,7 @@ class SourceFrame:
     mapping: dict
     rows_in: int
     notes: list[str]
+    meta: dict = field(default_factory=dict)   # file-level facts, e.g. the export timestamp of a JSON feed
 
 
 def _apply_mapping(df: pd.DataFrame, m: Mapping) -> pd.DataFrame:
@@ -110,7 +111,8 @@ def read_skills_json(path: Path) -> SourceFrame:
                "columns": {"candidate.roll": "roll", "candidate.name": "name", "assessment.technical.*": "technical",
                            "assessment.soft_skills.*": "soft"},
                "method": {"roll": "json-path", "technical": "json-path", "soft": "json-path"}, "unmapped": [], "score": 1.0}
-    return SourceFrame("skills_assessment", path.name, df, mapping, len(rows), ["Flattened nested JSON records"])
+    meta = {"exported_at": payload.get("exported_at")} if isinstance(payload, dict) and payload.get("exported_at") else {}
+    return SourceFrame("skills_assessment", path.name, df, mapping, len(rows), ["Flattened nested JSON records"], meta)
 
 
 def read_any(path: Path) -> SourceFrame:

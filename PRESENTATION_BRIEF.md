@@ -225,6 +225,7 @@ Use this when a judge asks "is it secure / production-ready?". Honest status: **
 | Dependencies | Vulnerable Python packages upgraded (models give identical predictions); CI blocks known vulnerabilities | CI `deps-audit` |
 | Data sources | Admin screen shows each source's real status; only file import is built; CUIMS shows "Awaiting institution authorisation" | `GET /connectors`, Data integration page |
 | Privacy in the browser | Mentor screens receive only what they show: email and phone masked on the server, gender and other fairness-only fields never leave it (found by checking our own data dictionary) | browser test checks the page source for the raw values |
+| Data freshness | Every source shows how current it is, from dates inside the file (not the upload time); files without dates say so; stale sources are flagged on the overview | Data integration page, `freshness.py` tests |
 | Stuck runs | A pipeline run that takes over 15 minutes is stopped and publishes nothing | `tests/test_runs.py` |
 | Browser tests | 11 end-to-end journeys run in CI on every web or ML change | CI `e2e` |
 
