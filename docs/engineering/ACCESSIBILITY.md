@@ -17,7 +17,13 @@ Found and fixed in the student portal: two dropdowns with no accessible name (at
 and `text-brand-foreground` used on 11 controls without the token existing, so text inherited its colour (1.64:1 on the
 brand colour in dark mode). `--brand-foreground` is now defined for both themes.
 
-Not covered: signed-in views against the live database, keyboard-only and screen-reader walkthroughs, and zoom to 400%.
+## Keyboard
+Playwright test `keyboard only: skip link, dialog open and close, focus always visible` (CI): the first Tab reaches
+"Skip to content", which moves past the navigation; the intervention dialog opens with Enter, closes with Escape and
+returns focus to its button; each of the next 25 tab stops shows a focus indicator. A probe over 40 tab stops on four
+pages found one gap, tab panels (focusable by design) with their outline removed; they now show a focus ring.
+
+Not covered: signed-in views against the live database, screen-reader walkthroughs, and zoom to 400%.
 
 A first attempt measured Next.js error pages (the server was started outside `apps/web`, so the snapshot was not found,
 and every page returned 500). Those results were discarded; the table above is from the corrected run, where every page

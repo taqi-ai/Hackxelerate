@@ -152,3 +152,34 @@ test("the join page checks the form before anything is sent", async ({ page }) =
   await expect(page.getByText("The two passwords do not match.")).toBeVisible();
   expect(sent).toEqual([]);
 });
+
+test("keyboard only: skip link, dialog open and close, focus always visible", async ({ page }) => {
+  await page.goto(`/students/${STUDENT}`);
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  // first Tab lands on the skip link, which moves focus past the navigation
+  await page.keyboard.press("Tab");
+  await expect(page.locator(":focus")).toHaveText(/Skip to content/);
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/#main$/);
+
+  // the intervention dialog opens from the keyboard, closes with Escape and gives focus back
+  const open = page.getByRole("button", { name: /plan intervention/i });
+  await open.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toBeHidden();
+  await expect(open).toBeFocused();
+
+  // every stop in the first 25 tab presses shows a visible focus indicator (outline or ring)
+  for (let i = 0; i < 25; i++) {
+    await page.keyboard.press("Tab");
+    const shown = await page.evaluate(() => {
+      const el = document.activeElement as HTMLElement | null;
+      if (!el || el === document.body) return true;
+      const s = getComputedStyle(el);
+      return (s.outlineStyle !== "none" && parseFloat(s.outlineWidth) > 0) || s.boxShadow !== "none";
+    });
+    expect(shown, `focus indicator on tab stop ${i + 1}`).toBe(true);
+  }
+});
