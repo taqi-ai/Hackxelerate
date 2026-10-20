@@ -1,6 +1,6 @@
 # Final acceptance gate: PASS / FAIL / NOT VERIFIED (never silently pass)
 
-Audited 2026-10-20 against `main` at f05dc3c (production deployment READY on the same commit).
+Audited 2026-10-20 against `main` at f05dc3c (production deployment READY on the same commit). Re-checked after #48/#49 and the production republish: database counts complete, model figures in production now match the brief (AUC 0.881 / 0.802).
 
 | Check | Result | Evidence |
 |---|---|---|

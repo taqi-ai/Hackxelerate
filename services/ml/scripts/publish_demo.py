@@ -14,6 +14,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from app.config import ARTIFACTS, DEMO_DIR, ROOT  # noqa: E402
 from app.service import run_all  # noqa: E402
 
+# publishing replaces live pipeline rows, so anything other than the one known flag stops here instead of publishing
+unknown = [a for a in sys.argv[1:] if a != "--no-publish"]
+if unknown:
+    print(__doc__)
+    sys.exit(f"unknown argument(s): {' '.join(unknown)}; nothing was run")
+
 t = time.time()
 summary = run_all(DEMO_DIR, publish="--no-publish" not in sys.argv,
                   snapshot_path=ROOT / "apps" / "web" / "demo-data" / "snapshot.json")
