@@ -11,7 +11,6 @@ axe-core (rules `wcag2a`, `wcag2aa`, `wcag21aa`, `wcag22aa`) on a production bui
 | `/`, `/product`, `/mobile`, `/login`, `/join` | no violations |
 | `/overview`, `/this-week`, `/students`, `/students/<id>`, `/students/<id>/report`, `/segments` | no violations |
 | `/interventions`, `/ask`, `/model`, `/fairness`, `/data`, `/accounts`, `/settings` | no violations |
-
 | `/student`, `/student/academics`, `/student/calculator`, `/student/schedule`, `/student/connection` (preview cookie) | no violations after the fixes below |
 
 Found and fixed in the student portal: two dropdowns with no accessible name (attendance planner subject, subject sort),
