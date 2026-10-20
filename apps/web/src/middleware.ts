@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const PUBLIC_PREFIXES = [
   "/login",
+  "/join",
   "/auth",
   "/api/ml-token",
   "/api/health",

@@ -148,7 +148,7 @@ jobs:
       - uses: supabase/setup-cli@v1
         with: { version: 2.121.0 }
       - run: supabase db start
-      - run: psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f supabase/tests/rls_seed.sql -f supabase/tests/rls_isolation.sql -f supabase/tests/intervention_rules.sql -f supabase/tests/ingest_tenancy.sql
+      - run: psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f supabase/tests/rls_seed.sql -f supabase/tests/rls_isolation.sql -f supabase/tests/intervention_rules.sql -f supabase/tests/ingest_tenancy.sql -f supabase/tests/provisioning.sql
 
   # Known-vulnerability gate on what ships. Web: production dependencies, blocks on critical (the two Next.js
   # advisories fixed only in Next 16 are an accepted, tracked risk: docs/engineering/SECURITY_REMEDIATION.md).

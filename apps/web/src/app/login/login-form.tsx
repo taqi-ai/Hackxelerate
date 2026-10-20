@@ -55,6 +55,8 @@ export function LoginForm({ next }: { next?: string }) {
         );
         return;
       }
+      // first sign-in of an invited person: turn the pending invite into their profile (no-op otherwise)
+      await createClient().rpc("claim_invite").then(() => undefined, () => undefined);
       play("success");
       const { exitDemoStudentAction } = await import("@/app/(app)/actions");
       await exitDemoStudentAction();
@@ -151,6 +153,10 @@ export function LoginForm({ next }: { next?: string }) {
               {pending && <Loader2 className="mr-2 size-4 animate-spin" />}
               Sign in
             </Button>
+            <p className="text-center text-sm text-muted-foreground">
+              Invited by your institution?{" "}
+              <a href="/join" className="font-medium text-foreground underline-offset-4 hover:underline">Create your account</a>
+            </p>
           </form>
 
           <div className="space-y-3">

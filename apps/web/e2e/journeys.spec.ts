@@ -130,3 +130,23 @@ test("changing an intervention status persists across a reload", async ({ page }
   // after a reload the item is still out of the open list: the change was saved, not just shown
   await expect(page.locator("ul.divide-y > li").first()).not.toContainText(who);
 });
+
+test("account management says plainly that it needs the live database when offline", async ({ page }) => {
+  const errors = trackErrors(page);
+  await page.goto("/accounts");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Accounts");
+  await expect(page.getByText("Account management needs the live database")).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test("the join page checks the form before anything is sent", async ({ page }) => {
+  const sent: string[] = [];
+  page.on("request", (r) => r.url().includes("/auth/v1/signup") && sent.push(r.url()));
+  await page.goto("/join");
+  await page.getByLabel("Email").fill("someone@college.edu");
+  await page.getByLabel("Password", { exact: true }).fill("long-enough-pass");
+  await page.getByLabel("Confirm password").fill("different-pass-1");
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page.getByText("The two passwords do not match.")).toBeVisible();
+  expect(sent).toEqual([]);
+});

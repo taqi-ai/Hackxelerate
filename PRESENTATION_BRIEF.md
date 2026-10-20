@@ -216,7 +216,8 @@ Use this when a judge asks "is it secure / production-ready?". Honest status: **
 | Bugs the tests found | Students could create and edit staff interventions; any signed-in account could read campus analytics; migrations did not apply to an empty database | fixed in migrations 0008, 0009 and 0002 |
 | Multi-institution | Institutions table; every record and rule scoped to the caller's institution; a second institution is proven isolated both ways. Publishing is per institution: each campus has its own upload key and cannot write into another's data | migrations 0010 and 0012, `ingest_tenancy.sql` |
 | Bug our tests caught | Re-publishing data would have wiped user accounts and score history (a database cascade). Found before it ever ran in production, fixed, and tested | migration 0012 |
-| Public demo logins | Shared demo accounts can explore but cannot run or publish the pipeline | ML `require_admin_write`, tested |
+| Public demo logins | Shared demo accounts can explore but cannot run or publish the pipeline, or invite and deactivate people | ML `require_admin_write`; `profiles.shared_demo` in 0013, tested |
+| Accounts | Admins invite mentors, students and admins of their own institution; access starts only after the person confirms their email and ends the moment an admin deactivates them; every step is audited | migration 0013, `provisioning.sql`, Accounts page |
 | Uploads and exports | 25 MB limit, content checks, zip-bomb guard, path-traversal fix; CSV cells cannot run as formulas | `tests/test_auth.py`, `tests/test_runs.py`, `csv.test.ts` |
 | AI boundary | Roll numbers, emails and phones are stripped from every LLM prompt; `ASCORA_LLM=off` turns the LLM off entirely; scoring never uses the LLM | `tests/test_llm_boundary.py` |
 | Interventions | One open intervention per type per student; a database-enforced status flow (open, in progress, done, cancelled, reopen) | migration 0011, `intervention_rules.sql` |

@@ -5,7 +5,7 @@
 Not a pilot candidate yet. Gates that block any real student data:
 
 1. Multi-institution tenancy: PARTIAL. Data isolation enforced and tested (0010). Publishing is per institution (0012: one ingest token per institution, rows stamped server-side, cross-institution writes and key clashes refused, reset scoped). Still open: composite (institution_id, roll number) keys, so two institutions cannot yet use the same roll number, and per-institution ML artefacts.
-2. Account provisioning and deprovisioning, admin MFA: MISSING.
+2. Account provisioning and deprovisioning: DONE in the database (0013: admin invites within the institution, claim only with a confirmed email, deactivation ends access, shared evaluation accounts read-only, all audited; CI `provisioning.sql`). Web flow (`/accounts`, `/join`) builds and is covered offline; not exercised against the live project (needs a personal admin account). Requires Supabase Auth "Confirm email" to stay ON. Admin MFA: MISSING (Supabase setting, human).
 3. Automated RLS / cross-role negative test suite: DONE (CI `db-rls`): anonymous, profile-less, mentor, student and admin cases plus 11 cross-institution checks (0010), and intervention state-machine rules (0011).
 4. Durable job state for pipeline runs: DONE for single-instance hosting (file-backed); database-backed table needed before scaling out.
 5. Upload limits, run time limit and export formula-injection guard: DONE.
