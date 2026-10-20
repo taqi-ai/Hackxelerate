@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { unstable_cache } from "next/cache";
 import { createClient as createPlainClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { maskContactsDeep, maskedEmail, publicStudent, STUDENT_PUBLIC_COLUMNS } from "@/lib/minimise";
 import { PREVIEW_ENABLED, previewConnection, previewStudent, readDemoImport, readDemoPlans, searchPreview } from "@/lib/demo-preview";
 import {
   artifact,
@@ -103,7 +104,7 @@ function toRow(r: any, st: any): StudentRow {
   return {
     id: r.student_id,
     name: st.name,
-    email: st.email,
+    email: maskedEmail(st.email), // masked on the server: raw contacts never reach the browser
     branch: st.branch,
     year: st.year,
     section: st.section,
@@ -241,7 +242,10 @@ export async function getReviewQueue(limit = 300) {
       .source_links.filter((l) => l.status === "review")
       .sort((a, b) => b.match_confidence - a.match_confidence);
     return {
-      rows: all.slice(0, limit).map((l, i) => ({ id: i + 1, ...l, students: st.get(l.student_id) })),
+      rows: all.slice(0, limit).map((l, i) => {
+        const s = st.get(l.student_id);
+        return { id: i + 1, ...l, students: s ? { name: s.name, branch: s.branch, year: s.year } : null }; // same columns as online
+      }),
       total: all.length,
     };
   }
@@ -278,8 +282,8 @@ export async function getStudent360(id: string) {
     const s = snapshot();
     const st = s.students.find((x) => x.id === id);
     const mentor = s.mentors.find((m) => m.id === st.mentor_id);
-    return {
-      student: { ...st, mentors: mentor ? { name: mentor.name } : null },
+    return maskContactsDeep({
+      student: publicStudent({ ...st, mentors: mentor ? { name: mentor.name } : null }),
       score: one("student_scores", id) as StudentScore | null,
       academic: one("academic", id),
       attendance: one("attendance", id),
@@ -290,15 +294,15 @@ export async function getStudent360(id: string) {
       feedback: s.feedback.filter((f) => f.student_id === id),
       conflicts: s.conflicts.filter((c) => c.student_id === id),
       links: s.source_links.filter((l) => l.student_id === id),
-    };
+    });
   }
   if (isPreview(profile)) {
     const pv = await previewStudent(id);
-    return pv ? { ...pv, score: pv.score as StudentScore | null } : null;
+    return pv ? maskContactsDeep({ ...pv, score: pv.score as StudentScore | null }) : null;
   }
   const supabase = await createClient();
   const [student, score, academic, attendance, lms, engagement, placement, skills, feedback, conflicts, links] = await Promise.all([
-    supabase.from("students").select("*, mentors(name)").eq("id", id).maybeSingle(),
+    supabase.from("students").select(STUDENT_PUBLIC_COLUMNS).eq("id", id).maybeSingle(),
     supabase.from("student_scores").select("*").eq("student_id", id).maybeSingle(),
     supabase.from("academic").select("*").eq("student_id", id).maybeSingle(),
     supabase.from("attendance").select("*").eq("student_id", id).maybeSingle(),
@@ -318,8 +322,9 @@ export async function getStudent360(id: string) {
   } catch {
     // Ignore audit log insert error in demo / unauthenticated mode
   }
-  return {
-    student: student.data,
+  // everything below reaches client components, so contacts nested in lineage, link keys or comments are masked too
+  return maskContactsDeep({
+    student: publicStudent(student.data as Record<string, unknown>),
     score: score.data as StudentScore | null,
     academic: academic.data,
     attendance: attendance.data,
@@ -330,7 +335,7 @@ export async function getStudent360(id: string) {
     feedback: feedback.data ?? [],
     conflicts: conflicts.data ?? [],
     links: links.data ?? [],
-  };
+  });
 }
 
 export type Student360 = NonNullable<Awaited<ReturnType<typeof getStudent360>>>;

@@ -29,7 +29,7 @@ const COOKIE_BUDGET = 3600; // bytes, under the 4 KB browser limit
 const DIR = path.join(process.cwd(), "demo-data", "preview");
 
 export type PreviewStudent = {
-  student: { id: string; name: string; email: string | null; branch: string; year: number; section: string; mentor_id: string | null; mentors: { name: string } | null };
+  student: { id: string; name: string; email: string | null; phone?: string | null; branch: string; year: number; section: string; mentor_id: string | null; mentors: { name: string } | null };
   score: any;
   academic: any;
   attendance: any;
