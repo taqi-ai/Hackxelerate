@@ -4,6 +4,7 @@ Legend: REAL+TESTED · REAL/UNDER-TESTED · PARTIAL · DEMO/FIXTURE · UI-ONLY �
 
 | Area | Status | Evidence / notes |
 |---|---|---|
+| Account provisioning (invite, claim, deactivate) | REAL/UNDER-TESTED | database rules tested in CI (`supabase/tests/provisioning.sql`); web flow not yet run against the live project |
 | Staff login / logout (Supabase Auth, admin + mentor) | REAL/UNDER-TESTED | `login-form.tsx`, `middleware.ts`. No automated E2E (no test credentials in CI). |
 | Role resolution from `profiles` (role never from client) | REAL+TESTED (ML side) | `api/ml-token/route.ts`, `services/ml/tests/test_auth.py` |
 | Role isolation (RLS) | REAL+TESTED | `supabase/tests/rls_isolation.sql`, CI `db-rls`; re-run on production in a rolled-back transaction |

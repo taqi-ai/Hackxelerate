@@ -4,6 +4,7 @@ import {
   ChartNoAxesCombined,
   ClipboardCheck,
   DatabaseZap,
+  KeyRound,
   GraduationCap,
   LayoutDashboard,
   Link2,
@@ -25,6 +26,7 @@ export const NAV_ITEMS = [
   { href: "/ask", label: "Ask Ascora", icon: MessageSquareText, roles: ["admin", "mentor"], group: "Action", hint: "Questions in plain English" },
   { href: "/data", label: "Data integration", icon: DatabaseZap, roles: ["admin"], group: "Trust", hint: "Sources, matching, conflicts" },
   { href: "/model", label: "Score & models", icon: ScanSearch, roles: ["admin", "mentor"], group: "Trust", hint: "Formula, accuracy, drivers" },
+  { href: "/accounts", label: "Accounts", icon: KeyRound, roles: ["admin"], group: "Trust", hint: "Invite and deactivate people" },
   { href: "/fairness", label: "Fairness & privacy", icon: ShieldCheck, roles: ["admin"], group: "Trust", hint: "Audit and safeguards" },
 
   // Student Navigation (Student Portal)
