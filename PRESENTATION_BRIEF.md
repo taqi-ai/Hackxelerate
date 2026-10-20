@@ -222,12 +222,14 @@ Use this when a judge asks "is it secure / production-ready?". Honest status: **
 | Reliability | Pipeline run status survives restarts; one run at a time; health probes for web and ML; request IDs in logs | `/api/health`, `/health/ready` |
 | Dependencies | Vulnerable Python packages upgraded (models give identical predictions); CI blocks known vulnerabilities | CI `deps-audit` |
 | Data sources | Admin screen shows each source's real status; only file import is built; CUIMS shows "Awaiting institution authorisation" | `GET /connectors`, Data integration page |
-| Browser tests | 10 end-to-end journeys run in CI on every web or ML change | CI `e2e` |
+| Privacy in the browser | Mentor screens receive only what they show: email and phone masked on the server, gender and other fairness-only fields never leave it (found by checking our own data dictionary) | browser test checks the page source for the raw values |
+| Stuck runs | A pipeline run that takes over 15 minutes is stopped and publishes nothing | `tests/test_runs.py` |
+| Browser tests | 11 end-to-end journeys run in CI on every web or ML change | CI `e2e` |
 
 **Who answers:**
 - **Ujjwal (backend):** access control, multi-institution, uploads, health checks, connectors.
 - **Ashmit (models and product):** AI boundary, model card (`docs/engineering/ML_MODEL_CARD.md`), why the baseline is reported.
-- **Harsh (dashboard and trust):** intervention rules, browser tests, what a judge sees on screen.
+- **Harsh (dashboard and trust):** intervention rules, browser tests, privacy in the browser, what a judge sees on screen.
 
 **Say it straight:**
 - "We test our own security rules automatically, and those tests found real bugs that we fixed."
