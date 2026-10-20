@@ -87,10 +87,10 @@ export const getProfile = cache(async (): Promise<(Profile & { email: string }) 
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data } = await supabase.from("profiles").select("id, full_name, role, mentor_id, student_id, disabled_at").eq("id", user.id).single();
+  const { data } = await supabase.from("profiles").select("id, full_name, role, mentor_id, student_id, disabled_at, institution_id").eq("id", user.id).single();
   // a deactivated account is treated as having no profile (the database helpers already give it nothing)
   if (!data || data.disabled_at) return null;
-  return { id: data.id, full_name: data.full_name, role: data.role, mentor_id: data.mentor_id, student_id: data.student_id, email: user.email ?? "" } as Profile & { email: string };
+  return { id: data.id, full_name: data.full_name, role: data.role, mentor_id: data.mentor_id, student_id: data.student_id, institution_id: data.institution_id, email: user.email ?? "" } as Profile & { email: string };
 });
 
 /** a visitor previewing a demo student (no database identity) */

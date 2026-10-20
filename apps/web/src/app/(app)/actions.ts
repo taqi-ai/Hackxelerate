@@ -350,7 +350,8 @@ export async function importManualAcademicRecordAction(input: z.infer<typeof Imp
     const supabase = await createClient();
     const { error } = await supabase.from("external_connections").upsert(
       { student_id: v.student_id, provider: "manual_import", status: "manual_import", last_synced_at: now, provenance: "manual_import", details, updated_at: now },
-      { onConflict: "student_id" },
+      // the institution is stamped by the database from the signed-in user (migration 0014)
+      { onConflict: "institution_id,student_id" },
     );
     if (error) return { ok: false, error: `Could not save the import: ${error.message}` };
   }

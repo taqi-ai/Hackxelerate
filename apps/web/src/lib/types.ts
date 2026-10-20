@@ -9,6 +9,8 @@ export interface Profile {
   mentor_id: string | null;
   student_id?: string | null;
   email?: string | null;
+  /** the institution the account belongs to (the evaluation campus offline) */
+  institution_id?: string | null;
 }
 
 export interface Driver {
