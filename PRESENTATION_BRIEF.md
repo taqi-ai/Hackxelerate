@@ -222,7 +222,7 @@ Use this when a judge asks "is it secure / production-ready?". Honest status: **
 | AI boundary | Roll numbers, emails and phones are stripped from every LLM prompt; `ASCORA_LLM=off` turns the LLM off entirely; scoring never uses the LLM | `tests/test_llm_boundary.py` |
 | Interventions | One open intervention per type per student; a database-enforced status flow (open, in progress, done, cancelled, reopen) | migration 0011, `intervention_rules.sql` |
 | Reliability | Pipeline run status survives restarts; one run at a time; health probes for web and ML; request IDs in logs | `/api/health`, `/health/ready` |
-| Dependencies | Vulnerable Python packages upgraded (models give identical predictions); CI blocks known vulnerabilities | CI `deps-audit` |
+| Dependencies | Vulnerable Python packages upgraded (models give identical predictions); the web app's production dependencies have 0 known vulnerabilities (a patched CSS library forced into Next.js without a risky upgrade); CI blocks known vulnerabilities | CI `deps-audit`, `npm audit --omit=dev` |
 | Data sources | Admin screen shows each source's real status; only file import is built; CUIMS shows "Awaiting institution authorisation" | `GET /connectors`, Data integration page |
 | Privacy in the browser | Mentor screens receive only what they show: email and phone masked on the server, gender and other fairness-only fields never leave it (found by checking our own data dictionary) | browser test checks the page source for the raw values |
 | Data freshness | Every source shows how current it is, from dates inside the file (not the upload time); files without dates say so; stale sources are flagged on the overview | Data integration page, `freshness.py` tests |
