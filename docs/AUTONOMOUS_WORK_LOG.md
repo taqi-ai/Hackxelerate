@@ -7,5 +7,13 @@ Window: started 00:52 IST, stop at 05:00 IST (owner instruction). Earlier histor
 - Found `npm audit` critical on `next`; bumped to 15.5.28. tsc, vitest, build verified locally. e2e could not run locally (no Playwright browser); relying on CI.
 - Next: open PR, wait for CI, merge if green, verify production, then continue the audit (RLS grants review, upload limits, pipeline idempotency).
 
+## Batch 2 (01:15-02:30)
+- PR #51 merged (CI incl. 14 e2e green); production deployment for 265f4b9 reports success; web `/`, `/login`, health 200 afterwards.
+- Verified live: RLS on 25/25 tables, anonymous reads empty, anonymous RPCs refused, ML endpoints 401 anonymously.
+- Rate limiter for ML `/ask` and `/whatif` built and tested (61 pytest) on branch `claude/ml-ratelimit`, **not merged** (an ML deploy restarts the Azure app; held until after the event).
+- Docs added: PRIVACY_AND_COMPLIANCE_READINESS, DATA_RETENTION_AND_DELETION, INCIDENT_RESPONSE_RUNBOOK, SECURITY_CONTROL_MATRIX, MVP_KNOWN_LIMITATIONS, BUILDATHON_DEMO_CHECKLIST, FOUNDER_TECHNICAL_HANDOFF. DPDP dates are from secondary sources (MeitY page blocked, 403).
+- Not done: connector framework / mapping UI (large, risky on event day), RLS suite re-run, authenticated live journeys, Azure cost review (no credit data read), restore drill.
+- Next: decide on merging the rate limiter after the event; enable Supabase leaked-password protection and admin MFA (dashboard).
+
 ## Recovery
 `git checkout claude/hardening-night`; run `npm ci && npm test && npm run build` in apps/web and `pytest -q` in services/ml. Roll back production with `vercel rollback` to the deployment preceding the merge.
