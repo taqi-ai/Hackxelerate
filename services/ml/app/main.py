@@ -22,6 +22,8 @@ from .config import ALLOWED_ORIGINS, DEMO_DIR, ML_ROOT
 from .ingest import review
 from .insights.llm import model_name, provider
 from .insights import ask_grounded
+from .campus_api import router as campus_router
+from .lms.api import router as lms_router
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("ascora.api")
@@ -29,6 +31,8 @@ UPLOADS = ML_ROOT / "artifacts" / "uploads"
 
 app = FastAPI(title="Ascora ML service", version="1.0.0",
               description="Integration pipeline, Success Score, risk models, what-if simulation and Ask Ascora.")
+app.include_router(lms_router)
+app.include_router(campus_router)
 app.add_middleware(CORSMiddleware, allow_origins=ALLOWED_ORIGINS, allow_origin_regex=r"https://ascora.*\.vercel\.app",
                    allow_methods=["GET", "POST"], allow_headers=["Authorization", "Content-Type"])
 
