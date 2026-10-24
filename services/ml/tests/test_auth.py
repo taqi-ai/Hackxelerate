@@ -23,7 +23,7 @@ def test_tampered_token_is_rejected():
     t = token()
     payload, sig = t.split(".")
     forged = auth.sign({"sub": "u1", "role": "admin", "exp": time.time() + 600}, "other-secret")
-    for bad in (payload + "." + "A" + sig[1:], forged, "garbage", ""):
+    for bad in (payload + "." + ("B" if sig[0] == "A" else "A") + sig[1:], forged, "garbage", ""):
         with pytest.raises(HTTPException) as e:
             auth.verify(bad, SECRET)
         assert e.value.status_code in (401, 503)
