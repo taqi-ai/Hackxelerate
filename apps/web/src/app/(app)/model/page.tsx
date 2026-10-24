@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { COMPONENT_LABEL } from "@/lib/format";
 import { OULAD_BENCHMARK as OU } from "@/lib/external-benchmark";
+import { RoundComparisonValidation } from "./round-comparison-validation";
 
 export const metadata: Metadata = { title: "Score & models" };
 
@@ -76,11 +77,19 @@ export default async function ModelPage() {
       <Tabs defaultValue="score">
         <TabsList className="max-w-full justify-start overflow-x-auto">
           <TabsTrigger value="score">Success Score</TabsTrigger>
+          <TabsTrigger value="round2">Round 2 Model Validation</TabsTrigger>
           <TabsTrigger value="academic">Academic risk model</TabsTrigger>
           <TabsTrigger value="placement">Placement risk model</TabsTrigger>
           <TabsTrigger value="early">How early can we know?</TabsTrigger>
           <TabsTrigger value="data">Evaluation data</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="round2" className="mt-4">
+          <RoundComparisonValidation
+            modelAcademic={a.model_academic}
+            modelPlacement={a.model_placement}
+          />
+        </TabsContent>
 
         <TabsContent value="score" className="mt-4 space-y-4">
           <Panel title="Formula" description="Success Score = sum of component score × weight. Each component is a 0-100 cohort percentile.">
