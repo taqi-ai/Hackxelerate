@@ -104,13 +104,17 @@ def map_headers(headers: list[str], source_type: str) -> Mapping:
     lookup = {syn: canon for canon, syns in schema.items() for syn in syns}
     m = Mapping(source_type=source_type)
     used: set[str] = set()
+    # exact synonyms claim their field first, so an earlier column that only fuzzy-matches cannot take it
     for h in headers:
         n = _norm(h)
         if n in lookup and lookup[n] not in used:
             m.columns[h] = lookup[n]
             m.method[lookup[n]] = "exact"
             used.add(lookup[n])
+    for h in headers:
+        if h in m.columns:
             continue
+        n = _norm(h)
         best = process.extractOne(n, list(lookup), scorer=fuzz.token_set_ratio)
         if best and best[1] >= 85 and lookup[best[0]] not in used:
             m.columns[h] = lookup[best[0]]
