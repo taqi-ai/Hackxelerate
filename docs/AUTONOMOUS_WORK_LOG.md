@@ -15,5 +15,11 @@ Window: started 00:52 IST, stop at 05:00 IST (owner instruction). Earlier histor
 - Not done: connector framework / mapping UI (large, risky on event day), RLS suite re-run, authenticated live journeys, Azure cost review (no credit data read), restore drill.
 - Next: decide on merging the rate limiter after the event; enable Supabase leaked-password protection and admin MFA (dashboard).
 
+## Batch 3 (07:30-08:30, 24 Oct)
+- Mission Control merged (PR 55, CI green incl. new e2e) and deployed (6995828): `/mission-control` redirects signed-out users to login; not exercised with a live staff login. Offline build: 128 interventions persisted with baselines.
+- Found and fixed: header mapper let an early fuzzy match steal a field from a later exact one (PR 53, held).
+- OULAD benchmark executed (PR 54, held): out-of-time AUC about 0.70, LightGBM no better than logistic. See `docs/EXTERNAL_PUBLIC_DATA_BENCHMARK.md`. No web UI section added.
+- Held PRs (touch services/ml, would redeploy Azure): ratelimit branch, 53, 54.
+
 ## Recovery
 `git checkout claude/hardening-night`; run `npm ci && npm test && npm run build` in apps/web and `pytest -q` in services/ml. Roll back production with `vercel rollback` to the deployment preceding the merge.

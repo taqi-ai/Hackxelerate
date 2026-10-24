@@ -1,0 +1,130 @@
+{
+  "dataset": "Open University Learning Analytics Dataset (OULAD), CC BY 4.0, doi:10.1038/sdata.2017.171",
+  "cutoff_days": 28,
+  "target": "Fail or Withdrawn (1) vs Pass or Distinction (0)",
+  "rows_before_exclusion": 32593,
+  "rows_after_exclusions": 27553,
+  "excluded_unregistered_before_cutoff": 5040,
+  "train": {
+    "rows": 18334,
+    "prevalence": 0.4585,
+    "presentations": [
+      "2013B",
+      "2013J",
+      "2014B"
+    ]
+  },
+  "test": {
+    "rows": 7932,
+    "prevalence": 0.3836,
+    "presentation": "2014J",
+    "removed_students_also_in_training": 1287
+  },
+  "features": [
+    "clicks_total",
+    "active_days",
+    "distinct_sites",
+    "clicks_week1",
+    "clicks_week2",
+    "clicks_week3",
+    "clicks_week4",
+    "clicks_before_start",
+    "first_activity_day",
+    "last_activity_day",
+    "no_vle_activity",
+    "assessments_due",
+    "assessments_submitted",
+    "submitted_share_of_due",
+    "mean_score",
+    "registered_days_before_start",
+    "studied_credits",
+    "num_of_prev_attempts"
+  ],
+  "prevalence_baseline_pr_auc": 0.3836,
+  "models": {
+    "logistic_baseline": {
+      "roc_auc": 0.6996,
+      "roc_auc_95ci_bootstrap": [
+        0.6881,
+        0.7109
+      ],
+      "pr_auc": 0.5458,
+      "brier": 0.225,
+      "ece_10bin": 0.0615,
+      "train_oof_roc_auc": 0.7604,
+      "threshold_from_train_oof_for_20pct_flag_share": {
+        "threshold": 0.6568,
+        "flagged_share": 0.1996,
+        "precision": 0.6197,
+        "recall": 0.3224
+      },
+      "top_20pct_of_test_by_score": {
+        "threshold": 0.6558,
+        "flagged_share": 0.2001,
+        "precision": 0.6194,
+        "recall": 0.323
+      }
+    },
+    "lightgbm_isotonic": {
+      "roc_auc": 0.6993,
+      "roc_auc_95ci_bootstrap": [
+        0.6879,
+        0.7105
+      ],
+      "pr_auc": 0.5431,
+      "brier": 0.2281,
+      "ece_10bin": 0.0788,
+      "train_oof_roc_auc": 0.7684,
+      "threshold_from_train_oof_for_20pct_flag_share": {
+        "threshold": 0.6806,
+        "flagged_share": 0.208,
+        "precision": 0.6242,
+        "recall": 0.3385
+      },
+      "top_20pct_of_test_by_score": {
+        "threshold": 0.6891,
+        "flagged_share": 0.2054,
+        "precision": 0.6255,
+        "recall": 0.3349
+      }
+    }
+  },
+  "lightgbm_by_module": {
+    "AAA": {
+      "rows": 317,
+      "prevalence": 0.262,
+      "roc_auc": 0.698
+    },
+    "BBB": {
+      "rows": 1692,
+      "prevalence": 0.353,
+      "roc_auc": 0.589
+    },
+    "CCC": {
+      "rows": 1281,
+      "prevalence": 0.474,
+      "roc_auc": 0.782
+    },
+    "DDD": {
+      "rows": 1290,
+      "prevalence": 0.427,
+      "roc_auc": 0.766
+    },
+    "EEE": {
+      "rows": 960,
+      "prevalence": 0.318,
+      "roc_auc": 0.733
+    },
+    "FFF": {
+      "rows": 1680,
+      "prevalence": 0.374,
+      "roc_auc": 0.755
+    },
+    "GGG": {
+      "rows": 712,
+      "prevalence": 0.382,
+      "roc_auc": 0.659
+    }
+  },
+  "seconds": 7.7
+}
