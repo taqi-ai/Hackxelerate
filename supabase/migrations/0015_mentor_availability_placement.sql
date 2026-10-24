@@ -92,11 +92,12 @@ begin
 end $$;
 revoke all on function private.check_holiday_has_no_bookings() from public, anon, authenticated;
 
-create trigger stamp_institution before insert on public.mentor_allotments for each row execute function private.stamp_institution_forced();
-create trigger stamp_institution before insert on public.mentor_holidays for each row execute function private.stamp_institution_forced();
-create trigger allotment_not_on_holiday before insert or update of mentor_id, slot_date, status on public.mentor_allotments
+-- BEFORE triggers fire alphabetically: the institution must be stamped (a_) before the rule triggers (b_) compare it
+create trigger a_stamp_institution before insert on public.mentor_allotments for each row execute function private.stamp_institution_forced();
+create trigger a_stamp_institution before insert on public.mentor_holidays for each row execute function private.stamp_institution_forced();
+create trigger b_allotment_not_on_holiday before insert or update of mentor_id, slot_date, status on public.mentor_allotments
   for each row execute function private.check_allotment_not_on_holiday();
-create trigger holiday_has_no_bookings before insert or update of mentor_id, from_date, to_date on public.mentor_holidays
+create trigger b_holiday_has_no_bookings before insert or update of mentor_id, from_date, to_date on public.mentor_holidays
   for each row execute function private.check_holiday_has_no_bookings();
 
 alter table public.mentor_allotments enable row level security;
@@ -156,8 +157,8 @@ create table public.placement_applications (
   primary key (drive_id, student_id),
   constraint application_student_fk foreign key (institution_id, student_id) references public.students (institution_id, id)
 );
-create trigger stamp_institution before insert on public.placement_drives for each row execute function private.stamp_institution_forced();
-create trigger stamp_institution before insert on public.placement_applications for each row execute function private.stamp_institution_forced();
+create trigger a_stamp_institution before insert on public.placement_drives for each row execute function private.stamp_institution_forced();
+create trigger a_stamp_institution before insert on public.placement_applications for each row execute function private.stamp_institution_forced();
 
 alter table public.placement_drives enable row level security;
 alter table public.placement_applications enable row level security;
