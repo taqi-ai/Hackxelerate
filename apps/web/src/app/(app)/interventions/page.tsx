@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { ClipboardList, TrendingDown } from "lucide-react";
+import { TrendingDown } from "lucide-react";
 import { getArtifacts, getInterventions, getStudentRows } from "@/lib/data";
 import { EmptyState, PageHeader, Panel, Stat } from "@/components/kit";
 import { HBar } from "@/components/charts";
-import { InterventionRow } from "../students/[id]/intervention-panel";
 import { INTERVENTION_LABEL } from "@/lib/format";
 import { campusDate } from "@/lib/dates";
+import { InterventionsQueueClient } from "./interventions-queue-client";
 
 export const metadata: Metadata = { title: "Interventions & Follow-up Effectiveness" };
 
@@ -162,22 +162,18 @@ export default async function InterventionsPage() {
         </section>
       )}
 
-      {/* Main Grid: Open Interventions & What Works Historical Lift */}
-      <section className="mt-4 grid gap-4 lg:grid-cols-[1.2fr_1fr]">
-        <Panel title="Active Interventions Requiring Review" description="Update status inline or log follow-up measurements">
-          {open.length === 0 ? (
-            <EmptyState icon={ClipboardList} title="Nothing open right now">
-              Open a student profile and choose Plan intervention. The suggested type follows that student&apos;s top risk driver.
-            </EmptyState>
-          ) : (
-            <ul className="divide-y">
-              {open.map((i) => (
-                <InterventionRow key={i.id} i={i} current={byId.get(i.student_id) ?? null} showStudent />
-              ))}
-            </ul>
-          )}
-        </Panel>
+      {/* Prescriptive Recommendation Queue & Closed-Loop Tracker */}
+      <section className="mt-4">
+        <InterventionsQueueClient
+          students={rows}
+          interventions={withNames}
+          openCount={open.length}
+          doneCount={done.length}
+        />
+      </section>
 
+      {/* Main Grid: What Works Historical Lift Analysis */}
+      <section className="mt-4">
         <Panel
           title="Empirical Program Lift Analysis"
           description="Share of at-risk students whose risk improved last semester, by intervention, versus similar control students who received none"
@@ -210,17 +206,6 @@ export default async function InterventionsPage() {
           )}
         </Panel>
       </section>
-
-      {/* Completed Interventions Section with Follow-up Records */}
-      {done.length > 0 && (
-        <Panel title="Completed Interventions & Observed Follow-up Records" className="mt-4">
-          <ul className="divide-y">
-            {done.map((i) => (
-              <InterventionRow key={i.id} i={i} current={byId.get(i.student_id) ?? null} showStudent />
-            ))}
-          </ul>
-        </Panel>
-      )}
     </>
   );
 }

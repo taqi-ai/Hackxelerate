@@ -1,10 +1,8 @@
-import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowRight } from "lucide-react";
 import { getSegments, getStudentRows } from "@/lib/data";
 import { PageHeader, ScoreValue } from "@/components/kit";
 import { COMPONENT_LABEL, fmtInt } from "@/lib/format";
-import { Button } from "@/components/ui/button";
+import { PlaybookCardActions, PlaybookCardDetails } from "./playbook-actions";
 
 export const metadata: Metadata = { title: "Segments" };
 
@@ -79,16 +77,11 @@ export default async function SegmentsPage() {
 
               {s.traits.length > 0 && <p className="text-sm text-muted-foreground">Defining traits: {s.traits.join(", ")}.</p>}
 
-              <div className="rounded-lg bg-brand-soft px-4 py-3 text-sm">
-                <p className="mb-0.5 text-xs font-medium text-brand">Recommended action</p>
-                <p className="leading-relaxed">{s.action}</p>
-              </div>
+              {/* Prescriptive Playbook Card Component */}
+              <PlaybookCardDetails persona={s.persona} />
 
-              <Button asChild variant="outline" size="sm">
-                <Link href={`/students?persona=${encodeURIComponent(s.persona)}`}>
-                  Open {fmtInt(m.length)} members <ArrowRight className="size-4" />
-                </Link>
-              </Button>
+              {/* Playbook Card Actions: Filter Students in Segment & Queue Playbook for Cohort */}
+              <PlaybookCardActions persona={s.persona} studentIds={m.map((x) => x.id)} />
             </article>
           );
         })}

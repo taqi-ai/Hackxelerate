@@ -28,6 +28,7 @@ import {
   maskEmail,
   maskPhone,
   suggestIntervention,
+  deriveMobileRecommendation,
   INTERVENTION_LABEL,
   INTENT_LABEL,
   COMPONENT_LABEL,
@@ -259,6 +260,96 @@ export default function StudentDetailScreen() {
             </Text>
           </View>
         </View>
+
+        {/* Round 2 Prescribed Action & Owner Card */}
+        {(() => {
+          const rec = deriveMobileRecommendation(score, student);
+          return (
+            <View
+              style={[
+                styles.profileCard,
+                {
+                  backgroundColor: colors.card,
+                  borderColor: colors.cardBorder,
+                  marginTop: -4,
+                  gap: 10,
+                },
+              ]}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                  <Feather name="shield" size={14} color={colors.brand} />
+                  <Text style={{ fontSize: 13, fontWeight: "700", color: colors.text }}>
+                    Prescribed Action & Owner
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    backgroundColor:
+                      rec.priority === "P0 Immediate"
+                        ? colors.riskHighSoft
+                        : rec.priority === "P1 High"
+                        ? colors.riskMediumSoft
+                        : colors.brandSoft,
+                    paddingHorizontal: 8,
+                    paddingVertical: 3,
+                    borderRadius: 6,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 10,
+                      fontWeight: "700",
+                      color:
+                        rec.priority === "P0 Immediate"
+                          ? colors.riskHigh
+                          : rec.priority === "P1 High"
+                          ? colors.riskMedium
+                          : colors.brand,
+                    }}
+                  >
+                    {rec.priority}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={{ gap: 4 }}>
+                <Text style={{ fontSize: 13, fontWeight: "600", color: colors.text }}>
+                  {rec.action}
+                </Text>
+                <Text style={{ fontSize: 11, color: colors.mutedText, lineHeight: 16 }}>
+                  {rec.reason}
+                </Text>
+              </View>
+
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingTop: 8,
+                  borderTopWidth: 1,
+                  borderTopColor: colors.cardBorder,
+                }}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                  <Feather name="user-check" size={12} color={colors.brand} />
+                  <Text style={{ fontSize: 11, color: colors.mutedText }}>
+                    Owner: <Text style={{ fontWeight: "600", color: colors.text }}>{rec.owner}</Text>
+                  </Text>
+                </View>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                  <Feather name="trending-up" size={12} color={colors.mutedText} />
+                  <Text style={{ fontSize: 10, color: colors.mutedText }}>Actual vs Predicted</Text>
+                </View>
+              </View>
+
+              <Text style={{ fontSize: 10, color: colors.mutedText, fontStyle: "italic" }}>
+                {rec.forecast}
+              </Text>
+            </View>
+          );
+        })()}
 
         {/* Alert Banner */}
         {score.alerts && score.alerts.length > 0 && (
