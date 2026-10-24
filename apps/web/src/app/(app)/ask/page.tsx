@@ -1,19 +1,34 @@
 import type { Metadata } from "next";
-import { getStudentRows } from "@/lib/data";
+import { getDriverMap, getProfile, getStudentRows } from "@/lib/data";
 import { PageHeader } from "@/components/kit";
 import { AskClient } from "./ask-client";
 
 export const metadata: Metadata = { title: "Ask Ascora" };
 
 export default async function AskPage() {
-  const rows = await getStudentRows();
+  const [rows, driverMap, profile] = await Promise.all([
+    getStudentRows(),
+    getDriverMap(),
+    getProfile(),
+  ]);
+
+  const drivers: Record<string, { academic: any[]; placement: any[] }> = {};
+  for (const [id, d] of driverMap.entries()) {
+    drivers[id] = d;
+  }
+
   return (
     <>
       <PageHeader
         title="Ask Ascora"
-        description="Ask in plain English. The question becomes a validated filter (never raw SQL) that runs on the students you are allowed to see."
+        description="Plain-English decision copilot. Questions translate into schema-validated analytical filters and TreeSHAP evidence (never raw SQL) scoped to your permitted student roster."
       />
-      <AskClient rows={rows} />
+      <AskClient
+        rows={rows}
+        drivers={drivers}
+        role={profile?.role ?? "admin"}
+        mentorId={profile?.mentor_id ?? null}
+      />
     </>
   );
 }
