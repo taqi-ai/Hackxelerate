@@ -74,6 +74,116 @@ export async function createIntervention(input: z.infer<typeof CreateSchema>): P
   return { ok: true };
 }
 
+export interface BulkQueueResult {
+  ok: boolean;
+  queued: number;
+  skipped: number;
+  error?: string;
+}
+
+const QueuePlaybookSchema = z.object({
+  persona: z.string().min(1),
+  intervention_type: z.enum(TYPES),
+  owner_name: z.string().trim().min(2).max(80),
+  due_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  driver: z.string().max(200).optional().nullable(),
+  target_student_ids: z.array(z.string().regex(/^CU\d{2}[A-Z]{2,4}\d{4}$/)).max(100),
+});
+
+export async function queuePlaybookAction(input: z.infer<typeof QueuePlaybookSchema>): Promise<BulkQueueResult> {
+  const parsed = QueuePlaybookSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, queued: 0, skipped: 0, error: parsed.error.issues[0]?.message ?? "Invalid playbook input" };
+  const v = parsed.data;
+
+  let queued = 0;
+  let skipped = 0;
+
+  if (OFFLINE) {
+    const allowed = visibleIds();
+    for (const sid of v.target_student_ids) {
+      if (!allowed.has(sid)) {
+        skipped++;
+        continue;
+      }
+      const alreadyActive = offlineInterventions.some(
+        (i) => i.student_id === sid && i.type === v.intervention_type && ACTIVE_STATUSES.includes(i.status)
+      );
+      if (alreadyActive) {
+        skipped++;
+        continue;
+      }
+      const s = one("student_scores", sid);
+      const now = new Date().toISOString();
+      offlineInterventions.unshift({
+        id: randomUUID(),
+        student_id: sid,
+        type: v.intervention_type,
+        driver: v.driver ?? `Segment Playbook: ${v.persona}`,
+        owner_name: v.owner_name,
+        due_date: v.due_date,
+        notes: `Bulk queued from Prescriptive Playbook for ${v.persona}`,
+        status: "open",
+        baseline: s ? { success_score: s.success_score, academic_risk_prob: s.academic_risk_prob, placement_risk_prob: s.placement_risk_prob } : null,
+        created_at: now,
+        updated_at: now,
+      });
+      queued++;
+    }
+  } else {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { ok: false, queued: 0, skipped: 0, error: "Your session has expired. Sign in again." };
+
+    for (const sid of v.target_student_ids) {
+      // Check existing active intervention to prevent duplicate
+      const { data: existing } = await supabase
+        .from("interventions")
+        .select("id")
+        .eq("student_id", sid)
+        .eq("type", v.intervention_type)
+        .in("status", ["open", "in_progress"])
+        .maybeSingle();
+
+      if (existing) {
+        skipped++;
+        continue;
+      }
+
+      const { data: s } = await supabase
+        .from("student_scores")
+        .select("success_score, academic_risk_prob, placement_risk_prob")
+        .eq("student_id", sid)
+        .maybeSingle();
+
+      const { error } = await supabase.from("interventions").insert({
+        student_id: sid,
+        type: v.intervention_type,
+        driver: v.driver ?? `Segment Playbook: ${v.persona}`,
+        owner_name: v.owner_name,
+        due_date: v.due_date,
+        notes: `Bulk queued from Prescriptive Playbook for ${v.persona}`,
+        created_by: user.id,
+        baseline: s ?? null,
+      });
+
+      if (error) {
+        skipped++;
+      } else {
+        queued++;
+        await supabase.from("audit_log").insert({ action: "queue_playbook_intervention", student_id: sid });
+      }
+    }
+  }
+
+  revalidatePath("/interventions");
+  revalidatePath("/segments");
+  revalidatePath("/overview");
+
+  return { ok: true, queued, skipped };
+}
+
 const StatusSchema = z.object({ id: z.string().uuid(), status: z.enum(["open", "in_progress", "done", "cancelled"]), notes: z.string().max(1000).optional() });
 
 export async function updateInterventionStatus(input: z.infer<typeof StatusSchema>): Promise<ActionResult> {
