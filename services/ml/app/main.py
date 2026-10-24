@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field
 
 from . import config, connectors, service
 from .auth import current_user, require_admin, require_admin_write
+from .ratelimit import limited
 from .config import ALLOWED_ORIGINS, DEMO_DIR, ML_ROOT
 from .ingest import review
 from .insights.llm import model_name, provider
@@ -210,7 +211,7 @@ def run_status(run_id: str):
     return {"run_id": st.run_id, "status": st.status, "steps": st.steps, "summary": st.summary, "error": st.error}
 
 
-@app.post("/whatif", dependencies=[Depends(current_user)])
+@app.post("/whatif", dependencies=[Depends(limited("whatif"))])
 def whatif(req: WhatIfRequest):
     try:
         return service.whatif(req.student_id, req.changes)
@@ -232,6 +233,6 @@ def whatif_inputs(student_id: str):
         raise HTTPException(503, str(e))
 
 
-@app.post("/ask", dependencies=[Depends(current_user)])
+@app.post("/ask", dependencies=[Depends(limited("ask"))])
 def ask(req: AskRequest):
     return ask_query(req.question)
