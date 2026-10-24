@@ -37,6 +37,7 @@ class Filter(BaseModel):
     attendance_max: float | None = Field(None, ge=0, le=100)
     attendance_min: float | None = Field(None, ge=0, le=100)
     mocks_max: int | None = Field(None, ge=0)
+    readiness_max: float | None = Field(None, ge=0, le=100)   # placement-readiness component, 0-100 cohort percentile
 
 
 class Query(BaseModel):
@@ -81,7 +82,7 @@ def rule_parse(q: str) -> Query:
     expl = []
     br = []
     for b, keys in (("CSE-AIML", ["aiml", "ai&ml", "ai ml"]), ("CSE-Data Science", ["data science", " ds "]),
-                    ("ECE", ["ece", "electronics"]), ("ME", [" me ", "mechanical", "mech"]), ("CSE", [" cse", "computer science"])):
+                    ("ECE", ["ece", "electronics"]), ("ME", ["mechanical", " mech "]), ("CSE", [" cse", "computer science"])):
         if any(k in f" {t} " for k in keys):
             br.append(b)
     if br:
