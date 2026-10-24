@@ -26,5 +26,11 @@ Window: started 00:52 IST, stop at 05:00 IST (owner instruction). Earlier histor
 - Evaluation data tab on `/model` (synthetic demo and OULAD side by side, labelled not comparable); constants guarded by a test against `docs/benchmarks/oulad_results.json`.
 - Still open: signed-in check of Mission Control on production (needs a staff login), web screen for the mapping review, Supabase MFA and leaked-password protection (dashboard), restore drill.
 
+## Batch 5 (24 Oct, afternoon)
+- Evidence-grounded Ask Ascora backend merged and deployed (PR 58; ML deploy run 40078653542 green; `/health/ready` 200; `/ask` 401 without a token). Contract: `docs/ASK_GROUNDED_CONTRACT.md`. Mentor scoping needs the web `mid` claim, deployed in the same PR.
+- Added `COMPREHENSIVE_AUDIT.md` (findings, tests, release report) and `DEPLOYMENT_AND_ROLLBACK_RUNBOOK.md`.
+- Frontend agent's Ask UI work (`ask-client.tsx`, `ask-adapter.ts`, `ask-types.ts`) is uncommitted on `gemini/ask-ascora-copilot`; not part of main.
+- Still open: signed-in production check of Mission Control and grounded Ask, Supabase MFA and leaked-password protection, restore drill, retention workflow.
+
 ## Recovery
 `git checkout claude/hardening-night`; run `npm ci && npm test && npm run build` in apps/web and `pytest -q` in services/ml. Roll back production with `vercel rollback` to the deployment preceding the merge.
