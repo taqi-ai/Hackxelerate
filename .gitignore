@@ -53,3 +53,4 @@ data/culko_login.html
 !apps/web/demo-data/
 apps/web/demo-data/*
 !apps/web/demo-data/preview/
+data/external/
