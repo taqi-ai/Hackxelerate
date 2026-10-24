@@ -183,3 +183,35 @@ test("keyboard only: skip link, dialog open and close, focus always visible", as
     expect(shown, `focus indicator on tab stop ${i + 1}`).toBe(true);
   }
 });
+
+// keep this test LAST: approving a plan creates real (offline-store) interventions that later tests would see
+test("Mission Control: capacity limits, validation, and approval that does not duplicate", async ({ page }) => {
+  const errors = trackErrors(page);
+  await page.goto("/mission-control");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Mission Control");
+  await expect(page.getByText(/synthetic demonstration cohort/i).first()).toBeVisible();
+  await expect(page.getByText(/Planning scenario, not a prediction/i)).toBeVisible();
+
+  // invalid input is refused visibly
+  await page.getByLabel("Peer-tutoring slots", { exact: true }).fill("-3");
+  await expect(page.getByRole("alert")).toContainText(/between 0 and 200/);
+  await page.getByRole("button", { name: /reset to defaults/i }).click();
+
+  // zero capacity gives a valid, empty plan
+  for (const label of ["Mentor hours per mentor", "Peer-tutoring slots", "Mock-interview slots", "Skill-workshop slots"]) {
+    await page.getByLabel(label, { exact: true }).fill("0");
+  }
+  await expect(page.getByText("No recommendations")).toBeVisible();
+  await expect(page.getByRole("button", { name: /review and approve \(0\)/i })).toBeDisabled();
+
+  // a small plan: one mentor hour each, nothing else. Approve, then see the records in Interventions
+  await page.getByLabel("Mentor hours per mentor", { exact: true }).fill("0.5");
+  const approve = page.getByRole("button", { name: /review and approve \((\d+)\)/i });
+  await expect(approve).toBeEnabled();
+  await approve.click();
+  await page.getByRole("button", { name: "Approve and create" }).click();
+  await expect(page.getByText(/interventions? created/i).first()).toBeVisible();
+  // the same students are now excluded ("already have an open intervention"), so an immediate re-approval cannot duplicate them
+  await expect(page.getByText(/already have an open intervention/i).first()).toBeVisible();
+  expect(errors).toEqual([]);
+});

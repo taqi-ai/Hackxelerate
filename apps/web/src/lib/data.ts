@@ -177,6 +177,20 @@ export const getStudentRows = cache(async (): Promise<StudentRow[]> => {
   )().catch(direct);
 });
 
+/** Strongest drivers that RAISE each risk, per student, trimmed for planning (Mission Control). Row-level security
+ *  scopes the rows exactly like getStudentRows. */
+export const getDriverMap = cache(async (): Promise<Map<string, { academic: any[]; placement: any[] }>> => {
+  const trim = (d: any) => (d?.raises ?? []).slice(0, 5).map((x: any) => ({ feature: x.feature, text: x.text, impact: Number(x.impact), actionable: !!x.actionable }));
+  let rows: any[];
+  if (OFFLINE) {
+    const ids = visibleIds();
+    rows = snapshot().student_scores.filter((r: any) => ids.has(r.student_id));
+  } else {
+    rows = await fetchAll<any>((s) => s.from("student_scores").select("student_id, shap_academic, shap_placement").order("student_id"));
+  }
+  return new Map(rows.map((r) => [r.student_id as string, { academic: trim(r.shap_academic), placement: trim(r.shap_placement) }]));
+});
+
 export const getArtifacts = cache(async (keys: string[]): Promise<Record<string, any>> => {
   if (OFFLINE) return Object.fromEntries(keys.map((k) => [k, artifact(k)]));
   const supabase = await createClient();
