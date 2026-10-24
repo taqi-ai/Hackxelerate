@@ -1,4 +1,4 @@
-import type { PlacementLevel } from "./types";
+import type { PlacementLevel, StudentScore } from "./types";
 
 const nf = new Intl.NumberFormat("en-IN");
 
@@ -115,4 +115,82 @@ export function scoreToneColor(
   if (score >= 65) return colors.riskLow;
   if (score >= 40) return colors.text;
   return colors.riskHigh;
+}
+
+export interface MobilePrescribedAction {
+  owner: "Faculty Mentor" | "Training & Placement Cell" | "Student Wellness Counsellor";
+  priority: "P0 Immediate" | "P1 High" | "P2 Watch";
+  action: string;
+  reason: string;
+  forecast: string;
+}
+
+export function deriveMobileRecommendation(score: StudentScore, metrics?: any): MobilePrescribedAction {
+  const acadProb = Number(score.academic_risk_prob || 0);
+  const placeProb = score.placement_risk_prob !== null && score.placement_risk_prob !== undefined ? Number(score.placement_risk_prob) : null;
+  const att = metrics?.att_overall ?? null;
+  const lmsComp = metrics?.completion_rate ?? null;
+  const cgpa = metrics?.cgpa ?? null;
+  const coding = metrics?.coding ?? null;
+
+  // Priority
+  let priority: "P0 Immediate" | "P1 High" | "P2 Watch" = "P2 Watch";
+  if (acadProb >= 0.65 || Number(score.priority || 0) >= 0.75) {
+    priority = "P0 Immediate";
+  } else if ((acadProb >= 0.40 && acadProb < 0.65) || (placeProb !== null && placeProb >= 0.60)) {
+    priority = "P1 High";
+  }
+
+  // Precedence Rules
+  if (att !== null && att < 55 && lmsComp !== null && lmsComp < 35) {
+    return {
+      owner: "Student Wellness Counsellor",
+      priority,
+      action: "Pastoral Academic Wellness Consultation + Workload Adjustment",
+      reason: `Attendance (${att.toFixed(0)}%) and LMS coursework (${lmsComp.toFixed(0)}%) indicate severe disengagement.`,
+      forecast: "Target: Re-engage attendance past 70% threshold within 3 weeks.",
+    };
+  }
+
+  if (
+    (cgpa !== null && cgpa >= 7.5 && placeProb !== null && placeProb >= 0.50) ||
+    (cgpa !== null && cgpa >= 7.5 && coding !== null && coding < 45) ||
+    (placeProb !== null && placeProb >= 0.60 && coding !== null && coding < 40)
+  ) {
+    return {
+      owner: "Training & Placement Cell",
+      priority,
+      action: "14-Day Intensive DSA Coding Bootcamp + 2 Mock Technical Interviews",
+      reason: `High CGPA (${cgpa?.toFixed(2) ?? "good"}) with technical employability benchmark gap.`,
+      forecast: "Target: Elevate mock interview rating from baseline by +1.5 pts.",
+    };
+  }
+
+  if (acadProb >= 0.50 || (metrics?.backlogs && metrics.backlogs > 0)) {
+    return {
+      owner: "Faculty Mentor",
+      priority,
+      action: "Gatekeeper Course Peer Tutoring Pod + Weekly Remedial Lab",
+      reason: `Academic risk probability is ${(acadProb * 100).toFixed(0)}% with prerequisite backlog risk.`,
+      forecast: "Target: Stabilize SGPA and clear prerequisite backlog in remedial cycle.",
+    };
+  }
+
+  if (score.persona === "Silent decliners") {
+    return {
+      owner: "Faculty Mentor",
+      priority,
+      action: "1-on-1 Mentor Early-Warning Check-in + Attendance Recovery Contract",
+      reason: "Observed downward trend in LMS activity and attendance.",
+      forecast: "Target: Halt attendance decline and recover past 75% cohort baseline.",
+    };
+  }
+
+  return {
+    owner: "Faculty Mentor",
+    priority,
+    action: "Preventive Mentoring Check-in & Academic Continuity Review",
+    reason: "Routine support check-in based on current risk profile.",
+    forecast: "Target: Maintain current performance and engagement trajectory.",
+  };
 }

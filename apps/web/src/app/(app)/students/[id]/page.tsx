@@ -13,6 +13,7 @@ import { StudentTimeline } from "./timeline";
 import { SourceTabs } from "./source-tabs";
 import { WhatIf } from "./what-if";
 import { InterventionPanel } from "./intervention-panel";
+import { QuadOutcomeCards } from "./quad-outcome-cards";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -90,6 +91,9 @@ export default async function Student360({ params }: { params: Promise<{ id: str
           </ul>
         </section>
       )}
+
+      {/* Quad-Outcome Predictive Forecast & Prescribed Action */}
+      <QuadOutcomeCards score={score} student={{ ...st, academic: d.academic, attendance: d.attendance, lms: d.lms, placement: d.placement, skills: d.skills }} />
 
       <InterventionPanel
         studentId={st.id}

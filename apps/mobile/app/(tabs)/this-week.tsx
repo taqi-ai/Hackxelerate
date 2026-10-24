@@ -351,9 +351,38 @@ export default function ThisWeekScreen() {
                         {a?.text || r.persona}
                       </Text>
 
-                      <Text style={[styles.suggestedText, { color: colors.brand }]}>
-                        Suggested: {INTERVENTION_LABEL[suggestedType] || suggestedType} · ~{m} min
-                      </Text>
+                      <View
+                        style={{
+                          backgroundColor: colors.surface,
+                          borderRadius: 6,
+                          padding: 6,
+                          marginVertical: 4,
+                          gap: 3,
+                        }}
+                      >
+                        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                          <Text style={{ fontSize: 10, fontWeight: "700", color: colors.brand }}>
+                            Owner: {r.academic_risk_level === "High" ? "Faculty Mentor" : r.placement_risk_level === "High" ? "Training & Placement Cell" : "Faculty Mentor"}
+                          </Text>
+                          <Text
+                            style={{
+                              fontSize: 9,
+                              fontWeight: "700",
+                              color:
+                                r.academic_risk_prob >= 0.65
+                                  ? colors.riskHigh
+                                  : r.academic_risk_prob >= 0.4
+                                  ? colors.riskMedium
+                                  : colors.brand,
+                            }}
+                          >
+                            {r.academic_risk_prob >= 0.65 ? "P0 (48h)" : r.academic_risk_prob >= 0.4 ? "P1 (7d)" : "P2 (14d)"}
+                          </Text>
+                        </View>
+                        <Text style={{ fontSize: 11, fontWeight: "600", color: colors.text }}>
+                          {INTERVENTION_LABEL[suggestedType] || suggestedType} · ~{m} min
+                        </Text>
+                      </View>
 
                       <View style={styles.badgeRow}>
                         <RiskBadge

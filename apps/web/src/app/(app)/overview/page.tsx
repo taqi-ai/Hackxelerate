@@ -10,6 +10,8 @@ import { AgendaCalendar, type AgendaEvent } from "@/components/dashboard/agenda-
 import { HealthHeatmap } from "@/components/dashboard/health-heatmap";
 import { HelpCard } from "@/components/dashboard/help-card";
 import { WeeklyEngagement } from "@/components/dashboard/weekly-engagement";
+import { RolePerspectiveSwitcher } from "./role-perspective-switcher";
+import { RiskTrendsExplorer } from "./risk-trends-explorer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { fmtInt, INTERVENTION_LABEL, SOURCE_LABEL } from "@/lib/format";
@@ -119,6 +121,15 @@ export default async function OverviewPage() {
             ]}
           />
 
+          {/* Role-Appropriate Perspective Switcher & Round 1 Compare Toggle */}
+          <RolePerspectiveSwitcher
+            rows={rows}
+            isMentor={isMentor}
+            highA={highA}
+            highP={highP}
+            decliners={decliners}
+          />
+
           <Stagger className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <StaggerItem>
               <Stat label="Students" value={n} icon={Users} hint={isMentor ? "Your mentees" : `${cohort?.mentors ?? "-"} faculty mentors`} href="/students" />
@@ -133,6 +144,9 @@ export default async function OverviewPage() {
               <Stat label="High placement risk" value={highP} tone="medium" icon={BriefcaseBusiness} hint={`of ${fmtInt(track.length)} on placement track`} href="/students?placement=High" />
             </StaggerItem>
           </Stagger>
+
+          {/* Multi-Dimensional Risk Trends Explorer */}
+          <RiskTrendsExplorer rows={rows} segments={segments} />
 
           <Tabs defaultValue="focus" className="gap-4">
             <TabsList className="h-10 max-w-full justify-start overflow-x-auto rounded-full p-1">

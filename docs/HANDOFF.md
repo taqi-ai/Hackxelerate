@@ -21,3 +21,4 @@ One line per finished or in-progress task. Newest at the bottom. Format: `date |
 2026-10-14 | claude | Audit + release: new hero, /mobile web simulator, student crash fix, honest mobile Ask, a11y, Tokyo region; PRs #5 #9 live | main | done, see OVERNIGHT_PROGRESS.md
 2026-10-14 | gemini | Comprehensive project documentation overhaul in README.md: architecture, data flows, math formulas, ER diagrams, test gates | main | done
 2026-10-24 | claude | Evidence-grounded Ask Ascora backend (contract ask-grounded/1, mentor scope via mid claim): see docs/ASK_GROUNDED_CONTRACT.md | claude/ask-grounded | PR open
+2026-10-24 | gemini | Second Round 2 Upgrade: 5-act Dean Executive Brief (/brief), Role perspectives & R1 comparison toggle, Multi-dimensional risk trends explorer, Quad-outcome prediction cards, Round 2 model validation tab | gemini/round2-buildathon-upgrade | done
