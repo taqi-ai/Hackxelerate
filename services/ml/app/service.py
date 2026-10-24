@@ -19,6 +19,7 @@ from .config import ARTIFACTS, CACHE_DIR, DEMO_DIR, RISK_THRESHOLDS
 from .db import Publisher, _clean, records
 from .features.build import ACADEMIC_FEATURES, PLACEMENT_FEATURES
 from .insights.ask_index import build as build_ask_index
+from .lms.sandbox_index import build as build_lms_index
 from .insights.llm import cache_rows
 from .intelligence import Intelligence, run_intelligence
 from .models.risk import level
@@ -165,10 +166,15 @@ def build_payload(res: PipelineResult, intel: Intelligence) -> dict[str, list[di
     }
 
 
-def save_state(intel: Intelligence, ask_index: list | None = None):
+STATE_KEYS = ("features", "ref", "academic", "placement", "ask_index", "round2", "lms_index", "campus_mentors", "model_metrics")
+
+
+def save_state(intel: Intelligence, ask_index: list | None = None, lms_index: dict | None = None, campus_mentors: list | None = None):
     joblib.dump({"features": intel.features, "ref": intel.ref,
                  "academic": intel.models["academic"].calibrated, "placement": intel.models["placement"].calibrated,
-                 "ask_index": ask_index or []},
+                 "ask_index": ask_index or [], "round2": intel.round2 or {}, "lms_index": lms_index or {},
+                 "campus_mentors": campus_mentors or [],
+                 "model_metrics": {k: intel.artifacts[k]["metrics"] for k in ("model_academic", "model_placement", "model_semester", "model_engagement") if k in intel.artifacts}},
                 STATE_FILE, compress=3)
     STATE.update(joblib.load(STATE_FILE))
 
@@ -180,11 +186,12 @@ def load_state() -> bool:
     return False
 
 
-def write_snapshot(payload: dict, path: Path):
+def write_snapshot(payload: dict, path: Path, extra: dict | None = None):
     """Compact JSON snapshot for the web app's offline demo mode (no Supabase / no internet needed)."""
     keep = {k: payload[k] for k in ("students", "segments", "student_scores", "insights", "analytics_artifacts", "mentors",
                                     "data_quality_log", "conflicts", "raw_uploads", "academic", "attendance", "lms_activity",
                                     "engagement", "placement", "skills", "feedback", "source_links")}
+    keep.update(extra or {})
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(keep, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
@@ -219,14 +226,14 @@ def run_all(folder: Path = DEMO_DIR, publish: bool = True, run: RunState | None 
         _checkpoint(run)   # a stopped run must not replace the live model state
         res.report["steps"] = sl.as_list()
         payload = build_payload(res, intel)
-        save_state(intel, build_ask_index(payload))
+        save_state(intel, build_ask_index(payload), build_lms_index(res), payload.get("mentors"))
         summary_base = {"run_id": res.run_id, "students": len(res.students), "matching": res.report["matching"].get("fuzzy_overall"),
                         "conflicts": len(res.conflicts),
                         "academic_auc": intel.artifacts["model_academic"]["metrics"]["roc_auc"],
                         "placement_auc": intel.artifacts["model_placement"]["metrics"]["roc_auc"]}
-        _save_cache(fp, payload, sl.as_list(), summary_base, {k: STATE[k] for k in ("features", "ref", "academic", "placement", "ask_index")})
+        _save_cache(fp, payload, sl.as_list(), summary_base, {k: STATE[k] for k in STATE_KEYS})
     if snapshot_path:
-        write_snapshot(payload, snapshot_path)
+        write_snapshot(payload, snapshot_path, extra={"round2_students": STATE.get("round2") or {}})
     counts = {}
     with _lock:   # decide atomically: either the time limit stopped the run, or it finishes (and publishes) in full
         _checkpoint(run)

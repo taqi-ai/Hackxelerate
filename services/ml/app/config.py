@@ -45,7 +45,7 @@ BACKLOG_PENALTY_CAP = 24.0
 NO_PLACEMENT_DATA_SCORE = 15.0  # readiness when a student never visited the placement cell
 
 # --- Risk levels: calibrated probability cut-offs -----------------------------------------
-RISK_THRESHOLDS = {"academic": (0.25, 0.50), "placement": (0.35, 0.60)}  # (medium_from, high_from)
+RISK_THRESHOLDS = {"academic": (0.25, 0.50), "placement": (0.35, 0.60), "engagement": (0.25, 0.45)}  # (medium_from, high_from)
 
 # --- Entity resolution --------------------------------------------------------------------
 MATCH_AUTO = 0.90     # auto-accept at or above

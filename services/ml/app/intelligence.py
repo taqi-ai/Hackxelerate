@@ -12,7 +12,7 @@ from .config import RISK_THRESHOLDS, SCORE_WEIGHTS
 from .features.build import ACADEMIC_FEATURES, FEATURES, PLACEMENT_FEATURES, build_features, weekly_index
 from .insights import auto as auto_insights
 from .insights.llm import polish_insight
-from .models import extras, segments as seg
+from .models import extras, round2, segments as seg
 from .models.risk import explain_rows, level, train
 from .pipeline import PipelineResult, StepLog
 from .scoring.score import COMPONENT_LABELS, COMPONENTS, PercentileRef, component_scores, sensitivity, success_score
@@ -28,6 +28,7 @@ class Intelligence:
     artifacts: dict[str, dict]
     ref: PercentileRef
     models: dict
+    round2: dict | None = None     # per-student Round 2 outcomes (kept with the model state, not a database column)
 
 
 def load_labels(truth_dir: Path) -> tuple[pd.Series, pd.Series]:
@@ -122,6 +123,9 @@ def run_intelligence(res: PipelineResult, log: StepLog, truth_dir: Path) -> Inte
     ww = extras.what_works(pd.read_csv(hist_path) if hist_path.exists() else None)
     log.done("insights", count=len(ins), early_curve_week8_auc=next((c["roc_auc"] for c in curve if c["week"] == 8), None))
 
+    truth = pd.read_parquet(truth_dir / "_truth.parquet").set_index("student_id")
+    r2_students, r2_artifacts = round2.compute(res, f, scores, truth, score)   # no pipeline step of its own: the UI lists 12 steps
+
     cohort = _cohort_stats(f, comps, scores, res)
     artifacts = {
         "model_academic": dict(metrics=m_acad.metrics, importance=m_acad.importance, features=m_acad.features,
@@ -141,9 +145,10 @@ def run_intelligence(res: PipelineResult, log: StepLog, truth_dir: Path) -> Inte
         "what_works": ww,
         "segmentation": seg_meta,
         "cohort": cohort,
+        **r2_artifacts,
     }
     return Intelligence(features=f, components=comps, scores=scores, segments=seg_df, insights=ins, artifacts=artifacts,
-                        ref=ref, models={"academic": m_acad, "placement": m_plac})
+                        ref=ref, models={"academic": m_acad, "placement": m_plac}, round2=r2_students)
 
 
 def _score_frame(f: pd.DataFrame) -> pd.DataFrame:
