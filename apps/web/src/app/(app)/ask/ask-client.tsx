@@ -441,20 +441,27 @@ export function AskClient({ rows }: { rows: StudentRow[] }) {
                 </div>
               </header>
 
-              {backendGroundedResponse?.driver_evidence?.academic?.cohort_top_drivers?.length ? (
+              {backendGroundedResponse?.driver_evidence?.academic?.cohort_top_drivers?.length ||
+              backendGroundedResponse?.driver_evidence?.placement?.cohort_top_drivers?.length ? (
                 <div className="space-y-2">
                   <span className="text-[10px] uppercase font-semibold text-muted-foreground">
-                    TreeSHAP Model Attributions:
+                    Genuine TreeSHAP Attributions (log-odds impact):
                   </span>
                   <ul className="space-y-1.5 text-xs">
-                    {backendGroundedResponse.driver_evidence.academic.cohort_top_drivers.slice(0, 3).map((d: any) => (
-                      <li key={d.feature} className="rounded bg-muted/40 p-2">
-                        <span className="font-semibold text-foreground block text-[11px]">{d.label}</span>
-                        <span className="text-muted-foreground text-[10px]">
-                          Affects {d.students_affected} students · Mean TreeSHAP impact: {Number(d.mean_impact).toFixed(2)}
-                        </span>
-                      </li>
-                    ))}
+                    {(
+                      backendGroundedResponse.driver_evidence?.academic?.cohort_top_drivers ??
+                      backendGroundedResponse.driver_evidence?.placement?.cohort_top_drivers ??
+                      []
+                    )
+                      .slice(0, 3)
+                      .map((d: any) => (
+                        <li key={d.feature} className="rounded bg-muted/40 p-2">
+                          <span className="font-semibold text-foreground block text-[11px]">{d.label}</span>
+                          <span className="text-muted-foreground text-[10px]">
+                            Affects {d.students_affected} students · Mean impact: +{Number(d.mean_impact).toFixed(2)} log-odds ({d.actionable ? "actionable" : "structural"})
+                          </span>
+                        </li>
+                      ))}
                   </ul>
                 </div>
               ) : localAnalysis.topDrivers.length > 0 ? (

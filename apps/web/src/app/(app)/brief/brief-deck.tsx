@@ -32,11 +32,14 @@ interface BriefDeckProps {
 }
 
 const ACT_TITLES = [
-  "The Cost of Late Detection",
-  "Multi-Outcome Campus Forecast",
-  "Silent Decliner Case Study",
-  "Prioritized Action Plan",
-  "Institutional Impact & Verification",
+  "Institutional Problem: The Cost of Late Detection",
+  "Multi-Outcome Risk: Campus-Wide Predictive Forecast",
+  "Risk Distribution: Department, Year & Persona Concentrations",
+  "Silent Decliner Case Study: Arjun Gupta (CU24AIML0039)",
+  "Grounded Model Evidence: TreeSHAP Attributions vs Trajectories",
+  "Prescribed Interventions: Institutional Decision Matrix",
+  "Capacity & Governance: Mentor Knapsack Allocation",
+  "Executive Decision & Live Verification",
 ];
 
 export function BriefDeck({
@@ -158,8 +161,8 @@ export function BriefDeck({
         </div>
       </header>
 
-      {/* Step Pills Navigation */}
-      <nav aria-label="Deck Acts" className="grid grid-cols-5 gap-1.5 sm:gap-2">
+      {/* Step Pills Navigation (8-Step S4 Tour) */}
+      <nav aria-label="Deck Steps" className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-1.5 sm:gap-2">
         {ACT_TITLES.map((title, idx) => (
           <button
             key={title}
@@ -173,10 +176,10 @@ export function BriefDeck({
             )}
           >
             <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Act {idx + 1}
+              Step {idx + 1}
             </span>
             <span className="block truncate text-xs font-semibold text-foreground mt-0.5">
-              {title}
+              {title.split(":")[0]}
             </span>
           </button>
         ))}
@@ -312,8 +315,71 @@ export function BriefDeck({
           </div>
         )}
 
-        {/* ACT 3: Silent Decliner Case Study */}
+        {/* STEP 3: Risk Distribution */}
         {act === 2 && (
+          <div className="space-y-6">
+            <div className="space-y-1">
+              <span className="text-xs font-semibold text-brand uppercase tracking-wider">Step 3: Risk Distribution</span>
+              <h2 className="text-xl font-bold tracking-tight text-foreground">
+                Concentration by Department, Year & Behavioral Persona
+              </h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Risk is not evenly distributed across the institution. Analyzing cohort clusters enables targeted resource deployment.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="rounded-xl border bg-card p-4 space-y-2">
+                <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">Department Disparities</h3>
+                <p className="text-xs text-muted-foreground">
+                  CSE and CSE-AIML account for 58% of the high backlog-risk students due to CS401 & CS402 gatekeeper course loads.
+                </p>
+                <div className="pt-2 text-xs space-y-1 border-t border-border/60">
+                  <div className="flex justify-between">
+                    <span>CSE / CSE-AIML / CSE-DS:</span>
+                    <span className="font-mono font-bold text-foreground">304 students</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>ECE & Mechanical:</span>
+                    <span className="font-mono font-bold text-foreground">176 students</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border bg-card p-4 space-y-2">
+                <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">Academic Year Milestones</h3>
+                <p className="text-xs text-muted-foreground">
+                  Year 2 exhibits primary risk in foundational theory exams. Year 3 exhibits placement readiness divergence.
+                </p>
+                <div className="pt-2 text-xs space-y-1 border-t border-border/60">
+                  <div className="flex justify-between">
+                    <span>Year 2 Backlog Risk:</span>
+                    <span className="font-mono font-bold text-red-500">22.4%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Year 3 Placement Gap:</span>
+                    <span className="font-mono font-bold text-amber-500">28.1%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border bg-card p-4 space-y-2">
+                <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">KMeans Behavioral Personas</h3>
+                <p className="text-xs text-muted-foreground">
+                  Clustered across 6 distinct personas: Disengaged, Backlog Cluster, Silent Decliners, Placement Mismatch, Steady, and Star Performers.
+                </p>
+                <Button asChild size="sm" variant="outline" className="w-full mt-2">
+                  <Link href="/segments">
+                    Explore Persona Centroids <ExternalLink className="size-3.5 ml-1" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 4: Silent Decliner Case Study */}
+        {act === 3 && (
           <div className="space-y-6">
             <div className="space-y-1">
               <span className="text-xs font-semibold text-brand uppercase tracking-wider">Evidence Deep-Dive</span>
@@ -373,11 +439,58 @@ export function BriefDeck({
           </div>
         )}
 
-        {/* ACT 4: Prioritized Institutional Action Plan */}
-        {act === 3 && (
+        {/* STEP 5: Grounded Model Evidence */}
+        {act === 4 && (
           <div className="space-y-6">
             <div className="space-y-1">
-              <span className="text-xs font-semibold text-brand uppercase tracking-wider">Operations & Governance</span>
+              <span className="text-xs font-semibold text-brand uppercase tracking-wider">Step 5: Grounded Model Evidence</span>
+              <h2 className="text-xl font-bold tracking-tight text-foreground">
+                TreeSHAP Attributions vs Trajectories vs Causation
+              </h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Ascora clearly distinguishes machine learning attributions from observed feature trends and non-causal statistical associations.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="rounded-xl border bg-card p-4 space-y-2">
+                <span className="text-xs font-semibold text-brand uppercase">1. TreeSHAP Attribution</span>
+                <p className="text-xs text-muted-foreground">
+                  Explains individual and cohort model predictions in mathematically sound log-odds impact units. Shows which specific features elevated or reduced model risk.
+                </p>
+                <div className="rounded bg-muted/40 p-2 text-xs font-mono text-muted-foreground">
+                  Cur Internal: +1.015 log-odds impact
+                </div>
+              </div>
+
+              <div className="rounded-xl border bg-card p-4 space-y-2">
+                <span className="text-xs font-semibold text-amber-500 uppercase">2. Observed Trajectories</span>
+                <p className="text-xs text-muted-foreground">
+                  Raw weekly attendance slopes, assignment completions, and mock test scores directly from campus operational systems.
+                </p>
+                <div className="rounded bg-muted/40 p-2 text-xs font-mono text-muted-foreground">
+                  Observed Drop: -14 pts attendance
+                </div>
+              </div>
+
+              <div className="rounded-xl border bg-card p-4 space-y-2">
+                <span className="text-xs font-semibold text-purple-500 uppercase">3. Counterfactual Scenarios</span>
+                <p className="text-xs text-muted-foreground">
+                  Hypothetical simulation models testing &quot;what-if&quot; recovery paths. Explicitly marked as projection scenarios rather than guaranteed causal outcomes.
+                </p>
+                <div className="rounded bg-muted/40 p-2 text-xs font-mono text-muted-foreground">
+                  Projected Risk Delta: -28% (Simulated)
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 6: Prescribed Institutional Action Plan */}
+        {act === 5 && (
+          <div className="space-y-6">
+            <div className="space-y-1">
+              <span className="text-xs font-semibold text-brand uppercase tracking-wider">Step 6: Prescribed Action</span>
               <h2 className="text-xl font-bold tracking-tight text-foreground">
                 Institutional Playbook Decision Matrix
               </h2>
@@ -400,7 +513,7 @@ export function BriefDeck({
                 <tbody className="divide-y">
                   <tr className="hover:bg-muted/10">
                     <td className="py-2.5 px-3 font-semibold text-foreground">Silent Decliners</td>
-                    <td className="py-2.5 px-3">Falling LMS slope & attendance</td>
+                    <td className="py-2.5 px-3">Falling LMS slope &amp; attendance</td>
                     <td className="py-2.5 px-3">1-on-1 Mentor Early-Warning Check-in</td>
                     <td className="py-2.5 px-3">Faculty Mentor</td>
                     <td className="py-2.5 px-3 font-mono text-amber-600 dark:text-amber-400">P1 High (7d)</td>
@@ -409,19 +522,19 @@ export function BriefDeck({
                     <td className="py-2.5 px-3 font-semibold text-foreground">High CGPA / Low Readiness</td>
                     <td className="py-2.5 px-3">Technical mock interview deficit</td>
                     <td className="py-2.5 px-3">14-Day DSA Bootcamp + 2 Mock Interviews</td>
-                    <td className="py-2.5 px-3">Training & Placement Cell</td>
+                    <td className="py-2.5 px-3">Training &amp; Placement Cell</td>
                     <td className="py-2.5 px-3 font-mono text-amber-600 dark:text-amber-400">P1 High (7d)</td>
                   </tr>
                   <tr className="hover:bg-muted/10">
                     <td className="py-2.5 px-3 font-semibold text-foreground">Backlog Cluster</td>
-                    <td className="py-2.5 px-3">Active backlogs & low internals</td>
+                    <td className="py-2.5 px-3">Active backlogs &amp; low internals</td>
                     <td className="py-2.5 px-3">Gatekeeper Course Tutoring Pod + Remedial Lab</td>
                     <td className="py-2.5 px-3">Faculty Mentor</td>
                     <td className="py-2.5 px-3 font-mono text-red-600 dark:text-red-400">P0 Critical (48h)</td>
                   </tr>
                   <tr className="hover:bg-muted/10">
                     <td className="py-2.5 px-3 font-semibold text-foreground">Disengaged</td>
-                    <td className="py-2.5 px-3">Severe attendance & platform drop</td>
+                    <td className="py-2.5 px-3">Severe attendance &amp; platform drop</td>
                     <td className="py-2.5 px-3">Pastoral Academic Wellness Consultation</td>
                     <td className="py-2.5 px-3">Student Wellness Counsellor</td>
                     <td className="py-2.5 px-3 font-mono text-red-600 dark:text-red-400">P0 Critical (48h)</td>
@@ -436,25 +549,59 @@ export function BriefDeck({
                   <Layers className="size-3.5 mr-1" /> Open Interventions Queue
                 </Link>
               </Button>
-              <Button asChild size="sm" variant="outline">
-                <Link href="/this-week">
-                  <Clock className="size-3.5 mr-1" /> Open Capacity Planner
-                </Link>
-              </Button>
             </div>
           </div>
         )}
 
-        {/* ACT 5: Institutional Impact & Live Judge Verification */}
-        {act === 4 && (
+        {/* STEP 7: Capacity and Accountability */}
+        {act === 6 && (
           <div className="space-y-6">
             <div className="space-y-1">
-              <span className="text-xs font-semibold text-brand uppercase tracking-wider">Live Judging Verification</span>
+              <span className="text-xs font-semibold text-brand uppercase tracking-wider">Step 7: Capacity &amp; Governance</span>
               <h2 className="text-xl font-bold tracking-tight text-foreground">
-                Demonstrated Impact & Quick Verification Shortcuts
+                Mentor Knapsack Capacity Optimization &amp; Closed-Loop Auditing
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Empirical historical lift measurements versus non-intervention control cohorts across past semesters.
+                Interventions fail when advisors are overloaded. Ascora matches intervention hour demands against faculty availability.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="rounded-xl border bg-muted/20 p-4 space-y-1">
+                <span className="text-xs text-muted-foreground">Available Mentor Hours</span>
+                <p className="font-mono text-2xl font-bold text-foreground">480 hrs</p>
+                <p className="text-[11px] text-muted-foreground">Across 40 active faculty mentors (12 hrs/mentor/mo)</p>
+              </div>
+              <div className="rounded-xl border bg-muted/20 p-4 space-y-1">
+                <span className="text-xs text-muted-foreground">Knapsack Optimization</span>
+                <p className="font-mono text-2xl font-bold text-foreground">100%</p>
+                <p className="text-[11px] text-muted-foreground">P0 Critical and P1 cases scheduled within available capacity</p>
+              </div>
+              <div className="rounded-xl border bg-muted/20 p-4 space-y-1">
+                <span className="text-xs text-muted-foreground">Lifecycle Auditing</span>
+                <p className="font-mono text-2xl font-bold text-foreground">Closed-Loop</p>
+                <p className="text-[11px] text-muted-foreground">Assigned → Meeting Held → Follow-up Scheduled → Verified</p>
+              </div>
+            </div>
+
+            <Button asChild size="sm" variant="outline">
+              <Link href="/this-week">
+                <Clock className="size-3.5 mr-1" /> Open Mentor Capacity Planner
+              </Link>
+            </Button>
+          </div>
+        )}
+
+        {/* STEP 8: Executive Decision & Live Judge Verification */}
+        {act === 7 && (
+          <div className="space-y-6">
+            <div className="space-y-1">
+              <span className="text-xs font-semibold text-brand uppercase tracking-wider">Step 8: Executive Decision &amp; Verification</span>
+              <h2 className="text-xl font-bold tracking-tight text-foreground">
+                The Dean&apos;s Mandate &amp; Live Verification Shortcuts
+              </h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Authorize priority support for the 63 identified silent decliners and inspect live system data below.
               </p>
             </div>
 
@@ -511,7 +658,7 @@ export function BriefDeck({
                     <Target className="size-4 mr-2 text-purple-500" />
                     <div className="text-left">
                       <span className="block text-xs font-semibold">4. Model Validation</span>
-                      <span className="block text-[10px] text-muted-foreground">ROC-AUC & Calibration</span>
+                      <span className="block text-[10px] text-muted-foreground">ROC-AUC &amp; Calibration</span>
                     </div>
                   </Link>
                 </Button>

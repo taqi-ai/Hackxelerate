@@ -22,3 +22,4 @@ One line per finished or in-progress task. Newest at the bottom. Format: `date |
 2026-10-14 | gemini | Comprehensive project documentation overhaul in README.md: architecture, data flows, math formulas, ER diagrams, test gates | main | done
 2026-10-24 | claude | Evidence-grounded Ask Ascora backend (contract ask-grounded/1, mentor scope via mid claim): see docs/ASK_GROUNDED_CONTRACT.md | claude/ask-grounded | PR open
 2026-10-24 | gemini | Second Round 2 Upgrade: 5-act Dean Executive Brief (/brief), Role perspectives & R1 comparison toggle, Multi-dimensional risk trends explorer, Quad-outcome prediction cards, Round 2 model validation tab | gemini/round2-buildathon-upgrade | done
+2026-10-24 | gemini | AI Copilot audit (4 official questions, TreeSHAP units & placement drivers), S4 8-step Executive Decision Tour (/brief), Timed demo script & technical defense (ROUND2_DEAN_DEMO_SCRIPT.md), 17 vitest suites pass | gemini/copilot-audit-and-s4-brief | done
