@@ -194,7 +194,7 @@ test("Mission Control: capacity limits, validation, and approval that does not d
 
   // invalid input is refused visibly
   await page.getByLabel("Peer-tutoring slots", { exact: true }).fill("-3");
-  await expect(page.getByRole("alert")).toContainText(/between 0 and 200/);
+  await expect(page.locator("p[role=alert]")).toContainText(/between 0 and 200/);
   await page.getByRole("button", { name: /reset to defaults/i }).click();
 
   // zero capacity gives a valid, empty plan
