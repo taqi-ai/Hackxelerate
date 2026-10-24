@@ -21,5 +21,10 @@ Window: started 00:52 IST, stop at 05:00 IST (owner instruction). Earlier histor
 - OULAD benchmark executed (PR 54, held): out-of-time AUC about 0.70, LightGBM no better than logistic. See `docs/EXTERNAL_PUBLIC_DATA_BENCHMARK.md`. No web UI section added.
 - Held PRs (touch services/ml, would redeploy Azure): ratelimit branch, 53, 54.
 
+## Batch 4 (24 Oct, after 08:30)
+- ML work merged and deployed: PR 53 (mapping review API, exact-before-fuzzy fix, SSRF guard, rate limiter), PR 54 (OULAD benchmark), PR 56. First ML deploy was blocked by a flaky pre-existing test (`test_tampered_token_is_rejected` passed by chance when the signature started with A); fixed, re-dispatched, deploy succeeded; ML health/ready 200; `/mapping/suggest` 401 anonymously.
+- Evaluation data tab on `/model` (synthetic demo and OULAD side by side, labelled not comparable); constants guarded by a test against `docs/benchmarks/oulad_results.json`.
+- Still open: signed-in check of Mission Control on production (needs a staff login), web screen for the mapping review, Supabase MFA and leaked-password protection (dashboard), restore drill.
+
 ## Recovery
 `git checkout claude/hardening-night`; run `npm ci && npm test && npm run build` in apps/web and `pytest -q` in services/ml. Roll back production with `vercel rollback` to the deployment preceding the merge.
