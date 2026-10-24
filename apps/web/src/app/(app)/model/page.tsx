@@ -5,6 +5,7 @@ import { HBar, SimpleLine } from "@/components/charts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { COMPONENT_LABEL } from "@/lib/format";
+import { OULAD_BENCHMARK as OU } from "@/lib/external-benchmark";
 
 export const metadata: Metadata = { title: "Score & models" };
 
@@ -78,6 +79,7 @@ export default async function ModelPage() {
           <TabsTrigger value="academic">Academic risk model</TabsTrigger>
           <TabsTrigger value="placement">Placement risk model</TabsTrigger>
           <TabsTrigger value="early">How early can we know?</TabsTrigger>
+          <TabsTrigger value="data">Evaluation data</TabsTrigger>
         </TabsList>
 
         <TabsContent value="score" className="mt-4 space-y-4">
@@ -168,6 +170,40 @@ export default async function ModelPage() {
               ))}
             </ul>
           </Panel>
+        </TabsContent>
+        <TabsContent value="data" className="mt-4 space-y-4">
+          <p className="rounded-xl border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+            Two separate evaluations that must not be compared. The numbers in the first panel are what this demonstration runs on. The second panel is an
+            independent experiment on public data and is <strong className="text-foreground">not the accuracy of Ascora&apos;s models</strong>.
+          </p>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Panel title="Synthetic demo (this app)" description="Generated cohort of 1,200 students">
+              <dl className="space-y-1.5 text-sm">
+                <div><dt className="inline font-medium">Data type: </dt><dd className="inline">Synthetic. Labels and features come from one generator, so the task is easier than real life.</dd></div>
+                <div><dt className="inline font-medium">Targets: </dt><dd className="inline">Academic: end-semester failure or a new backlog. Placement: not placed by final year (placement-intent students only).</dd></div>
+                <div><dt className="inline font-medium">Status: </dt><dd className="inline">Reproduced from code on 24 Oct 2026. Not validated on real institutional outcomes.</dd></div>
+                <div><dt className="inline font-medium">Held-out ROC-AUC: </dt><dd className="inline tabular">academic {a.model_academic?.metrics?.roc_auc?.toFixed(3) ?? "-"}, placement {a.model_placement?.metrics?.roc_auc?.toFixed(3) ?? "-"}</dd></div>
+                <div><dt className="inline font-medium">Limits: </dt><dd className="inline">Random split, not out of time. Probabilities are unvalidated for any real deployment.</dd></div>
+              </dl>
+            </Panel>
+            <Panel title="External benchmark (OULAD)" description="A separate experiment; never merged with the synthetic cohort">
+              <dl className="space-y-1.5 text-sm">
+                <div><dt className="inline font-medium">Dataset: </dt><dd className="inline">{OU.name}. {OU.kind}.</dd></div>
+                <div><dt className="inline font-medium">Cite: </dt><dd className="inline">{OU.citation}</dd></div>
+                <div><dt className="inline font-medium">Target: </dt><dd className="inline">{OU.target}.</dd></div>
+                <div><dt className="inline font-medium">Protocol: </dt><dd className="inline">{OU.protocol}</dd></div>
+                <div><dt className="inline font-medium">Test set: </dt><dd className="inline tabular">{OU.test.rows.toLocaleString("en-IN")} rows, {(OU.test.prevalence * 100).toFixed(1)}% positive</dd></div>
+                <div>
+                  <dt className="inline font-medium">ROC-AUC: </dt>
+                  <dd className="inline tabular">
+                    logistic baseline {OU.logistic.rocAuc.toFixed(2)} (95% CI {OU.logistic.rocCi[0].toFixed(2)} to {OU.logistic.rocCi[1].toFixed(2)}), LightGBM {OU.lightgbm.rocAuc.toFixed(2)} ({OU.lightgbm.rocCi[0].toFixed(2)} to {OU.lightgbm.rocCi[1].toFixed(2)}). The complex model adds nothing over the baseline.
+                  </dd>
+                </div>
+                <div><dt className="inline font-medium">Flagging 20%: </dt><dd className="inline tabular">finds {(OU.flag20.recall * 100).toFixed(0)}% of at-risk students at {(OU.flag20.precision * 100).toFixed(0)}% precision</dd></div>
+                <div><dt className="inline font-medium">Status: </dt><dd className="inline">Completed, single run. Different target, population and data origin from the demo, so the two sets of numbers are not comparable. Does not validate transfer to any Indian institution.</dd></div>
+              </dl>
+            </Panel>
+          </div>
         </TabsContent>
       </Tabs>
     </>

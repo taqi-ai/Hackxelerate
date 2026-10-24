@@ -32,3 +32,6 @@ returned 200.
 ## Practices in the code
 Labels on every form field, `role="alert"` on form errors, visible focus rings, `prefers-reduced-motion` respected by the
 intro and page transitions, colour never the only signal (stale data says "stale", risk levels are written out).
+
+## 2026-10-24: Mission Control and Evaluation data tab
+axe-core 4.10.2 (WCAG 2.0/2.1/2.2 A and AA tags), run in the browser pane against the offline production build: `/mission-control` in dark and light themes, and `/model` with the Evaluation data tab open: 0 violations. Automated testing only: no screen-reader or keyboard walkthrough of Mission Control was done.
