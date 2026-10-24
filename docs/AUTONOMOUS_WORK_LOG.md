@@ -32,5 +32,10 @@ Window: started 00:52 IST, stop at 05:00 IST (owner instruction). Earlier histor
 - Frontend agent's Ask UI work (`ask-client.tsx`, `ask-adapter.ts`, `ask-types.ts`) is uncommitted on `gemini/ask-ascora-copilot`; not part of main.
 - Still open: signed-in production check of Mission Control and grounded Ask, Supabase MFA and leaked-password protection, restore drill, retention workflow.
 
+## Batch 6 (24 Oct, evening): Round 2 backend (PR 64, merged, deployed)
+- LMS adapter engine with four adapters in demo-sandbox mode, four outcomes (semester MAE 0.43 vs 0.81 baseline; engagement-drop AUC 0.83, silent-decliner recall 0.38 vs 0.27 for the Success Score), mentor availability with double-booking guard, placement panel, migration 0015, day mode default. 188 pytest; CI db-rls green after a trigger-order fix found by the new SQL test.
+- Live end-to-end LMS flow verified on production (aktu_erp). Staff-token routes not exercised live.
+- Not done: migration 0015 not applied to production; campus store resets on redeploy; no real university connector (needs authorisation); the web screens for all of this belong to the frontend agent and are not in main.
+
 ## Recovery
 `git checkout claude/hardening-night`; run `npm ci && npm test && npm run build` in apps/web and `pytest -q` in services/ml. Roll back production with `vercel rollback` to the deployment preceding the merge.
