@@ -5,6 +5,8 @@
 type Kind = "bars" | "orbit" | "nodes" | "grid" | "shield" | "chat" | "calendar" | "stack";
 
 const KIND: Record<string, Kind> = {
+  "Executive Decision Brief": "stack",
+  "Executive Brief": "stack",
   "Who to meet this week": "calendar",
   Students: "orbit",
   Segments: "nodes",
