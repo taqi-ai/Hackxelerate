@@ -11,6 +11,7 @@ import {
   MessageSquareText,
   ScanSearch,
   Settings,
+  Target,
   Shapes,
   ShieldCheck,
   Users,
@@ -20,6 +21,7 @@ export const NAV_ITEMS = [
   // Institutional Navigation (Admin & Mentor)
   { href: "/overview", label: "Overview", icon: LayoutDashboard, roles: ["admin", "mentor"], group: "Insight", hint: "Cohort health and insights" },
   { href: "/this-week", label: "This week", icon: ClipboardCheck, roles: ["admin", "mentor"], group: "Insight", hint: "Who to meet first" },
+  { href: "/mission-control", label: "Mission Control", icon: Target, roles: ["admin", "mentor"], group: "Action", hint: "Plan support within capacity" },
   { href: "/students", label: "Students", icon: Users, roles: ["admin", "mentor"], group: "Insight", hint: "Filter, sort, export" },
   { href: "/segments", label: "Segments", icon: Shapes, roles: ["admin", "mentor"], group: "Insight", hint: "Personas and actions" },
   { href: "/interventions", label: "Interventions", icon: ChartNoAxesCombined, roles: ["admin", "mentor"], group: "Action", hint: "Track what was done" },
