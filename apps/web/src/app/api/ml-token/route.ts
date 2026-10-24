@@ -18,7 +18,7 @@ export async function GET() {
   try {
     // the institution travels with the token: one analytics deployment serves one institution
     const inst = profile.institution_id ?? EVALUATION_INSTITUTION;
-    const { token, exp } = mintMlToken({ sub: profile.id, role: profile.role, inst, ...(isDemoAccount(profile.email) ? { demo: true } : {}) });
+    const { token, exp } = mintMlToken({ sub: profile.id, role: profile.role, inst, ...(profile.role === "mentor" && profile.mentor_id ? { mid: profile.mentor_id } : {}), ...(isDemoAccount(profile.email) ? { demo: true } : {}) });
     return NextResponse.json({ token, exp }, { headers: { "Cache-Control": "no-store" } });
   } catch {
     return NextResponse.json({ error: "ML service auth is not configured" }, { status: 503, headers: { "Cache-Control": "no-store" } });

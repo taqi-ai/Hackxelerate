@@ -21,7 +21,7 @@ from .ratelimit import limited
 from .config import ALLOWED_ORIGINS, DEMO_DIR, ML_ROOT
 from .ingest import review
 from .insights.llm import model_name, provider
-from .insights.ask import ask as ask_query
+from .insights import ask_grounded
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("ascora.api")
@@ -233,6 +233,12 @@ def whatif_inputs(student_id: str):
         raise HTTPException(503, str(e))
 
 
-@app.post("/ask", dependencies=[Depends(limited("ask"))])
-def ask(req: AskRequest):
-    return ask_query(req.question)
+@app.post("/ask")
+def ask(req: AskRequest, user: dict = Depends(limited("ask"))):
+    """Grounded answer: the original filter fields (question, engine, query) plus evidence from stored predictions.
+    Scoped by the caller's token: admins see the institution, mentors only their own students."""
+    try:
+        return ask_grounded.answer(req.question, user, service.STATE.get("ask_index"))
+    except Exception:  # never leak internals or student data in an error body
+        log.exception("ask failed")
+        raise HTTPException(500, "The question could not be answered. Try rephrasing it.")
