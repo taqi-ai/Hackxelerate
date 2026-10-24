@@ -18,6 +18,7 @@ from pydantic import BaseModel, Field
 from . import config, connectors, service
 from .auth import current_user, require_admin, require_admin_write
 from .config import ALLOWED_ORIGINS, DEMO_DIR, ML_ROOT
+from .ingest import review
 from .insights.llm import model_name, provider
 from .insights.ask import ask as ask_query
 
@@ -69,6 +70,12 @@ class RunRequest(BaseModel):
 class WhatIfRequest(BaseModel):
     student_id: str = Field(..., pattern=r"^CU\d{2}[A-Z]{2,4}\d{4}$")
     changes: dict[str, float]
+
+
+class MappingRequest(BaseModel):
+    headers: list[str] = Field(..., min_length=1, max_length=200)
+    source_type: str | None = Field(None, max_length=40)
+    overrides: dict[str, str | None] | None = None
 
 
 class AskRequest(BaseModel):
@@ -180,6 +187,19 @@ def run(req: RunRequest):
 def list_connectors():
     """Data sources and their real status (only the file import is built; nothing else claims a connection)."""
     return {"connectors": connectors.list_connectors()}
+
+
+@app.post("/mapping/suggest", dependencies=[Depends(require_admin)])
+def mapping_suggest(req: MappingRequest):
+    """Column mapping for an unfamiliar export, with a confidence tier per column. Reads no data, writes nothing."""
+    try:
+        if req.overrides is not None:
+            if not req.source_type:
+                raise ValueError("source_type is required to apply overrides")
+            return review.apply_overrides(req.headers, req.source_type, req.overrides)
+        return review.suggest(req.headers, req.source_type)
+    except ValueError as e:
+        raise HTTPException(422, str(e))
 
 
 @app.get("/pipeline/runs/{run_id}", dependencies=[Depends(require_admin)])
